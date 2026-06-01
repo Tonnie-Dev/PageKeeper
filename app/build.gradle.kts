@@ -1,7 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp.plugin)
+    alias(libs.plugins.kotlin.serializer.plugin)
 }
+
 
 android {
     namespace = "com.tonyxlab.pagekeeper"
@@ -31,28 +35,81 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
     }
 }
-
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // Core Libs
+    implementation(AndroidX.core.ktx)
+    implementation(AndroidX.lifecycle.runtime.ktx)
+    implementation(AndroidX.activity.compose)
+    implementation(platform(AndroidX.compose.bom))
+    implementation(AndroidX.compose.ui)
+    implementation(AndroidX.compose.ui.graphics)
+    implementation(AndroidX.compose.ui.toolingPreview)
+
+    // Navigation 3
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    // Material 3
+    implementation(AndroidX.compose.material3)
+
+    // Window Size Class
+    implementation(AndroidX.compose.material3.windowSizeClass)
+    implementation(libs.material3.adaptive)
+
+    // Material Extended Icons
+    implementation(AndroidX.compose.material.icons.extended)
+
+    // Splash Screen
+    implementation(AndroidX.core.splashscreen)
+
+    // Room
+    implementation(AndroidX.room.ktx)
+    ksp(AndroidX.room.compiler)
+
+    // Data Store
+    implementation(AndroidX.dataStore.preferences)
+
+    // Splash Screen
+    implementation(COIL.compose)
+
+    // Koin
+    implementation(Koin.android)
+    implementation(Koin.compose)
+
+    // Kotlinx Serialization
+    implementation(KotlinX.serialization.json)
+
+    // Accompanist Permissions
+    implementation(Google.accompanist.permissions)
+
+    // Logging
+    implementation(JakeWharton.timber)
+
+    // Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Testing
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(Testing.Kotest.assertions.core)
+    testImplementation(Testing.Kotest.runner.junit5)
+
+    // Android Tests
     androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(AndroidX.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
