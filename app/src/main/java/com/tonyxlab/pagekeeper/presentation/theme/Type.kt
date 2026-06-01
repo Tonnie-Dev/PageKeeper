@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.ui.theme
+package com.tonyxlab.pagekeeper.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
