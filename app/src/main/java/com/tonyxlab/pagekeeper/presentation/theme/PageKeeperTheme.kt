@@ -35,6 +35,7 @@ fun PageKeeperTheme(
     MaterialTheme(
             colorScheme = PageKeeperColorScheme,
             typography = Typography,
+            shapes = MaterialShapes,
             content = content
     )
 }

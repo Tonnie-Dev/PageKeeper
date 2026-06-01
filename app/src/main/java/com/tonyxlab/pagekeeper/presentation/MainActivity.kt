@@ -11,9 +11,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+
+
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
-import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
+import com.tonyxlab.pagekeeper.presentation.theme.ExtendedTypography.BodyMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 
 class MainActivity : ComponentActivity() {
@@ -38,7 +41,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
             text = "Hello $name!",
             style = MaterialTheme.typography.BodyMediumMedium,
-            modifier = modifier
+            modifier = modifier.clip(MaterialTheme.shapes.extraSmall)
     )
 }
 
