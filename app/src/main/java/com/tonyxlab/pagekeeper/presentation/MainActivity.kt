@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
-
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.ExtendedTypography.BodyMediumMedium
@@ -22,6 +22,9 @@ import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { true }
+        }
         enableEdgeToEdge()
         setContent {
             PageKeeperTheme {
