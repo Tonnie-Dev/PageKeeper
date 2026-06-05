@@ -1,3 +1,63 @@
 <resources>
+    <!-- App Name-->
     <string name="app_name">PageKeeper</string>
+
+    <!-- Blank Text-->
+    <string name="blank_text" />
+
+    <!-- Top Bar Texts-->
+    <string name="topbar_text_library">Library</string>
+
+    <!--Header Texts-->
+    <string name="header_text_edit_steps">Edit steps</string>
+    <string name="header_text_date">Date</string>
+
+    <!--Caption Texts-->
+    <string name="caption_text_profile_desc">This information helps calculate your activity more accurately.</string>
+
+    <!--Label Texts-->
+    <string name="label_text_gender">Gender</string>
+
+
+    <!--Menu Texts-->
+    <string name="menu_text_male">Male</string>
+
+
+    <!--Button Texts-->
+    <string name="button_text_start">Start</string>
+
+    <!--Text Button Texts-->
+    <string name="text_button_skip">Skip</string>
+
+    <!--Content Description Texts-->
+    <string name="cds_text_menu">menu</string>
+    <string name="cds_text_search">search</string>
+
+    <!--Snackbar Texts-->
+    <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
+
+    <!--Toast Texts-->
+    <string name="toast_text_copied">Copied to Clipboard</string>
+
+    <!--Dialog Texts-->
+    <string name="dialog_text_log_out">Are you sure you want to log out?</string>
+
+
+    <!--Supporting Texts-->
+    <string name="sup_text_def_username">Use between 3 and 20 characters for your username.</string>
+
+    <!--Settings Presets-->
+    <string name="settings_sync_interval">Sync Interval</string>
+
+    <!--Placeholder Texts-->
+    <string name="placeholder_text_search">Search for delicious food…</string>
+
+    <!--Meta Data Texts-->
+    <string name="dollar_price_tag">$%.2f</string>
+
+    <!--String Templates-->
+    <string name="template_steps_goal">/%1$d %2$s</string>
+
+    <!-- Navigation Drawer Strings -->
+    <string name="nav_drawer_fix_stop_counting">Fix the “Stop Counting Steps” issue</string>
 </resources>
