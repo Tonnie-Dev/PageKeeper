@@ -33,7 +33,8 @@ fun AppTopBar(
     titleText: String,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    onActionClick: () -> Unit = {},
+    onNavButtonClick: () -> Unit,
+    onActionClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
             modifier = modifier,
@@ -55,7 +56,7 @@ fun AppTopBar(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
                                         role = Role.Button,
-                                        onClick = onActionClick
+                                        onClick = onNavButtonClick
                                 )
                                 .padding(MaterialTheme.spacing.spaceTwelve)
                 )
@@ -96,10 +97,10 @@ private fun AppTopBarPreview() {
 
             AppTopBar(
                     titleText = stringResource(id = R.string.topbar_text_library),
-                    backgroundColor =
-                        TabletBlockBg
+                    backgroundColor = TabletBlockBg,
+                    onNavButtonClick = {},
+                    onActionClick = {}
             )
-
         }
     }
 }

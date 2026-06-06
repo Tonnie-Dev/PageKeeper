@@ -1,0 +1,119 @@
+package com.tonyxlab.pagekeeper.presentation.core.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.tonyxlab.pagekeeper.R
+import com.tonyxlab.pagekeeper.presentation.theme.BgActive
+import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
+import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumRegular
+import com.tonyxlab.pagekeeper.presentation.theme.Icons
+import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
+import com.tonyxlab.pagekeeper.presentation.theme.Primary
+import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
+import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
+import com.tonyxlab.pagekeeper.presentation.theme.TitleLargeBold
+import com.tonyxlab.pagekeeper.presentation.theme.spacing
+
+@Composable
+fun EmptyScreen(
+    modifier: Modifier = Modifier,
+    onImportBookClick: () -> Unit = {}
+) {
+    Column(
+            modifier = modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+                modifier = Modifier
+                        .size(180.dp)
+                        .background(BgActive, CircleShape),
+                contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                    painter = painterResource(id = R.drawable.ic_book),
+                    contentDescription = stringResource(id = R.string.cds_text_book),
+                    modifier = Modifier.size(100.dp),
+                    tint = Icons
+            )
+        }
+
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceTwelve * 2))
+
+        Text(
+                text = stringResource(id = R.string.caption_text_empty_library),
+                style = MaterialTheme.typography.TitleLargeBold,
+                color = TextPrimary,
+                textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceSmall))
+
+        Text(
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceLarge),
+                text = stringResource(id = R.string.caption_text_import_book),
+                style = MaterialTheme.typography.BodyMediumRegular,
+                color = TextSecondary,
+                textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceLarge))
+
+        Button(
+                modifier = Modifier.height(MaterialTheme.spacing.spaceSmall * 7),
+                onClick = onImportBookClick,
+                colors = ButtonDefaults.buttonColors(
+                        containerColor = Primary,
+                        contentColor = Color.White
+                ),
+                shape = MaterialTheme.shapes.large,
+                contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.spaceTwelve * 2)
+        ) {
+            Icon(
+                    painter = painterResource(id = R.drawable.ic_import_book),
+                    contentDescription = null,
+                    tint = Color.White
+            )
+            Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceSmall))
+            Text(
+                    text = stringResource(id = R.string.button_text_import_book),
+                    style = MaterialTheme.typography.BodyMediumMedium
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyScreenPreview() {
+    PageKeeperTheme {
+        EmptyScreen()
+    }
+}
