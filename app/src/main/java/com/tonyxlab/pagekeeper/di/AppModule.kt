@@ -2,6 +2,8 @@ package com.tonyxlab.pagekeeper.di
 
 import androidx.room.Room
 import com.tonyxlab.pagekeeper.data.local.PageKeeperDatabase
+import com.tonyxlab.pagekeeper.data.repository.BookRepositoryImpl
+import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryViewModel
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 import org.koin.android.ext.koin.androidContext
@@ -24,7 +26,12 @@ val databaseModule = module {
 
 }
 
+val repositoryModule = module {
+    single<BookRepository> { BookRepositoryImpl(get()) }
+}
+
 val appModule = listOf(
         viewModelModule,
-        databaseModule
+        databaseModule,
+        repositoryModule
 )
