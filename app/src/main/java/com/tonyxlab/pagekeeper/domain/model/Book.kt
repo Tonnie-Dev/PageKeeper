@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.domain
+package com.tonyxlab.pagekeeper.domain.model
 
 data class Book(
     val id: String,

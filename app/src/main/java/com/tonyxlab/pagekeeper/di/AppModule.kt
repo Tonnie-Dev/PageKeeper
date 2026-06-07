@@ -1,6 +1,7 @@
 package com.tonyxlab.pagekeeper.di
 
 import androidx.room.Room
+import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.data.local.PageKeeperDatabase
 import com.tonyxlab.pagekeeper.data.repository.BookRepositoryImpl
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
@@ -30,8 +31,13 @@ val repositoryModule = module {
     single<BookRepository> { BookRepositoryImpl(get()) }
 }
 
+val importerModule = module {
+    single { BookImporter(androidContext(), get()) }
+}
+
 val appModule = listOf(
         viewModelModule,
         databaseModule,
-        repositoryModule
+        repositoryModule,
+        importerModule
 )

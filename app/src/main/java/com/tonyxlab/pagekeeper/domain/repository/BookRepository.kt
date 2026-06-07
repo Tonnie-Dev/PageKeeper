@@ -1,7 +1,6 @@
 package com.tonyxlab.pagekeeper.domain.repository
 
-import com.tonyxlab.pagekeeper.data.local.entity.BookEntity
-import com.tonyxlab.pagekeeper.domain.Book
+import com.tonyxlab.pagekeeper.domain.model.Book
 import kotlinx.coroutines.flow.Flow
 
 interface BookRepository {
