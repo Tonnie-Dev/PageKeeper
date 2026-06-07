@@ -5,7 +5,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActi
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 
-class LibraryHomeViewModel : BaseViewModel<LibraryUiState, LibraryUiEvent, LibraryActionEvent>() {
+class LibraryViewModel : BaseViewModel<LibraryUiState, LibraryUiEvent, LibraryActionEvent>() {
     override val initialState: LibraryUiState = LibraryUiState
 
     override fun onEvent(event: LibraryUiEvent) {
