@@ -15,6 +15,17 @@
     <!--Caption Texts-->
     <string name="caption_text_empty_library">Your library is empty</string>
     <string name="caption_text_import_book">Import your first book to start building your library</string>
+    <string name="caption_text_boo_title">The Fellowship of the Ring (Book 1) (Illustrated Edition)</string>
+    <string name="caption_text_author">J.R.R. Tolkien</string>
+
+    <!--Content Description Texts-->
+    <string name="cds_text_menu">menu</string>
+    <string name="cds_text_search">search</string>
+    <string name="cds_text_book">book</string>
+    <string name="cds_text_favorite">favorite</string>
+    <string name="cds_text_bookmark">bookmark</string>
+    <string name="cds_text_share">share</string>
+    <string name="cds_text_delete">delete</string>
 
     <!--Label Texts-->
     <string name="label_text_gender">Gender</string>
@@ -31,10 +42,6 @@
     <!--Text Button Texts-->
     <string name="text_button_skip">Skip</string>
 
-    <!--Content Description Texts-->
-    <string name="cds_text_menu">menu</string>
-    <string name="cds_text_search">search</string>
-    <string name="cds_text_book">book</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
