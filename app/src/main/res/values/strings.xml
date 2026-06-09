@@ -27,21 +27,20 @@
     <string name="cds_text_share">share</string>
     <string name="cds_text_delete">delete</string>
 
-    <!--Label Texts-->
-    <string name="label_text_gender">Gender</string>
-
-
-    <!--Menu Texts-->
-    <string name="menu_text_male">Male</string>
-
-
     <!--Button Texts-->
     <string name="button_text_start">Start</string>
     <string name="button_text_import_book">Import Book</string>
 
     <!--Text Button Texts-->
-    <string name="text_button_skip">Skip</string>
+    <string name="text_button_cancel">Cancel</string>
 
+    <!--Label Texts-->
+    <string name="label_text_gender">Gender</string>
+
+    <!--Dialog Texts-->
+    <string name="dialog_text_delete_book">Delete \"%s\"?</string>
+    <string name="dialog_text_unsupported_format">Unsupported file format</string>
+    <string name="dialog_text_remove_action">This action will remove the book from your library.</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
@@ -49,9 +48,8 @@
     <!--Toast Texts-->
     <string name="toast_text_copied">Copied to Clipboard</string>
 
-    <!--Dialog Texts-->
-    <string name="dialog_text_log_out">Are you sure you want to log out?</string>
-
+    <!--Menu Texts-->
+    <string name="menu_text_male">Male</string>
 
     <!--Supporting Texts-->
     <string name="sup_text_def_username">Use between 3 and 20 characters for your username.</string>
