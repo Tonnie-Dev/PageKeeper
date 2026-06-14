@@ -13,7 +13,7 @@ interface BookDao {
     @Query("SELECT * FROM books ORDER BY dateAdded DESC")
     fun observeBooks(): Flow<List<BookEntity>>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM books WHERE fileHash = :fileHash)")
+    @Query("SELECT EXISTS(SELECT 1 FROM books WHERE id = :fileHash)")
     suspend fun existsByHash(fileHash: String): Boolean
 
     @Insert

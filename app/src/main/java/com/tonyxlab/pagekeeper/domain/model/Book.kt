@@ -7,7 +7,6 @@ data class Book(
     val coverPath: String?,
     val fileName: String,
     val filePath: String,
-    val fileHash: String,
     val dateAdded: Long,
     val isFavorite: Boolean = false,
     val isFinished: Boolean = false

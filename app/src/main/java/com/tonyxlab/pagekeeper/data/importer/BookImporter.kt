@@ -45,7 +45,6 @@ class BookImporter(
                 coverPath = metadata.coverPath,
                 fileName = fileName,
                 filePath = bookFile.absolutePath,
-                fileHash = fileHash,
                 dateAdded = System.currentTimeMillis()
         )
 
