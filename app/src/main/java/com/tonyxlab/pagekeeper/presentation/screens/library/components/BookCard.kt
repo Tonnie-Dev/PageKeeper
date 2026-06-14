@@ -156,7 +156,6 @@ fun BookCardPreview() {
                         coverPath = null,
                         fileName = "fellowship.epub",
                         filePath = "/books/fellowship.epub",
-                        fileHash = "hash",
                         dateAdded = System.currentTimeMillis()
                 )
         )

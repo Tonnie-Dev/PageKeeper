@@ -39,7 +39,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.TitleLargeBold
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @Composable
-fun EmptyScreen(
+fun EmptyScreenContent(
     modifier: Modifier = Modifier,
     onImportBookClick: () -> Unit = {}
 ) {
@@ -112,8 +112,8 @@ fun EmptyScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun EmptyScreenPreview() {
+private fun EmptyScreenContentPreview() {
     PageKeeperTheme {
-        EmptyScreen()
+        EmptyScreenContent()
     }
 }

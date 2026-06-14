@@ -7,7 +7,7 @@ data class LibraryUiState(
     val books: List<Book> = emptyList(),
     val isLoading: Boolean = false,
     val isImporting: Boolean = false,
-    val dialog: LibraryDialog? = null,
+    val dialog: LibraryDialog? = null
 ): UiState
 
 data class LibraryDialog(
@@ -16,7 +16,7 @@ data class LibraryDialog(
     val positiveButtonText: String,
     val negativeButtonText: String? = null,
     val type: LibraryDialogType,
-    val bookId: Long? = null,
+    val bookId: String? = null,
 )
 
 enum class LibraryDialogType {

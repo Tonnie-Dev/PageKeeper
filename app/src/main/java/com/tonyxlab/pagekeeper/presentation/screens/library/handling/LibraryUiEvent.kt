@@ -7,17 +7,17 @@ sealed interface LibraryUiEvent: UiEvent{
 
     data object ImportBookClicked : LibraryUiEvent
 
-    data class BookSelected(val bookId: Long) : LibraryUiEvent
+    data class OpenBook(val bookId: String) : LibraryUiEvent
 
-    data class FavoriteBookClicked(val bookId: Long) : LibraryUiEvent
+    data class MarkFavorite(val bookId: String) : LibraryUiEvent
 
-    data class BookmarkBookClicked(val bookId: Long) : LibraryUiEvent
+    data class FinishBook(val bookId: String) : LibraryUiEvent
 
-    data class ShareBookClicked(val bookId: Long) : LibraryUiEvent
+    data class ShareBook(val bookId: String) : LibraryUiEvent
 
-    data class DeleteBookClicked(val bookId: Long) : LibraryUiEvent
+    data class DeleteBook(val bookId: String) : LibraryUiEvent
 
-    data class ConfirmDeleteBook(val bookId: Long) : LibraryUiEvent
+    data class ConfirmDeleteDialog(val bookId: String) : LibraryUiEvent
 
     data object DismissDialog : LibraryUiEvent
 
