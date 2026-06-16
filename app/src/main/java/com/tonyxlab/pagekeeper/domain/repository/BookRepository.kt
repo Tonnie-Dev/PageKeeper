@@ -14,5 +14,5 @@ interface BookRepository {
 
     suspend fun updateFinished(bookId: String, isFinished: Boolean)
 
-    suspend fun deleteBook(book: Book)
+    suspend fun deleteBookById(id: String)
 }

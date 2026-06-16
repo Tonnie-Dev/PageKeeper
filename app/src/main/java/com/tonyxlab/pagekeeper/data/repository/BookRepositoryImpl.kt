@@ -22,7 +22,7 @@ class BookRepositoryImpl(
         }
     }
 
-    override suspend fun existsByHash(fileHash: String): Boolean = bookDao.existsById(fileHash)
+    override suspend fun existsByHash(fileHash: String): Boolean = bookDao.existsByHash(fileHash)
 
     override suspend fun insertBook(book: Book) = bookDao.insertBook(book.toEntity())
 
@@ -34,5 +34,5 @@ class BookRepositoryImpl(
         bookDao.updateFinished(bookId, isFinished)
     }
 
-    override suspend fun deleteBook(book: Book) = bookDao.deleteBookById(book.id)
+    override suspend fun deleteBookById(id: String) = bookDao.deleteBookById(id)
 }

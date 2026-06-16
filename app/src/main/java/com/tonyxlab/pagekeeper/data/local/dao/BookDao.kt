@@ -14,7 +14,7 @@ interface BookDao {
     fun observeBooks(): Flow<List<BookEntity>>
 
     @Query("SELECT EXISTS(SELECT 1 FROM books WHERE id = :id)")
-    suspend fun existsById(id: String): Boolean
+    suspend fun existsByHash(id: String): Boolean
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertBook(book: BookEntity)

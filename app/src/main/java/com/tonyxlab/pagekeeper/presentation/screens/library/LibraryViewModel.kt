@@ -83,7 +83,7 @@ class LibraryViewModel(
                 onError = { showToast("Unable to delete book.") },
                 onCompletion = { dismissDialog() }
         ) {
-            bookRepository.deleteBook(book)
+            bookRepository.deleteBookById(id = bookId)
         }
     }
 
