@@ -20,11 +20,13 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
@@ -42,8 +44,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
 
-
     val context = LocalContext.current
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -58,7 +62,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
 
     BaseContentLayout(
             viewModel = viewModel,
-            topBar = { stateX ->
+            topBar = {
                 AppTopBar(
                         titleText = stringResource(id = R.string.topbar_text_library),
                         onNavButtonClick = {},
@@ -67,7 +71,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
             },
 
             floatingActionButton = {
-                if (viewModel.uiState.value.books.isNotEmpty()) {
+                if (uiState.books.isNotEmpty()) {
                     FloatingActionButton(
                             onClick = { viewModel.onEvent(LibraryUiEvent.ImportBookClicked) },
                             containerColor = Primary,
@@ -131,10 +135,10 @@ fun LibraryScreenContent(
                 LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
-                                horizontal = MaterialTheme.spacing.spaceSmall,
-                                vertical = MaterialTheme.spacing.spaceSmall
+                              //  horizontal = MaterialTheme.spacing.spaceSmall,
+                               // vertical = MaterialTheme.spacing.spaceSmall
                         ),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+                      //  verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
                 ) {
                     items(items = uiState.books, key = { it.id }) { book ->
 
@@ -174,7 +178,13 @@ fun LibraryScreenContent(
 }
 
 private fun Context.getDisplayName(uri: Uri): String {
-    val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+    val cursor: Cursor? = contentResolver.query(
+            uri,
+            null,
+            null,
+            null,
+            null
+    )
     cursor?.use {
         val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         if (nameIndex >= 0 && it.moveToFirst()) {

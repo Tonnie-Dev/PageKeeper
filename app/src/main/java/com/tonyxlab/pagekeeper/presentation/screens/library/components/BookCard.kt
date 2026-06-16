@@ -1,6 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.library.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
@@ -48,10 +51,24 @@ fun BookCard(
     Row(
             modifier = modifier
                     .fillMaxWidth()
-                    .padding(MaterialTheme.spacing.spaceTwelve)
                     .height(IntrinsicSize.Min)
+                    .padding(MaterialTheme.spacing.spaceTwelve)
     ) {
-        BookCoverPlaceholder()
+
+        book.coverPath?.let { cover ->
+            AsyncImage(
+                    model = cover,
+                    contentDescription = book.title,
+                    modifier = Modifier
+                            .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = MaterialTheme.shapes.small
+                            )
+                            .size(width = 104.dp, height = 156.dp),
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center
+            )
+        } ?: BookCoverPlaceholder()
 
         Column(
                 modifier = Modifier
