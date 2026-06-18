@@ -22,4 +22,12 @@ sealed interface LibraryUiEvent: UiEvent{
     data object DismissDialog : LibraryUiEvent
 
     data class FileSelected(val uri: Uri, val fileName: String) : LibraryUiEvent
+
+    data object SearchClicked : LibraryUiEvent
+
+    data object SearchBackClicked : LibraryUiEvent
+
+    data object ClearSearchClicked : LibraryUiEvent
+
+    data class SearchQueryChanged(val query: String) : LibraryUiEvent
 }

@@ -17,15 +17,18 @@
     <string name="caption_text_import_book">Import your first book to start building your library</string>
     <string name="caption_text_boo_title">The Fellowship of the Ring (Book 1) (Illustrated Edition)</string>
     <string name="caption_text_author">J.R.R. Tolkien</string>
+    <string name="caption_text_no_results">No results found</string>
 
     <!--Content Description Texts-->
-    <string name="cds_text_menu">menu</string>
-    <string name="cds_text_search">search</string>
-    <string name="cds_text_book">book</string>
-    <string name="cds_text_favorite">favorite</string>
+    <string name="cds_text_menu">Menu</string>
+    <string name="cds_text_search">Search</string>
+    <string name="cds_text_book">Book</string>
+    <string name="cds_text_favorite">Favorite</string>
     <string name="cds_text_bookmark">bookmark</string>
-    <string name="cds_text_share">share</string>
-    <string name="cds_text_delete">delete</string>
+    <string name="cds_text_share">Share</string>
+    <string name="cds_text_delete">Delete</string>
+    <string name="cds_text_back">Back</string>
+    <string name="cds_text_cancel">Cancel</string>
 
     <!--Button Texts-->
     <string name="button_text_start">Start</string>
@@ -58,7 +61,7 @@
     <string name="settings_sync_interval">Sync Interval</string>
 
     <!--Placeholder Texts-->
-    <string name="placeholder_text_search">Search for delicious food…</string>
+    <string name="placeholder_text_search">Search books…</string>
 
     <!--Meta Data Texts-->
     <string name="dollar_price_tag">$%.2f</string>

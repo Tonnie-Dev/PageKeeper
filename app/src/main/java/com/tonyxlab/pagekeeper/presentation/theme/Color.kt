@@ -2,9 +2,6 @@ package com.tonyxlab.pagekeeper.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-
-
-
 val TextPrimary = Color(0xFF2C2926)
 val TextSecondary = Color(0xFF706C61)
 

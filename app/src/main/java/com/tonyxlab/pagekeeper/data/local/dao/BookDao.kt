@@ -27,4 +27,14 @@ interface BookDao {
 
     @Query("DELETE FROM books WHERE id = :id")
     suspend fun deleteBookById(id: String)
+
+    @Query(
+            """
+    SELECT * FROM books
+    WHERE title LIKE '%' || :query || '%' COLLATE NOCASE
+       OR author LIKE '%' || :query || '%' COLLATE NOCASE
+    ORDER BY dateAdded DESC
+    """
+    )
+    fun searchBooks(query: String): Flow<List<BookEntity>>
 }

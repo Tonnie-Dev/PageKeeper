@@ -1,7 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.library.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -101,7 +100,10 @@ fun BookCard(
 
                 IconButton(onClick = { onFavoriteClick(book) }) {
                     Icon(
-                            painter = painterResource(id = R.drawable.ic_favorite),
+                            painter = if (book.isFavorite)
+                                painterResource(id = R.drawable.ic_star_filled)
+                            else
+                                painterResource(id = R.drawable.ic_star_outlined),
                             contentDescription = stringResource(id = R.string.cds_text_favorite),
                             tint = if (book.isFavorite) Primary else Icons,
                     )
@@ -109,7 +111,10 @@ fun BookCard(
 
                 IconButton(onClick = { onBookmarkClick(book) }) {
                     Icon(
-                            painter = painterResource(id = R.drawable.ic_bookmark),
+                            painter = if (book.isFinished)
+                                painterResource(id = R.drawable.ic_finished_filed)
+                            else
+                                painterResource(id = R.drawable.ic_finished_outlined),
                             contentDescription = stringResource(id = R.string.cds_text_bookmark),
                             tint = Icons
                     )

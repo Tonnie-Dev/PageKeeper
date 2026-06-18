@@ -15,4 +15,6 @@ interface BookRepository {
     suspend fun updateFinished(bookId: String, isFinished: Boolean)
 
     suspend fun deleteBookById(id: String)
+
+    fun searchBooks(query: String): Flow<List<Book>>
 }

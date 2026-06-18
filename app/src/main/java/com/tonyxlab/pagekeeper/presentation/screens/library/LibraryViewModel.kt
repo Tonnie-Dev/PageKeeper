@@ -35,6 +35,10 @@ class LibraryViewModel(
             is LibraryUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
             LibraryUiEvent.ImportBookClicked -> onImport()
             is LibraryUiEvent.ShareBook -> onShareBook(event.bookId)
+            LibraryUiEvent.ClearSearchClicked -> TODO()
+            LibraryUiEvent.SearchBackClicked -> TODO()
+            LibraryUiEvent.SearchClicked -> TODO()
+            is LibraryUiEvent.SearchQueryChanged -> TODO()
         }
     }
 

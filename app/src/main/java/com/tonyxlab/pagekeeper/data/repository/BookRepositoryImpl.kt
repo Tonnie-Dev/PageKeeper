@@ -15,7 +15,6 @@ class BookRepositoryImpl(
 ) : BookRepository {
 
     override fun observeBooks(): Flow<List<Book>> {
-
         return bookDao.observeBooks().map {books ->
             books.map(BookEntity::toModel)
 
@@ -35,4 +34,10 @@ class BookRepositoryImpl(
     }
 
     override suspend fun deleteBookById(id: String) = bookDao.deleteBookById(id)
+
+    override fun searchBooks(query: String): Flow<List<Book>>  =
+        bookDao.searchBooks(query).map { books ->
+            books.map (BookEntity::toModel)
+        }
+
 }
