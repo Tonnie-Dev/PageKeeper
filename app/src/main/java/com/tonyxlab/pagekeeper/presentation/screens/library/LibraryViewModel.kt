@@ -1,6 +1,10 @@
+@file:OptIn(FlowPreview::class)
+
 package com.tonyxlab.pagekeeper.presentation.screens.library
 
 import android.net.Uri
+import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.viewModelScope
 import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.domain.ImportBookResult
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
@@ -10,18 +14,26 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDial
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.core.KoinApplication.Companion.init
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlin.time.Duration.Companion.milliseconds
 
 typealias HomeBaseViewModel = BaseViewModel<LibraryUiState, LibraryUiEvent, LibraryActionEvent>
 
 class LibraryViewModel(
     private val bookRepository: BookRepository,
     private val bookImporter: BookImporter,
-) : HomeBaseViewModel(initialState =LibraryUiState()) {
+) : HomeBaseViewModel(initialState = LibraryUiState()) {
 
     init {
         observeBooks()
+        observeSearchQuery()
     }
 
     override fun onEvent(event: LibraryUiEvent) {
@@ -35,20 +47,63 @@ class LibraryViewModel(
             is LibraryUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
             LibraryUiEvent.ImportBookClicked -> onImport()
             is LibraryUiEvent.ShareBook -> onShareBook(event.bookId)
-            LibraryUiEvent.ClearSearchClicked -> TODO()
-            LibraryUiEvent.SearchBackClicked -> TODO()
-            LibraryUiEvent.SearchClicked -> TODO()
-            is LibraryUiEvent.SearchQueryChanged -> TODO()
+            LibraryUiEvent.ClearSearchClicked -> clearSearchText()
+            LibraryUiEvent.SearchBackClicked -> onSearchBackClick()
+            LibraryUiEvent.SearchClicked -> onSearch()
+
         }
     }
 
     private fun observeBooks() {
         launch {
-          //updateState { it.copy(isLoading = true) }
             bookRepository.observeBooks()
                     .collectLatest { books ->
                         updateState { it.copy(books = books, isLoading = false) }
                     }
+        }
+    }
+
+    private fun observeSearchQuery() {
+
+        val textFlow = snapshotFlow {
+            currentState.searchState.searchTextFieldState.text
+        }
+
+        textFlow.debounce(300.milliseconds)
+                .map { it.toString() }
+                .distinctUntilChanged()
+                .onEach { query ->
+                    onSearchQueryChange(query = query)
+                }
+                .launchIn(viewModelScope)
+
+    }
+
+    private fun onSearchQueryChange(query: String) {
+        val cleanQuery = query.trim()
+
+        if (cleanQuery.isBlank()) {
+            updateState {
+                it.copy(
+                        searchState = it.searchState.copy(
+                                searchResults = emptyList()
+                        )
+                )
+            }
+            return
+        }
+
+        launch {
+            val searchResults = bookRepository.searchBooks(cleanQuery)
+                    .first()
+
+            updateState {
+                it.copy(
+                        searchState = it.searchState.copy(
+                                searchResults = searchResults
+                        )
+                )
+            }
         }
     }
 
@@ -131,6 +186,34 @@ class LibraryViewModel(
 
     private fun onShareBook(bookId: String) {
         sendActionEvent(LibraryActionEvent.ShareBook(bookId))
+    }
+
+    private fun onSearch() {
+        updateState {
+            it.copy(
+                    searchState = it.searchState.copy(
+                            isSearchMode = true
+                    )
+            )
+        }
+    }
+
+    private fun onSearchBackClick() {
+        clearSearchText()
+        updateState {
+            it.copy(
+                    searchState = it.searchState.copy(
+                            isSearchMode = false,
+                            searchResults = emptyList()
+                    )
+            )
+        }
+    }
+
+    private fun clearSearchText() {
+        currentState.searchState.searchTextFieldState.edit {
+            replace(0, length, "")
+        }
     }
 
     private fun showUnsupportedFileDialog() {

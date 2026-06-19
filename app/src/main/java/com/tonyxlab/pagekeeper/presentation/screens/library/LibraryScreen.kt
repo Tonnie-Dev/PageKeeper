@@ -9,9 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,12 +31,12 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyScreenContent
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
+import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
-import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -47,6 +45,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val inSearchMode = uiState.searchState.isSearchMode
 
     val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
@@ -63,15 +62,21 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
     BaseContentLayout(
             viewModel = viewModel,
             topBar = {
-                AppTopBar(
-                        titleText = stringResource(id = R.string.topbar_text_library),
-                        onNavButtonClick = {},
-                        onActionClick = {}
-                )
+                if (inSearchMode.not()) {
+
+                    AppTopBar(
+                            titleText = stringResource(id = R.string.topbar_text_library),
+                            onNavButtonClick = {},
+                            onActionClick = {
+                                viewModel.onEvent(LibraryUiEvent.SearchClicked)
+                            }
+                    )
+
+                }
             },
 
             floatingActionButton = {
-                if (uiState.books.isNotEmpty()) {
+                if (inSearchMode.not() && uiState.books.isNotEmpty()) {
                     FloatingActionButton(
                             onClick = { viewModel.onEvent(LibraryUiEvent.ImportBookClicked) },
                             containerColor = Primary,
@@ -88,11 +93,22 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                 when (actionEvent) {
                     LibraryActionEvent.OpenFilePicker -> filePicker.launch("*/*")
                     is LibraryActionEvent.OpenBook -> {
-                        Toast.makeText(actionContext, "Reader is not available yet.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                                actionContext,
+                                "Reader is not available yet.",
+                                Toast.LENGTH_SHORT
+                        )
+                                .show()
                     }
-                    is LibraryActionEvent.ShareBook -> actionContext.shareBook(actionEvent.bookId, viewModel.uiState.value)
+
+                    is LibraryActionEvent.ShareBook -> actionContext.shareBook(
+                            actionEvent.bookId,
+                            viewModel.uiState.value
+                    )
+
                     is LibraryActionEvent.ShowToast -> {
-                        Toast.makeText(actionContext, actionEvent.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(actionContext, actionEvent.message, Toast.LENGTH_SHORT)
+                                .show()
                     }
                 }
             }
@@ -101,7 +117,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
         LibraryScreenContent(
                 modifier = Modifier,
                 uiState = uiState,
-                uiEvent = viewModel::onEvent
+                onEvent = viewModel::onEvent
         )
     }
 }
@@ -110,7 +126,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
 fun LibraryScreenContent(
     modifier: Modifier,
     uiState: LibraryUiState,
-    uiEvent: (LibraryUiEvent) -> Unit
+    onEvent: (LibraryUiEvent) -> Unit
 ) {
     Box(
             modifier = modifier
@@ -125,30 +141,31 @@ fun LibraryScreenContent(
                 )
             }
 
+            uiState.searchState.isSearchMode -> {
+                SearchComponent(
+                        modifier = Modifier,
+                        uiState = uiState,
+                        onEvent = onEvent
+                )
+            }
+
             uiState.books.isEmpty() -> {
                 EmptyScreenContent(
-                        onImportBookClick = { uiEvent(LibraryUiEvent.ImportBookClicked) }
+                        onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
                 )
             }
 
             else -> {
-                LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                              //  horizontal = MaterialTheme.spacing.spaceSmall,
-                               // vertical = MaterialTheme.spacing.spaceSmall
-                        ),
-                      //  verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
-                ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(items = uiState.books, key = { it.id }) { book ->
 
                         BookCard(
                                 modifier = Modifier,
                                 book = book,
-                                onFavoriteClick = { uiEvent(LibraryUiEvent.MarkFavorite(it.id)) },
-                                onBookmarkClick = { uiEvent(LibraryUiEvent.FinishBook(it.id)) },
-                                onShareClick = { uiEvent(LibraryUiEvent.ShareBook(it.id)) },
-                                onDeleteClick = { uiEvent(LibraryUiEvent.ConfirmDeleteDialog(it.id)) }
+                                onFavoriteClick = { onEvent(LibraryUiEvent.MarkFavorite(it.id)) },
+                                onBookmarkClick = { onEvent(LibraryUiEvent.FinishBook(it.id)) },
+                                onShareClick = { onEvent(LibraryUiEvent.ShareBook(it.id)) },
+                                onDeleteClick = { onEvent(LibraryUiEvent.ConfirmDeleteDialog(it.id)) }
                         )
                     }
                 }
@@ -162,14 +179,14 @@ fun LibraryScreenContent(
                     positiveButtonText = dialog.positiveButtonText,
                     negativeButtonText = dialog.negativeButtonText,
                     isDeleteDialog = dialog.type == LibraryDialogType.DeleteBook,
-                    onDismissRequest = { uiEvent(LibraryUiEvent.DismissDialog) },
+                    onDismissRequest = { onEvent(LibraryUiEvent.DismissDialog) },
                     onConfirm = {
                         when (dialog.type) {
                             LibraryDialogType.DeleteBook -> {
-                                dialog.bookId?.let { uiEvent(LibraryUiEvent.DeleteBook(it)) }
+                                dialog.bookId?.let { onEvent(LibraryUiEvent.DeleteBook(it)) }
                             }
 
-                            LibraryDialogType.UnsupportedFile -> uiEvent(LibraryUiEvent.DismissDialog)
+                            LibraryDialogType.UnsupportedFile -> onEvent(LibraryUiEvent.DismissDialog)
                         }
                     }
             )
@@ -188,7 +205,8 @@ private fun Context.getDisplayName(uri: Uri): String {
     cursor?.use {
         val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         if (nameIndex >= 0 && it.moveToFirst()) {
-            return it.getString(nameIndex).orEmpty()
+            return it.getString(nameIndex)
+                    .orEmpty()
         }
     }
 
@@ -198,7 +216,8 @@ private fun Context.getDisplayName(uri: Uri): String {
 private fun Context.shareBook(bookId: String, uiState: LibraryUiState) {
     val book = uiState.books.firstOrNull { it.id == bookId }
     if (book == null) {
-        Toast.makeText(this, "Unable to share book.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Unable to share book.", Toast.LENGTH_SHORT)
+                .show()
         return
     }
 

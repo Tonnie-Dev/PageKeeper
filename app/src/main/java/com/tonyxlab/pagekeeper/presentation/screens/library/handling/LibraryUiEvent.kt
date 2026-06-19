@@ -29,5 +29,5 @@ sealed interface LibraryUiEvent: UiEvent{
 
     data object ClearSearchClicked : LibraryUiEvent
 
-    data class SearchQueryChanged(val query: String) : LibraryUiEvent
+  //  data class SearchQueryChanged(val query: String) : LibraryUiEvent
 }

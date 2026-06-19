@@ -2,6 +2,7 @@ package com.tonyxlab.pagekeeper.presentation.screens.library.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,21 +40,24 @@ import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.BookMock
 import com.tonyxlab.pagekeeper.presentation.core.components.AppInputField
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
+import com.tonyxlab.pagekeeper.presentation.theme.TitleMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.TitleSmallMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchComponent(
-    state: LibraryUiState,
+    uiState: LibraryUiState,
+    onEvent: (LibraryUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val searchTextFieldState = state.searchState.searchTextFieldState
+    val searchTextFieldState = uiState.searchState.searchTextFieldState
     val textFieldHasText = searchTextFieldState.text.isNotBlank()
 
     SearchBar(
@@ -68,7 +72,11 @@ fun SearchComponent(
                                 Column {
 
                                     Image(
-                                            modifier = Modifier,
+                                            modifier = Modifier.clickable(
+                                                    onClick = {
+                                                        onEvent(LibraryUiEvent.SearchBackClicked)
+                                                    }
+                                            ),
                                             painter = painterResource(R.drawable.ic_back),
                                             contentDescription = stringResource(id = R.string.cds_text_back),
                                     )
@@ -78,7 +86,11 @@ fun SearchComponent(
                                 if (textFieldHasText) {
 
                                     Image(
-                                            modifier = Modifier,
+                                            modifier = Modifier.clickable(onClick = {
+                                                onEvent(
+                                                        LibraryUiEvent.ClearSearchClicked
+                                                )
+                                            }),
                                             painter = painterResource(R.drawable.ic_cancel),
                                             contentDescription = stringResource(id = R.string.cds_text_back),
                                     )
@@ -92,8 +104,8 @@ fun SearchComponent(
                 }
 
             },
-            //expanded = searchTextFieldState.text.isNotBlank(),
-            expanded = true,
+            expanded = searchTextFieldState.text.isNotBlank(),
+            // expanded = true,
             onExpandedChange = {},
             colors = SearchBarDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -103,16 +115,23 @@ fun SearchComponent(
 
         LazyColumn {
 
-            val items = state.searchState.searchResults
+            val items = uiState.searchState.searchResults
             if (textFieldHasText && items.isEmpty()) {
                 item {
-                    Text(
-                            modifier = Modifier.padding(MaterialTheme.spacing.spaceSmall),
-                            text = stringResource(id = R.string.caption_text_no_results),
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                    )
+                    Box(
+                            modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = MaterialTheme.spacing.spaceTen * 4),
+                            contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                                modifier = Modifier
+                                        .padding(MaterialTheme.spacing.spaceSmall),
+                                text = stringResource(id = R.string.caption_text_no_results),
+                                style = MaterialTheme.typography.TitleMediumMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -132,7 +151,10 @@ private fun SearchResultItem(
             modifier = modifier
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min)
-                    .padding(MaterialTheme.spacing.spaceSmall)
+                    .padding(
+                            horizontal = MaterialTheme.spacing.spaceMedium,
+                            vertical = MaterialTheme.spacing.spaceSmall
+                    )
     ) {
 
         book.coverPath?.let { cover ->
@@ -207,14 +229,15 @@ private fun SearchComponent_Preview() {
         ) {
 
             SearchComponent(
-                    state = LibraryUiState(
+                    uiState = LibraryUiState(
 
                             searchState = LibraryUiState.SearchState(
                                     searchTextFieldState = TextFieldState(initialText = "Tonnie"),
 
                                     searchResults = BookMock.books
                             )
-                    )
+                    ),
+                    onEvent = {}
             )
 
         }

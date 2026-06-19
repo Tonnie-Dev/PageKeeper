@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,6 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
+import com.tonyxlab.pagekeeper.presentation.theme.TitleMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +41,7 @@ fun AppTopBar(
             title = {
                 Text(
                         text = titleText,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.TitleMediumMedium,
                         color = MaterialTheme.colorScheme.onSurface
                 )
             },
@@ -51,7 +51,6 @@ fun AppTopBar(
                         painter = painterResource(R.drawable.ic_menu),
                         contentDescription = stringResource(id = R.string.cds_text_menu),
                         modifier = Modifier
-                                .size(MaterialTheme.spacing.spaceLargeMedium)
                                 .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
@@ -66,7 +65,6 @@ fun AppTopBar(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = stringResource(id = R.string.cds_text_search),
                         modifier = Modifier
-                                .size(MaterialTheme.spacing.spaceLargeMedium)
                                 .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,

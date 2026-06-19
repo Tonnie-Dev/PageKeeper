@@ -10,13 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +27,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,7 +37,7 @@ import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.theme.BodyLargeRegular
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
-import com.tonyxlab.pagekeeper.utils.clickableWithoutRipple
+import kotlinx.coroutines.android.awaitFrame
 
 @Composable
 fun AppInputField(
@@ -48,62 +47,52 @@ fun AppInputField(
     textStyle: TextStyle = MaterialTheme.typography.BodyLargeRegular,
     placeholderTextStyle: TextStyle = MaterialTheme.typography.BodyLargeRegular,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    shape: Shape = RoundedCornerShape(MaterialTheme.spacing.spaceExtraSmall * 7),
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
 ) {
 
-    var focused by remember { mutableStateOf(false) }
+    var focused by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
 
-    Box(
+    LaunchedEffect(Unit) {
+        awaitFrame()
+        focusRequester.requestFocus()
+    }
+
+    Row(
             modifier = modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.spacing.spaceTwelve * 6)
-                    .background(
-                            color = backgroundColor,
-
-                            )
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focused = it.isFocused }
-
+                    .background(color = backgroundColor)
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-                    .padding(vertical = MaterialTheme.spacing.spaceExtraSmall)
-                    .clickableWithoutRipple {
-                        focusRequester.requestFocus()
-                    },
-            contentAlignment = Alignment.Center
+                    .padding(vertical = MaterialTheme.spacing.spaceExtraSmall),
+            verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
+        leadingIcon?.invoke()
 
-                verticalAlignment = Alignment.CenterVertically,
-
-                ) {
-            leadingIcon?.invoke()
-
-            BasicTextField(
-                    modifier = Modifier
-                            .weight(1f),
-                    state = textFieldState,
-                    textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    keyboardOptions = keyboardOptions,
-                    decorator = { innerTextField ->
-                        TextDecorator(
-                                isEmpty = textFieldState.text.isEmpty(),
-                                innerTextField = innerTextField,
-                                focused = focused,
-                                placeholderText = placeholderText,
-                                placeholderTextStyle = placeholderTextStyle.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                        )
-                    }
-            )
-
-            trailingIcon?.invoke()
-        }
+        BasicTextField(
+                modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focused = it.isFocused },
+                state = textFieldState,
+                textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = keyboardOptions,
+                decorator = { innerTextField ->
+                    TextDecorator(
+                            isEmpty = textFieldState.text.isEmpty(),
+                            innerTextField = innerTextField,
+                            focused = focused,
+                            placeholderText = placeholderText,
+                            placeholderTextStyle = placeholderTextStyle.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                    )
+                }
+        )
+        trailingIcon?.invoke()
     }
 }
 
@@ -116,9 +105,11 @@ fun TextDecorator(
     innerTextField: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier
-            .fillMaxWidth()
-            .padding(start = MaterialTheme.spacing.spaceSmall)) {
+    Box(
+            modifier = modifier
+                    .fillMaxWidth()
+                    .padding(start = MaterialTheme.spacing.spaceSmall)
+    ) {
         if (isEmpty && !focused) {
             Text(
                     text = placeholderText,
