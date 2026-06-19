@@ -15,6 +15,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDial
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlin.time.Duration.Companion.milliseconds
 
 typealias HomeBaseViewModel = BaseViewModel<LibraryUiState, LibraryUiEvent, LibraryActionEvent>
@@ -57,6 +59,13 @@ class LibraryViewModel(
     private fun observeBooks() {
         launch {
             bookRepository.observeBooks()
+                    .onStart {
+                        updateState { it.copy(isLoading = true) }
+                    }
+                    .catch {
+                        updateState { state -> state.copy(isLoading = false) }
+                        showToast("Unable to load books.")
+                    }
                     .collectLatest { books ->
                         updateState { it.copy(books = books, isLoading = false) }
                     }

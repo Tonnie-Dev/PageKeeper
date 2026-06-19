@@ -7,7 +7,7 @@ import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
 
 data class LibraryUiState(
     val books: List<Book> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isImporting: Boolean = false,
     val dialog: LibraryDialog? = null,
     val searchState: SearchState = SearchState()
