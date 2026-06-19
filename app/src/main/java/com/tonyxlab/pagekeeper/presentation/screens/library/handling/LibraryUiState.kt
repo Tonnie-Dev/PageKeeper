@@ -10,7 +10,8 @@ data class LibraryUiState(
     val isLoading: Boolean = true,
     val isImporting: Boolean = false,
     val dialog: LibraryDialog? = null,
-    val searchState: SearchState = SearchState()
+    val searchState: SearchState = SearchState(),
+    val selectionState: SelectionState = SelectionState()
 ) : UiState {
 
     @Stable
@@ -19,6 +20,16 @@ data class LibraryUiState(
         val isSearchMode: Boolean = false,
         val searchResults: List<Book> = emptyList(),
     )
+
+    @Stable
+    data class SelectionState(
+        val isSelectionMode: Boolean = false,
+        val selectedBooksIds: Set<String> = emptySet()
+    ){
+
+        val selectedCount: Int
+            get()= selectedBooksIds.size
+    }
 }
 
 data class LibraryDialog(
