@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -37,6 +38,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDial
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
+import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -156,12 +158,18 @@ fun LibraryScreenContent(
             }
 
             else -> {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.spaceSmall)
+
+                ) {
                     items(items = uiState.books, key = { it.id }) { book ->
 
                         BookCard(
                                 modifier = Modifier,
                                 book = book,
+                                uiState = uiState,
+                                onEvent = onEvent,
                                 onFavoriteClick = { onEvent(LibraryUiEvent.MarkFavorite(it.id)) },
                                 onBookmarkClick = { onEvent(LibraryUiEvent.FinishBook(it.id)) },
                                 onShareClick = { onEvent(LibraryUiEvent.ShareBook(it.id)) },
@@ -178,12 +186,17 @@ fun LibraryScreenContent(
                     dialogText = dialog.message,
                     positiveButtonText = dialog.positiveButtonText,
                     negativeButtonText = dialog.negativeButtonText,
-                    isDeleteDialog = dialog.type == LibraryDialogType.DeleteBook,
+                    isDeleteDialog = dialog.type == LibraryDialogType.DeleteBook ||
+                            dialog.type == LibraryDialogType.DeleteSelectedBooks,
                     onDismissRequest = { onEvent(LibraryUiEvent.DismissDialog) },
                     onConfirm = {
                         when (dialog.type) {
                             LibraryDialogType.DeleteBook -> {
                                 dialog.bookId?.let { onEvent(LibraryUiEvent.DeleteBook(it)) }
+                            }
+
+                            LibraryDialogType.DeleteSelectedBooks -> {
+                                onEvent(LibraryUiEvent.ConfirmDeleteSelectedClicked)
                             }
 
                             LibraryDialogType.UnsupportedFile -> onEvent(LibraryUiEvent.DismissDialog)

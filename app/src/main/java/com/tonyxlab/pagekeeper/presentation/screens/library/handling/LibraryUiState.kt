@@ -43,5 +43,6 @@ data class LibraryDialog(
 
 enum class LibraryDialogType {
     DeleteBook,
+    DeleteSelectedBooks,
     UnsupportedFile,
 }

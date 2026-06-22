@@ -6,10 +6,13 @@ import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.domain.ImportBookResult
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
+
+
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialog
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibrarySearchHandler
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SearchHandler
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SelectionHandler
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import kotlinx.coroutines.flow.catch
@@ -23,10 +26,15 @@ class LibraryViewModel(
     private val bookImporter: BookImporter,
 ) : HomeBaseViewModel(initialState = LibraryUiState()) {
 
-    private val searchHandler = LibrarySearchHandler(
+    private val searchHandler = SearchHandler(
             bookRepository = bookRepository,
             coroutineScope = viewModelScope,
             currentState = { currentState },
+            updateState = ::updateState
+    )
+
+    private val selectionHandler = SelectionHandler(
+            currentState ={currentState} ,
             updateState = ::updateState
     )
 
@@ -49,7 +57,14 @@ class LibraryViewModel(
             LibraryUiEvent.ClearSearchClicked -> searchHandler.clearSearchText()
             LibraryUiEvent.SearchBackClicked -> searchHandler.exitSearchMode()
             LibraryUiEvent.SearchClicked -> searchHandler.enterSearchMode()
-
+            LibraryUiEvent.AddSelectedToFavoritesClicked -> onAddSelectedToFavorites()
+            is LibraryUiEvent.BookLongClicked -> selectionHandler.enterSelectionMode(event.bookId)
+            is LibraryUiEvent.BookSelectionToggled -> selectionHandler.toggleBookSelection(event.bookId)
+            LibraryUiEvent.CancelDeleteSelectedClicked -> dismissDialog()
+            LibraryUiEvent.ConfirmDeleteSelectedClicked -> onDeleteSelected()
+            LibraryUiEvent.DeleteSelectedClicked -> onConfirmDeleteSelectedDialog()
+            LibraryUiEvent.ExitSelectionModeClicked -> selectionHandler.exitSelectionMode()
+            LibraryUiEvent.ShareSelectedClicked -> onShareSelected()
         }
     }
 
@@ -148,6 +163,67 @@ class LibraryViewModel(
 
     private fun onShareBook(bookId: String) {
         sendActionEvent(LibraryActionEvent.ShareBook(bookId))
+    }
+
+    private fun onAddSelectedToFavorites() {
+        val selectedBookIds = selectionHandler.selectedBookIds()
+        selectedBookIds.ifEmpty { return }
+
+        launchCatching(
+                onError = { showToast("Unable to update selected books.") },
+                onCompletion = { selectionHandler.exitSelectionMode() }
+        ) {
+            selectedBookIds.forEach { bookId ->
+                bookRepository.updateFavorite(bookId, true)
+            }
+        }
+    }
+
+    private fun onShareSelected() {
+        val selectedBookIds = selectionHandler.selectedBookIds()
+        val bookId = selectedBookIds.singleOrNull()
+
+        if (bookId == null) {
+            showToast("Select one book to share.")
+            return
+        }
+
+        selectionHandler.exitSelectionMode()
+        sendActionEvent(LibraryActionEvent.ShareBook(bookId))
+    }
+
+    private fun onConfirmDeleteSelectedDialog() {
+        val selectedCount = currentState.selectionState.selectedCount
+        if (selectedCount == 0) return
+
+        updateState {
+            it.copy(
+                    dialog = LibraryDialog(
+                            title = "Delete selected books?",
+                            message = "This action will remove $selectedCount selected book(s) from your library.",
+                            positiveButtonText = "Delete",
+                            negativeButtonText = "Cancel",
+                            type = LibraryDialogType.DeleteSelectedBooks
+                    )
+            )
+        }
+    }
+
+    private fun onDeleteSelected() {
+        val selectedBookIds = selectionHandler.selectedBookIds()
+        if (selectedBookIds.isEmpty()) return
+
+        launchCatching(
+                onError = { showToast("Unable to delete selected books.") },
+                onCompletion = {
+                    dismissDialog()
+                    selectionHandler.exitSelectionMode()
+                }
+        ) {
+            selectedBookIds.forEach { bookId ->
+                bookRepository.deleteBookById(id = bookId)
+            }
+        }
     }
 
     private fun showUnsupportedFileDialog() {

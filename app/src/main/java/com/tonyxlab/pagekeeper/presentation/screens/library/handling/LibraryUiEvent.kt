@@ -29,5 +29,14 @@ sealed interface LibraryUiEvent: UiEvent{
 
     data object ClearSearchClicked : LibraryUiEvent
 
-  //  data class SearchQueryChanged(val query: String) : LibraryUiEvent
+    data class BookLongClicked(val bookId: String) : LibraryUiEvent
+    data class BookSelectionToggled(val bookId: String) : LibraryUiEvent
+
+    data object ExitSelectionModeClicked : LibraryUiEvent
+    data object AddSelectedToFavoritesClicked : LibraryUiEvent
+    data object ShareSelectedClicked : LibraryUiEvent
+    data object DeleteSelectedClicked : LibraryUiEvent
+
+    data object ConfirmDeleteSelectedClicked : LibraryUiEvent
+    data object CancelDeleteSelectedClicked : LibraryUiEvent
 }

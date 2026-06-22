@@ -1,6 +1,8 @@
 package com.tonyxlab.pagekeeper.presentation.screens.library.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,13 +10,17 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.Icons
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
@@ -41,102 +49,156 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 @Composable
 fun BookCard(
     book: Book,
+    uiState: LibraryUiState,
+    onEvent: (LibraryUiEvent) -> Unit,
     modifier: Modifier = Modifier,
     onFavoriteClick: (Book) -> Unit = {},
     onBookmarkClick: (Book) -> Unit = {},
     onShareClick: (Book) -> Unit = {},
     onDeleteClick: (Book) -> Unit = {},
 ) {
-    Row(
+    val selectionState = uiState.selectionState
+    val isSelectionMode = uiState.selectionState.isSelectionMode
+    val isSelected = selectionState.selectedBooksIds.isSelected(book.id)
+
+    Surface(
             modifier = modifier
                     .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-                    .padding(MaterialTheme.spacing.spaceTwelve)
+                    .padding(
+                            vertical = if (isSelectionMode)
+                                MaterialTheme.spacing.spaceExtraSmall
+                            else
+                                MaterialTheme.spacing.spaceDefault
+                    )
+                    .combinedClickable(
+                            onClick = {
+                                if (selectionState.isSelectionMode) {
+                                    onEvent(LibraryUiEvent.BookSelectionToggled(book.id))
+                                } else {
+                                    onEvent(LibraryUiEvent.OpenBook(book.id))
+                                }
+                            },
+                            onLongClick = { onEvent(LibraryUiEvent.BookLongClicked(book.id)) }
+                    ),
+            shape = MaterialTheme.shapes.small,
+            color = if (isSelected)
+                MaterialTheme.colorScheme.secondary
+            else
+                MaterialTheme.colorScheme.background,
+            border = if (isSelectionMode) {
+                BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline
+                )
+
+            } else null
+
     ) {
-
-        book.coverPath?.let { cover ->
-            AsyncImage(
-                    model = cover,
-                    contentDescription = book.title,
-                    modifier = Modifier
-                            .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = MaterialTheme.shapes.small
-                            )
-                            .size(width = 104.dp, height = 156.dp),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
-            )
-        } ?: BookCoverPlaceholder()
-
-        Column(
+        Row(
                 modifier = Modifier
-                        .weight(1f)
-                        .padding(start = MaterialTheme.spacing.spaceTwelve)
-                        .fillMaxHeight()
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                        .padding(MaterialTheme.spacing.spaceTwelve),
+                verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                    text = book.title,
-                    style = MaterialTheme.typography.TitleSmallMedium,
-                    color = TextPrimary,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-            )
+            if (selectionState.isSelectionMode) {
+                Checkbox(
+                        checked = isSelected,
+                        onCheckedChange = {
+                            onEvent(LibraryUiEvent.BookSelectionToggled(book.id))
+                        },
+                        colors = CheckboxDefaults.colors(
+                                checkedColor = Primary,
+                                uncheckedColor = Icons,
+                                checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                )
+            }
 
-            Text(
-                    text = book.author,
-                    style = MaterialTheme.typography.BodySmallRegular,
-                    color = TextSecondary,
-                    modifier = Modifier.padding(top = MaterialTheme.spacing.spaceExtraSmall)
-            )
+            book.coverPath?.let { cover ->
+                AsyncImage(
+                        model = cover,
+                        contentDescription = book.title,
+                        modifier = Modifier
+                                .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = MaterialTheme.shapes.small
+                                )
+                                .size(width = 104.dp, height = 156.dp),
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center
+                )
+            } ?: BookCoverPlaceholder()
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+            Column(
+                    modifier = Modifier
+                            .weight(1f)
+                            .padding(start = MaterialTheme.spacing.spaceTwelve)
+                            .fillMaxHeight()
             ) {
+                Text(
+                        text = book.title,
+                        style = MaterialTheme.typography.TitleSmallMedium,
+                        color = TextPrimary,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                )
 
-                IconButton(onClick = { onFavoriteClick(book) }) {
-                    Icon(
-                            painter = if (book.isFavorite)
-                                painterResource(id = R.drawable.ic_star_filled)
-                            else
-                                painterResource(id = R.drawable.ic_star_outlined),
-                            contentDescription = stringResource(id = R.string.cds_text_favorite),
-                            tint = if (book.isFavorite) Primary else Icons,
-                    )
-                }
-
-                IconButton(onClick = { onBookmarkClick(book) }) {
-                    Icon(
-                            painter = if (book.isFinished)
-                                painterResource(id = R.drawable.ic_finished_filed)
-                            else
-                                painterResource(id = R.drawable.ic_finished_outlined),
-                            contentDescription = stringResource(id = R.string.cds_text_bookmark),
-                            tint = Icons
-                    )
-                }
-
-                IconButton(onClick = { onShareClick(book) }) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.ic_share),
-                            contentDescription = stringResource(id = R.string.cds_text_share),
-                            tint = Icons,
-
-                            )
-                }
+                Text(
+                        text = book.author,
+                        style = MaterialTheme.typography.BodySmallRegular,
+                        color = TextSecondary,
+                        modifier = Modifier.padding(top = MaterialTheme.spacing.spaceExtraSmall)
+                )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                IconButton(onClick = { onDeleteClick(book) }) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.ic_delete),
-                            contentDescription = stringResource(id = R.string.cds_text_delete),
-                            tint = Icons,
-                    )
+                Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+                ) {
+                    IconButton(onClick = { onFavoriteClick(book) }) {
+                        Icon(
+                                painter = if (book.isFavorite) {
+                                    painterResource(id = R.drawable.ic_star_filled)
+                                } else {
+                                    painterResource(id = R.drawable.ic_star_outlined)
+                                },
+                                contentDescription = stringResource(id = R.string.cds_text_favorite),
+                                tint = if (book.isFavorite) Primary else Icons,
+                        )
+                    }
+
+                    IconButton(onClick = { onBookmarkClick(book) }) {
+                        Icon(
+                                painter = if (book.isFinished) {
+                                    painterResource(id = R.drawable.ic_finished_filed)
+                                } else {
+                                    painterResource(id = R.drawable.ic_finished_outlined)
+                                },
+                                contentDescription = stringResource(id = R.string.cds_text_bookmark),
+                                tint = Icons
+                        )
+                    }
+
+                    IconButton(onClick = { onShareClick(book) }) {
+                        Icon(
+                                painter = painterResource(id = R.drawable.ic_share),
+                                contentDescription = stringResource(id = R.string.cds_text_share),
+                                tint = Icons,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    IconButton(onClick = { onDeleteClick(book) }) {
+                        Icon(
+                                painter = painterResource(id = R.drawable.ic_delete),
+                                contentDescription = stringResource(id = R.string.cds_text_delete),
+                                tint = Icons,
+                        )
+                    }
                 }
             }
         }
@@ -166,20 +228,57 @@ private fun BookCoverPlaceholder(modifier: Modifier = Modifier) {
     }
 }
 
+private fun Set<String>.isSelected(id: String): Boolean = id in this
+
 @Preview(showBackground = true, backgroundColor = 0xFFFDFCF8)
 @Composable
 fun BookCardPreview() {
     PageKeeperTheme {
-        BookCard(
-                book = Book(
-                        id = "1",
-                        title = "The Fellowship of the Ring (Book 1) (Illustrated Edition)",
-                        author = "J.R.R. Tolkien",
-                        coverPath = null,
-                        fileName = "fellowship.epub",
-                        filePath = "/books/fellowship.epub",
-                        dateAdded = System.currentTimeMillis()
-                )
-        )
+
+val book = Book(
+        id = "1",
+        title = "The Fellowship of the Ring (Book 1) (Illustrated Edition)",
+        author = "J.R.R. Tolkien",
+        coverPath = null,
+        fileName = "fellowship.epub",
+        filePath = "/books/fellowship.epub",
+        dateAdded = System.currentTimeMillis()
+)
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            BookCard(
+                    book = book,
+                    uiState = LibraryUiState(
+                            selectionState = LibraryUiState.SelectionState(
+                                    isSelectionMode = false,
+                                    selectedBooksIds = emptySet()
+                            )
+                    ),
+                    onEvent = {}
+            )
+
+            BookCard(
+                    book = book,
+                    uiState = LibraryUiState(
+                            selectionState = LibraryUiState.SelectionState(
+                                    isSelectionMode = true,
+                                    selectedBooksIds = emptySet()
+                            )
+                    ),
+                    onEvent = {}
+            )
+
+            BookCard(
+                    book = book,
+                    uiState = LibraryUiState(
+                            selectionState = LibraryUiState.SelectionState(
+                                    isSelectionMode = true,
+                                    selectedBooksIds = setOf("1")
+                            )
+                    ),
+                    onEvent = {}
+            )
+
+        }
     }
 }
