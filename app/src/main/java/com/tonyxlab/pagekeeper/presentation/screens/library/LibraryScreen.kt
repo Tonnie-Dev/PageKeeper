@@ -31,6 +31,7 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyScreenContent
+import com.tonyxlab.pagekeeper.presentation.core.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
@@ -48,6 +49,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val inSearchMode = uiState.searchState.isSearchMode
+    val selectionState = uiState.selectionState
 
     val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
@@ -65,14 +67,31 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
             viewModel = viewModel,
             topBar = {
                 if (inSearchMode.not()) {
-
-                    AppTopBar(
-                            titleText = stringResource(id = R.string.topbar_text_library),
-                            onNavButtonClick = {},
-                            onActionClick = {
-                                viewModel.onEvent(LibraryUiEvent.SearchClicked)
-                            }
-                    )
+                    if (selectionState.isSelectionMode) {
+                        SelectionTopBar(
+                                selectedCount = selectionState.selectedCount,
+                                onBackClick = {
+                                    viewModel.onEvent(LibraryUiEvent.ExitSelectionModeClicked)
+                                },
+                                onFavoriteClick = {
+                                    viewModel.onEvent(LibraryUiEvent.AddSelectedToFavoritesClicked)
+                                },
+                                onShareClick = {
+                                    viewModel.onEvent(LibraryUiEvent.ShareSelectedClicked)
+                                },
+                                onDeleteClick = {
+                                    viewModel.onEvent(LibraryUiEvent.DeleteSelectedClicked)
+                                }
+                        )
+                    } else {
+                        AppTopBar(
+                                titleText = stringResource(id = R.string.topbar_text_library),
+                                onNavButtonClick = {},
+                                onActionClick = {
+                                    viewModel.onEvent(LibraryUiEvent.SearchClicked)
+                                }
+                        )
+                    }
 
                 }
             },
@@ -169,11 +188,7 @@ fun LibraryScreenContent(
                                 modifier = Modifier,
                                 book = book,
                                 uiState = uiState,
-                                onEvent = onEvent,
-                                onFavoriteClick = { onEvent(LibraryUiEvent.MarkFavorite(it.id)) },
-                                onBookmarkClick = { onEvent(LibraryUiEvent.FinishBook(it.id)) },
-                                onShareClick = { onEvent(LibraryUiEvent.ShareBook(it.id)) },
-                                onDeleteClick = { onEvent(LibraryUiEvent.ConfirmDeleteDialog(it.id)) }
+                                onEvent = onEvent
                         )
                     }
                 }

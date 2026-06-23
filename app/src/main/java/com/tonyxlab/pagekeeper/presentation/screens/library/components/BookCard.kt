@@ -45,17 +45,14 @@ import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.TitleSmallMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import com.tonyxlab.pagekeeper.utils.ifThen
 
 @Composable
 fun BookCard(
     book: Book,
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    onFavoriteClick: (Book) -> Unit = {},
-    onBookmarkClick: (Book) -> Unit = {},
-    onShareClick: (Book) -> Unit = {},
-    onDeleteClick: (Book) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val selectionState = uiState.selectionState
     val isSelectionMode = uiState.selectionState.isSelectionMode
@@ -98,7 +95,12 @@ fun BookCard(
                 modifier = Modifier
                         .fillMaxWidth()
                         .height(IntrinsicSize.Min)
-                        .padding(MaterialTheme.spacing.spaceTwelve),
+                        .ifThen(isSelectionMode){
+                            padding(vertical = MaterialTheme.spacing.spaceTwelve)
+                        }
+                        .ifThen(isSelectionMode.not()){
+                            padding(MaterialTheme.spacing.spaceTwelve)
+                        },
                 verticalAlignment = Alignment.CenterVertically
         ) {
             if (selectionState.isSelectionMode) {
@@ -158,7 +160,7 @@ fun BookCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
                 ) {
-                    IconButton(onClick = { onFavoriteClick(book) }) {
+                    IconButton(onClick = { onEvent(LibraryUiEvent.MarkFavorite(book.id)) }) {
                         Icon(
                                 painter = if (book.isFavorite) {
                                     painterResource(id = R.drawable.ic_star_filled)
@@ -170,7 +172,7 @@ fun BookCard(
                         )
                     }
 
-                    IconButton(onClick = { onBookmarkClick(book) }) {
+                    IconButton(onClick = { onEvent(LibraryUiEvent.FinishBook(book.id)) }) {
                         Icon(
                                 painter = if (book.isFinished) {
                                     painterResource(id = R.drawable.ic_finished_filed)
@@ -182,7 +184,7 @@ fun BookCard(
                         )
                     }
 
-                    IconButton(onClick = { onShareClick(book) }) {
+                    IconButton(onClick = { onEvent(LibraryUiEvent.ShareBook(bookId = book.id)) }) {
                         Icon(
                                 painter = painterResource(id = R.drawable.ic_share),
                                 contentDescription = stringResource(id = R.string.cds_text_share),
@@ -192,7 +194,7 @@ fun BookCard(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    IconButton(onClick = { onDeleteClick(book) }) {
+                    IconButton(onClick = { onEvent(LibraryUiEvent.DeleteBook(bookId = book.id)) }) {
                         Icon(
                                 painter = painterResource(id = R.drawable.ic_delete),
                                 contentDescription = stringResource(id = R.string.cds_text_delete),
@@ -235,15 +237,15 @@ private fun Set<String>.isSelected(id: String): Boolean = id in this
 fun BookCardPreview() {
     PageKeeperTheme {
 
-val book = Book(
-        id = "1",
-        title = "The Fellowship of the Ring (Book 1) (Illustrated Edition)",
-        author = "J.R.R. Tolkien",
-        coverPath = null,
-        fileName = "fellowship.epub",
-        filePath = "/books/fellowship.epub",
-        dateAdded = System.currentTimeMillis()
-)
+        val book = Book(
+                id = "1",
+                title = "The Fellowship of the Ring (Book 1) (Illustrated Edition)",
+                author = "J.R.R. Tolkien",
+                coverPath = null,
+                fileName = "fellowship.epub",
+                filePath = "/books/fellowship.epub",
+                dateAdded = System.currentTimeMillis()
+        )
         Column(modifier = Modifier.fillMaxSize()) {
 
             BookCard(

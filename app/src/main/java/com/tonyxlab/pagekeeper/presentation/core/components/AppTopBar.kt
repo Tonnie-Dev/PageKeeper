@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,8 +24,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.tonyxlab.pagekeeper.R
+import com.tonyxlab.pagekeeper.presentation.theme.Icons
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
+import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.TitleMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
@@ -48,8 +52,6 @@ fun AppTopBar(
             navigationIcon = {
 
                 Icon(
-                        painter = painterResource(R.drawable.ic_menu),
-                        contentDescription = stringResource(id = R.string.cds_text_menu),
                         modifier = Modifier
                                 .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
@@ -57,13 +59,14 @@ fun AppTopBar(
                                         role = Role.Button,
                                         onClick = onNavButtonClick
                                 )
-                                .padding(MaterialTheme.spacing.spaceTwelve)
+                                .padding(MaterialTheme.spacing.spaceTwelve),
+                        contentDescription = stringResource(id = R.string.cds_text_menu),
+                        painter = painterResource(R.drawable.ic_menu),
+                        tint = Icons
                 )
             },
             actions = {
                 Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = stringResource(id = R.string.cds_text_search),
                         modifier = Modifier
                                 .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
@@ -71,8 +74,71 @@ fun AppTopBar(
                                         role = Role.Button,
                                         onClick = onActionClick
                                 )
-                                .padding(MaterialTheme.spacing.spaceTwelve)
+                                .padding(MaterialTheme.spacing.spaceTwelve),
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = stringResource(id = R.string.cds_text_search),
+                        tint = Icons
                 )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor
+            )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SelectionTopBar(
+    selectedCount: Int,
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    onBackClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    TopAppBar(
+            modifier = modifier,
+            title = {
+                Text(
+                        text = "$selectedCount selected",
+                        style = MaterialTheme.typography.TitleMediumMedium,
+                        color = TextPrimary
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = stringResource(id = R.string.cds_text_back),
+                            tint = Icons
+                    )
+                }
+            },
+            actions = {
+                IconButton(onClick = onFavoriteClick) {
+                    Icon(
+                            painter = painterResource(id = R.drawable.ic_star_outlined),
+                            contentDescription = stringResource(id = R.string.cds_text_favorite),
+                            tint = Icons
+                    )
+                }
+
+                IconButton(onClick = onShareClick) {
+                    Icon(
+                            painter = painterResource(id = R.drawable.ic_share),
+                            contentDescription = stringResource(id = R.string.cds_text_share),
+                            tint = Icons
+                    )
+                }
+
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                            painter = painterResource(id = R.drawable.ic_delete),
+                            contentDescription = stringResource(id = R.string.cds_text_delete),
+                            tint = Icons
+                    )
+                }
             },
             colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backgroundColor
@@ -98,6 +164,15 @@ private fun AppTopBarPreview() {
                     backgroundColor = TabletBlockBg,
                     onNavButtonClick = {},
                     onActionClick = {}
+            )
+
+            SelectionTopBar(
+                    selectedCount = 2,
+                    backgroundColor = TabletBlockBg,
+                    onBackClick = {},
+                    onFavoriteClick = {},
+                    onShareClick = {},
+                    onDeleteClick = {}
             )
         }
     }

@@ -17,7 +17,7 @@ class SelectionHandler(
     }
 
     fun toggleBookSelection(bookId: String) {
-        val selectedBooksIds = currentState().selectionState.selectedBooksIds
+        val selectedBooksIds = getSelectedBookIds()
         val updatedSelectedBooksIds = if (bookId in selectedBooksIds) {
             selectedBooksIds - bookId
         } else {
@@ -42,5 +42,5 @@ class SelectionHandler(
         }
     }
 
-    fun selectedBookIds(): Set<String> = currentState().selectionState.selectedBooksIds
+    fun getSelectedBookIds(): Set<String> = currentState().selectionState.selectedBooksIds
 }

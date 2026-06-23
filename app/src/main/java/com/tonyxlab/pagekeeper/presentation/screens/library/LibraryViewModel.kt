@@ -6,15 +6,13 @@ import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.domain.ImportBookResult
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
-
-
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialog
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SearchHandler
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SelectionHandler
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SearchHandler
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SelectionHandler
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
@@ -34,7 +32,7 @@ class LibraryViewModel(
     )
 
     private val selectionHandler = SelectionHandler(
-            currentState ={currentState} ,
+            currentState = { currentState },
             updateState = ::updateState
     )
 
@@ -114,7 +112,7 @@ class LibraryViewModel(
     }
 
     private fun onDelete(bookId: String) {
-        val book = currentState.books.firstOrNull { it.id == bookId } ?: return
+        currentState.books.firstOrNull { it.id == bookId } ?: return
         launchCatching(
                 onError = { showToast("Unable to delete book.") },
                 onCompletion = { dismissDialog() }
@@ -166,7 +164,7 @@ class LibraryViewModel(
     }
 
     private fun onAddSelectedToFavorites() {
-        val selectedBookIds = selectionHandler.selectedBookIds()
+        val selectedBookIds = selectionHandler.getSelectedBookIds()
         selectedBookIds.ifEmpty { return }
 
         launchCatching(
@@ -180,7 +178,7 @@ class LibraryViewModel(
     }
 
     private fun onShareSelected() {
-        val selectedBookIds = selectionHandler.selectedBookIds()
+        val selectedBookIds = selectionHandler.getSelectedBookIds()
         val bookId = selectedBookIds.singleOrNull()
 
         if (bookId == null) {
@@ -210,7 +208,7 @@ class LibraryViewModel(
     }
 
     private fun onDeleteSelected() {
-        val selectedBookIds = selectionHandler.selectedBookIds()
+        val selectedBookIds = selectionHandler.getSelectedBookIds()
         if (selectedBookIds.isEmpty()) return
 
         launchCatching(
