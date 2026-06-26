@@ -9,6 +9,7 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialog
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SearchHandler
@@ -51,6 +52,7 @@ class LibraryViewModel(
             is LibraryUiEvent.MarkFavorite -> onMarkFavorite(event.bookId)
             is LibraryUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
             LibraryUiEvent.ImportBookClicked -> onImport()
+            is LibraryUiEvent.DrawerDestinationClicked -> onDrawerDestinationClicked(event.destination)
             is LibraryUiEvent.ShareBook -> onShareBook(event.bookId)
             LibraryUiEvent.ClearSearchClicked -> searchHandler.clearSearchText()
             LibraryUiEvent.SearchBackClicked -> searchHandler.exitSearchMode()
@@ -222,6 +224,10 @@ class LibraryViewModel(
                 bookRepository.deleteBookById(id = bookId)
             }
         }
+    }
+
+    private fun onDrawerDestinationClicked(destination: LibraryDrawerDestination) {
+        updateState { it.copy(selectedDrawerDestination = destination) }
     }
 
     private fun showUnsupportedFileDialog() {

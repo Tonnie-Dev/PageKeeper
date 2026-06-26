@@ -7,6 +7,10 @@ sealed interface LibraryUiEvent: UiEvent{
 
     data object ImportBookClicked : LibraryUiEvent
 
+    data class DrawerDestinationClicked(
+        val destination: LibraryDrawerDestination
+    ) : LibraryUiEvent
+
     data class OpenBook(val bookId: String) : LibraryUiEvent
 
     data class MarkFavorite(val bookId: String) : LibraryUiEvent

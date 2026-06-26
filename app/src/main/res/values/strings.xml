@@ -70,5 +70,8 @@
     <string name="template_steps_goal">/%1$d %2$s</string>
 
     <!-- Navigation Drawer Strings -->
-    <string name="nav_drawer_fix_stop_counting">Fix the “Stop Counting Steps” issue</string>
+    <string name="nav_drawer_library">Library</string>
+    <string name="nav_drawer_favorites">Favorites</string>
+    <string name="nav_drawer_finished">Finished</string>
+
 </resources>

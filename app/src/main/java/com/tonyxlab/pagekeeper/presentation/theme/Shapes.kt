@@ -6,7 +6,7 @@ import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
-val MaterialShapes = Shapes(
+val            MaterialShapes = Shapes(
         // Pre-Defined M3 Shapes
         extraSmall = ShapeDefaults.ExtraSmall, //RoundedCornerShape(4.dp)
         small = ShapeDefaults.Small, //RoundedCornerShape(8.dp)
@@ -19,6 +19,7 @@ object ExtendedShapes {
     val RoundedCornerShape4 = RoundedCornerShape(4.dp)
     val RoundedCornerShape10 = RoundedCornerShape(10.dp)
     val RoundedCornerShape20 = RoundedCornerShape(20.dp)
+
 
     val StartVerticalRoundedCornerShape100 =
         RoundedCornerShape(topStart = 100.dp, bottomStart = 100.dp)
@@ -39,6 +40,13 @@ val Shapes.RoundedCornerShape4
 val Shapes.RoundedCornerShape10
     @Composable
     get() = ExtendedShapes.RoundedCornerShape10
+
+val Shapes.RoundedCornerShape20
+    @Composable
+    get() = ExtendedShapes.RoundedCornerShape20
+
+
+
 
 
 

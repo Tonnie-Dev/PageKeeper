@@ -10,6 +10,7 @@ data class LibraryUiState(
     val isLoading: Boolean = true,
     val isImporting: Boolean = false,
     val dialog: LibraryDialog? = null,
+    val selectedDrawerDestination: LibraryDrawerDestination = LibraryDrawerDestination.Library,
     val searchState: SearchState = SearchState(),
     val selectionState: SelectionState = SelectionState()
 ) : UiState {
@@ -25,10 +26,10 @@ data class LibraryUiState(
     data class SelectionState(
         val isSelectionMode: Boolean = false,
         val selectedBooksIds: Set<String> = emptySet()
-    ){
+    ) {
 
         val selectedCount: Int
-            get()= selectedBooksIds.size
+            get() = selectedBooksIds.size
     }
 }
 
@@ -46,3 +47,10 @@ enum class LibraryDialogType {
     DeleteSelectedBooks,
     UnsupportedFile,
 }
+
+enum class LibraryDrawerDestination {
+    Library,
+    Favorites,
+    Finished,
+}
+

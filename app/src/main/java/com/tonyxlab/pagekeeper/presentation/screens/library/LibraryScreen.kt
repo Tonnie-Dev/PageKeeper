@@ -15,13 +15,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,13 +38,16 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyScreenContent
 import com.tonyxlab.pagekeeper.presentation.core.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
+import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -50,6 +58,8 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val inSearchMode = uiState.searchState.isSearchMode
     val selectionState = uiState.selectionState
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
 
     val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
@@ -63,7 +73,28 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
         )
     }
 
-    BaseContentLayout(
+    ModalNavigationDrawer(
+            drawerState = drawerState,
+            gesturesEnabled = inSearchMode.not() && selectionState.isSelectionMode.not(),
+            scrimColor = Color.Black.copy(alpha = 0.38f),
+            drawerContent = {
+                LibraryNavigationDrawer(
+                        selectedDestination = uiState.selectedDrawerDestination,
+                        onCloseClick = {
+                            coroutineScope.launch { drawerState.close() }
+                        },
+                        onImportBookClick = {
+                            coroutineScope.launch { drawerState.close() }
+                            viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
+                        },
+                        onDestinationClick = { destination ->
+                            viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
+                            coroutineScope.launch { drawerState.close() }
+                        }
+                )
+            }
+    ) {
+        BaseContentLayout(
             viewModel = viewModel,
             topBar = {
                 if (inSearchMode.not()) {
@@ -86,7 +117,9 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                     } else {
                         AppTopBar(
                                 titleText = stringResource(id = R.string.topbar_text_library),
-                                onNavButtonClick = {},
+                                onNavButtonClick = {
+                                    coroutineScope.launch { drawerState.open() }
+                                },
                                 onActionClick = {
                                     viewModel.onEvent(LibraryUiEvent.SearchClicked)
                                 }
@@ -140,6 +173,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                 uiState = uiState,
                 onEvent = viewModel::onEvent
         )
+        }
     }
 }
 
@@ -149,6 +183,12 @@ fun LibraryScreenContent(
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit
 ) {
+    val visibleBooks = when (uiState.selectedDrawerDestination) {
+        LibraryDrawerDestination.Library -> uiState.books
+        LibraryDrawerDestination.Favorites -> uiState.books.filter { it.isFavorite }
+        LibraryDrawerDestination.Finished -> uiState.books.filter { it.isFinished }
+    }
+
     Box(
             modifier = modifier
                     .fillMaxSize()
@@ -170,7 +210,7 @@ fun LibraryScreenContent(
                 )
             }
 
-            uiState.books.isEmpty() -> {
+            visibleBooks.isEmpty() -> {
                 EmptyScreenContent(
                         onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
                 )
@@ -182,7 +222,7 @@ fun LibraryScreenContent(
                         contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.spaceSmall)
 
                 ) {
-                    items(items = uiState.books, key = { it.id }) { book ->
+                    items(items = visibleBooks, key = { it.id }) { book ->
 
                         BookCard(
                                 modifier = Modifier,
