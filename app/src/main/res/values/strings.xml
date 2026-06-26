@@ -7,6 +7,8 @@
 
     <!-- Top Bar Texts-->
     <string name="topbar_text_library">Library</string>
+    <string name="topbar_text_favorites">Favorites</string>
+    <string name="topbar_text_finished">Finished</string>
 
     <!--Header Texts-->
     <string name="header_text_edit_steps">Edit steps</string>
@@ -18,12 +20,18 @@
     <string name="caption_text_boo_title">The Fellowship of the Ring (Book 1) (Illustrated Edition)</string>
     <string name="caption_text_author">J.R.R. Tolkien</string>
     <string name="caption_text_no_results">No results found</string>
+    <string name="caption_text_favs_empty">Your favorites is empty</string>
+    <string name="caption_text_favs_empty_desc">Books you add to Favorites will appear here.</string>
+    <string name="caption_text_finished_empty">Your finished is empty</string>
+    <string name="caption_text_finished_empty_desc">Books you mark as Finished will appear here.</string>
+
 
     <!--Content Description Texts-->
     <string name="cds_text_menu">Menu</string>
     <string name="cds_text_search">Search</string>
     <string name="cds_text_book">Book</string>
     <string name="cds_text_favorite">Favorite</string>
+    <string name="cds_text_finished">Finished</string>
     <string name="cds_text_bookmark">bookmark</string>
     <string name="cds_text_share">Share</string>
     <string name="cds_text_delete">Delete</string>

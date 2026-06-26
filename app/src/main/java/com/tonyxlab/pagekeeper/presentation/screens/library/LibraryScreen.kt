@@ -35,7 +35,9 @@ import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
-import com.tonyxlab.pagekeeper.presentation.core.components.EmptyScreenContent
+import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
+import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
+import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
@@ -116,7 +118,12 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                         )
                     } else {
                         AppTopBar(
-                                titleText = stringResource(id = R.string.topbar_text_library),
+                                titleText = stringResource(id = when(uiState.selectedDrawerDestination){
+                                   LibraryDrawerDestination.Library -> R.string.topbar_text_library
+                                   LibraryDrawerDestination.Favorites -> R.string.topbar_text_favorites
+                                   LibraryDrawerDestination.Finished-> R.string.topbar_text_finished
+
+                                }),
                                 onNavButtonClick = {
                                     coroutineScope.launch { drawerState.open() }
                                 },
@@ -211,9 +218,20 @@ fun LibraryScreenContent(
             }
 
             visibleBooks.isEmpty() -> {
-                EmptyScreenContent(
-                        onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
-                )
+                when(uiState.selectedDrawerDestination){
+
+                    LibraryDrawerDestination.Favorites -> {
+                        EmptyFavoritesScreen()
+                    }
+                    LibraryDrawerDestination.Finished -> {
+                        EmptyFinishedScreen()
+                    }
+                    LibraryDrawerDestination.Library -> {
+                        EmptyBooksScreen(
+                                onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
+                        )
+                    }
+                }
             }
 
             else -> {
