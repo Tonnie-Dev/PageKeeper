@@ -96,8 +96,6 @@ fun LibraryNavigationRail(
                 onClick = onImportBookClick
         )
 
-
-
         Column(
                 modifier = Modifier
                         .fillMaxWidth()

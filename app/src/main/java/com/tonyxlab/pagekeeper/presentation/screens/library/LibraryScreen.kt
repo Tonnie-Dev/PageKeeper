@@ -10,7 +10,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,13 +25,17 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
@@ -41,6 +47,7 @@ import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
+import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationRail
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
@@ -55,13 +62,95 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
 
-    val context = LocalContext.current
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val inSearchMode = uiState.searchState.isSearchMode
     val selectionState = uiState.selectionState
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
+    var isNavigationRailExpanded by rememberSaveable { mutableStateOf(false) }
+
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        if (maxWidth >= 600.dp) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                LibraryNavigationRail(
+                        selectedDestination = uiState.selectedDrawerDestination,
+                        expanded = isNavigationRailExpanded,
+                        onExpandedChange = { isNavigationRailExpanded = it },
+                        onImportBookClick = {
+                            viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
+                        },
+                        onDestinationClick = { destination ->
+                            viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
+                        }
+                )
+
+                Box(
+                        modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize()
+                ) {
+                    BaseContent(
+                            showNavigationIcon = false,
+                            showImportFab = false,
+                            onNavButtonClick = {},
+                            viewModel = viewModel,
+                    )
+                }
+            }
+        } else {
+            ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    gesturesEnabled = inSearchMode.not() && selectionState.isSelectionMode.not(),
+                    scrimColor = Color.Black.copy(alpha = 0.38f),
+                    drawerContent = {
+                        LibraryNavigationDrawer(
+                                selectedDestination = uiState.selectedDrawerDestination,
+                                onCloseClick = {
+                                    coroutineScope.launch { drawerState.close() }
+                                },
+                                onImportBookClick = {
+                                    coroutineScope.launch { drawerState.close() }
+                                    viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
+                                },
+                                onDestinationClick = { destination ->
+                                    viewModel.onEvent(
+                                            LibraryUiEvent.DrawerDestinationClicked(
+                                                    destination
+                                            )
+                                    )
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                        )
+                    }
+            ) {
+                BaseContent(
+                        showNavigationIcon = true,
+                        showImportFab = true,
+                        viewModel = viewModel,
+
+                        onNavButtonClick = {
+                            coroutineScope.launch { drawerState.open() }
+                        }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BaseContent(
+    showNavigationIcon: Boolean,
+    showImportFab: Boolean,
+    onNavButtonClick: () -> Unit,
+    viewModel: LibraryViewModel,
+
+    ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val inSearchMode = uiState.searchState.isSearchMode
+    val selectionState = uiState.selectionState
 
     val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
@@ -74,29 +163,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                 )
         )
     }
-
-    ModalNavigationDrawer(
-            drawerState = drawerState,
-            gesturesEnabled = inSearchMode.not() && selectionState.isSelectionMode.not(),
-            scrimColor = Color.Black.copy(alpha = 0.38f),
-            drawerContent = {
-                LibraryNavigationDrawer(
-                        selectedDestination = uiState.selectedDrawerDestination,
-                        onCloseClick = {
-                            coroutineScope.launch { drawerState.close() }
-                        },
-                        onImportBookClick = {
-                            coroutineScope.launch { drawerState.close() }
-                            viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
-                        },
-                        onDestinationClick = { destination ->
-                            viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
-                            coroutineScope.launch { drawerState.close() }
-                        }
-                )
-            }
-    ) {
-        BaseContentLayout(
+    BaseContentLayout(
             viewModel = viewModel,
             topBar = {
                 if (inSearchMode.not()) {
@@ -118,15 +185,15 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                         )
                     } else {
                         AppTopBar(
-                                titleText = stringResource(id = when(uiState.selectedDrawerDestination){
-                                   LibraryDrawerDestination.Library -> R.string.topbar_text_library
-                                   LibraryDrawerDestination.Favorites -> R.string.topbar_text_favorites
-                                   LibraryDrawerDestination.Finished-> R.string.topbar_text_finished
-
-                                }),
-                                onNavButtonClick = {
-                                    coroutineScope.launch { drawerState.open() }
-                                },
+                                titleText = stringResource(
+                                        id = when (uiState.selectedDrawerDestination) {
+                                            LibraryDrawerDestination.Library -> R.string.topbar_text_library
+                                            LibraryDrawerDestination.Favorites -> R.string.topbar_text_favorites
+                                            LibraryDrawerDestination.Finished -> R.string.topbar_text_finished
+                                        }
+                                ),
+                                showNavigationIcon = showNavigationIcon,
+                                onNavButtonClick = onNavButtonClick,
                                 onActionClick = {
                                     viewModel.onEvent(LibraryUiEvent.SearchClicked)
                                 }
@@ -137,7 +204,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
             },
 
             floatingActionButton = {
-                if (inSearchMode.not() && uiState.books.isNotEmpty()) {
+                if (showImportFab && inSearchMode.not() && uiState.books.isNotEmpty()) {
                     FloatingActionButton(
                             onClick = { viewModel.onEvent(LibraryUiEvent.ImportBookClicked) },
                             containerColor = Primary,
@@ -173,16 +240,17 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                     }
                 }
             }
-    ) { uiState ->
+    ) { state ->
 
         LibraryScreenContent(
                 modifier = Modifier,
-                uiState = uiState,
+                uiState = state,
                 onEvent = viewModel::onEvent
         )
-        }
     }
 }
+
+
 
 @Composable
 fun LibraryScreenContent(
@@ -218,14 +286,16 @@ fun LibraryScreenContent(
             }
 
             visibleBooks.isEmpty() -> {
-                when(uiState.selectedDrawerDestination){
+                when (uiState.selectedDrawerDestination) {
 
                     LibraryDrawerDestination.Favorites -> {
                         EmptyFavoritesScreen()
                     }
+
                     LibraryDrawerDestination.Finished -> {
                         EmptyFinishedScreen()
                     }
+
                     LibraryDrawerDestination.Library -> {
                         EmptyBooksScreen(
                                 onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
@@ -314,3 +384,5 @@ private fun Context.shareBook(bookId: String, uiState: LibraryUiState) {
     }
     startActivity(Intent.createChooser(intent, null))
 }
+
+

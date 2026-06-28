@@ -127,7 +127,7 @@ fun LibraryNavigationDrawer(
             )
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_finished),
-                    iconRes = if (finishedSelected) R.drawable.ic_finished_filled else R.drawable.ic_finished_outlined,
+                    iconRes = if (finishedSelected) R.drawable.ic_mark_finished else R.drawable.ic_finished_outlined,
                     selected = finishedSelected,
                     onClick = { onDestinationClick(LibraryDrawerDestination.Finished) }
             )

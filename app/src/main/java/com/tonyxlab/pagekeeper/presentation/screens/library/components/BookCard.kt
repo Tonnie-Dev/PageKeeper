@@ -175,7 +175,7 @@ fun BookCard(
                     IconButton(onClick = { onEvent(LibraryUiEvent.FinishBook(book.id)) }) {
                         Icon(
                                 painter = if (book.isFinished) {
-                                    painterResource(id = R.drawable.ic_finished_filled)
+                                    painterResource(id = R.drawable.ic_mark_finished)
                                 } else {
                                     painterResource(id = R.drawable.ic_finished_outlined)
                                 },

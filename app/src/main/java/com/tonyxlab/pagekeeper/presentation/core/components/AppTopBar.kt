@@ -37,6 +37,7 @@ fun AppTopBar(
     titleText: String,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    showNavigationIcon: Boolean = true,
     onNavButtonClick: () -> Unit,
     onActionClick: () -> Unit
 ) {
@@ -50,20 +51,21 @@ fun AppTopBar(
                 )
             },
             navigationIcon = {
-
-                Icon(
-                        modifier = Modifier
-                                .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        role = Role.Button,
-                                        onClick = onNavButtonClick
-                                )
-                                .padding(MaterialTheme.spacing.spaceTwelve),
-                        contentDescription = stringResource(id = R.string.cds_text_menu),
-                        painter = painterResource(R.drawable.ic_menu),
-                        tint = Icons
-                )
+                if (showNavigationIcon) {
+                    Icon(
+                            modifier = Modifier
+                                    .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null,
+                                            role = Role.Button,
+                                            onClick = onNavButtonClick
+                                    )
+                                    .padding(MaterialTheme.spacing.spaceTwelve),
+                            contentDescription = stringResource(id = R.string.cds_text_menu),
+                            painter = painterResource(R.drawable.ic_menu),
+                            tint = Icons
+                    )
+                }
             },
             actions = {
                 Icon(
@@ -177,3 +179,4 @@ private fun AppTopBarPreview() {
         }
     }
 }
+
