@@ -19,6 +19,7 @@ object ExtendedShapes {
     val RoundedCornerShape4 = RoundedCornerShape(4.dp)
     val RoundedCornerShape10 = RoundedCornerShape(10.dp)
     val RoundedCornerShape20 = RoundedCornerShape(20.dp)
+    val RoundedCornerShape100 = RoundedCornerShape(percent = 100)
 
 
     val StartVerticalRoundedCornerShape100 =
@@ -44,6 +45,10 @@ val Shapes.RoundedCornerShape10
 val Shapes.RoundedCornerShape20
     @Composable
     get() = ExtendedShapes.RoundedCornerShape20
+
+val Shapes.RoundedCornerShape100
+    @Composable
+    get() = ExtendedShapes.RoundedCornerShape100
 
 
 
