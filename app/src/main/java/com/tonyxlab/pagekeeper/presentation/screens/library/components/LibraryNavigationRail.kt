@@ -42,6 +42,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.RoundedCornerShape100
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import kotlin.math.exp
 
 @Composable
 fun LibraryNavigationRail(
@@ -49,6 +50,7 @@ fun LibraryNavigationRail(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onImportBookClick: () -> Unit,
+    exitSearch: () -> Unit,
     onDestinationClick: (LibraryDrawerDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -62,6 +64,7 @@ fun LibraryNavigationRail(
                     .width(railWidth)
                     .fillMaxHeight()
                     .background(BgMain)
+                    .clickable{ exitSearch() }
                     .padding(
                             top = MaterialTheme.spacing.spaceExtraLarge,
                             start = if (expanded)
@@ -295,6 +298,7 @@ private fun LibraryNavigationRailPreview() {
                 selectedDestination = LibraryDrawerDestination.Library,
                 expanded = true,
                 onExpandedChange = {},
+                exitSearch = {},
                 onImportBookClick = {},
                 onDestinationClick = {}
         )

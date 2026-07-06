@@ -9,12 +9,20 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
@@ -31,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,13 +58,16 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationRail
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
+import com.tonyxlab.pagekeeper.presentation.screens.library.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
+import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -82,6 +94,9 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                         },
                         onDestinationClick = { destination ->
                             viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
+                        },
+                        exitSearch = {
+                            viewModel.onEvent(LibraryUiEvent.SearchBackClicked)
                         }
                 )
 
@@ -93,6 +108,13 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                     BaseContent(
                             showNavigationIcon = false,
                             showImportFab = false,
+                            showTopBar = false,
+                            modifier = Modifier.padding(
+                                    top = MaterialTheme.spacing.spaceLarge,
+                                    start = MaterialTheme.spacing.spaceMedium,
+                                    end = MaterialTheme.spacing.spaceMedium,
+                                    bottom = MaterialTheme.spacing.spaceMedium
+                            ),
                             onNavButtonClick = {},
                             viewModel = viewModel,
                     )
@@ -127,6 +149,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                 BaseContent(
                         showNavigationIcon = true,
                         showImportFab = true,
+                        showTopBar = true,
                         viewModel = viewModel,
 
                         onNavButtonClick = {
@@ -142,10 +165,14 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
 fun BaseContent(
     showNavigationIcon: Boolean,
     showImportFab: Boolean,
+    showTopBar: Boolean,
+    modifier: Modifier = Modifier,
     onNavButtonClick: () -> Unit,
     viewModel: LibraryViewModel,
 
     ) {
+
+    val isDeviceWide = rememberIsDeviceWide()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -164,9 +191,10 @@ fun BaseContent(
         )
     }
     BaseContentLayout(
+            modifier = modifier,
             viewModel = viewModel,
             topBar = {
-                if (inSearchMode.not()) {
+                if (showTopBar && inSearchMode.not()) {
                     if (selectionState.isSelectionMode) {
                         SelectionTopBar(
                                 selectedCount = selectionState.selectedCount,
@@ -199,7 +227,6 @@ fun BaseContent(
                                 }
                         )
                     }
-
                 }
             },
 
@@ -242,15 +269,129 @@ fun BaseContent(
             }
     ) { state ->
 
-        LibraryScreenContent(
-                modifier = Modifier,
-                uiState = state,
-                onEvent = viewModel::onEvent
-        )
+        if (isDeviceWide) {
+            WideLibraryLayout(
+                    modifier = Modifier,
+                    uiState = state,
+                    onEvent = viewModel::onEvent
+            )
+        } else {
+            LibraryScreenContent(
+                    modifier = Modifier,
+                    uiState = state,
+                    onEvent = viewModel::onEvent
+            )
+        }
     }
 }
 
+@Composable
+fun WideLibraryLayout(
+    modifier: Modifier,
+    uiState: LibraryUiState,
+    onEvent: (LibraryUiEvent) -> Unit
+) {
 
+    val visibleBooks = when (uiState.selectedDrawerDestination) {
+        LibraryDrawerDestination.Library -> uiState.books
+        LibraryDrawerDestination.Favorites -> uiState.books.filter { it.isFavorite }
+        LibraryDrawerDestination.Finished -> uiState.books.filter { it.isFinished }
+    }
+
+    Column(
+            modifier = modifier
+                    .fillMaxSize()
+                    .background(
+                            color = TabletBlockBg,
+                            shape = MaterialTheme.shapes.extraLarge
+                    )
+                    .padding(horizontal = MaterialTheme.spacing.spaceMedium)
+                    .padding(top = MaterialTheme.spacing.spaceTwelve),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTwelve)
+    ) {
+
+        val isSearchActive = uiState.searchState.isSearchMode
+
+        if (isSearchActive) {
+            SearchComponent(
+                    modifier = Modifier
+                            .clip(shape = MaterialTheme.shapes.extraLarge)
+                            .background(color = Color.Red)
+                            .fillMaxWidth(),
+                    uiState = uiState,
+                    onEvent = onEvent,
+                    expanded = uiState.searchState.isSearchMode,
+                    showBackButton = false,
+                    showSearchIconWhenEmpty = uiState.searchState.isSearchMode.not(),
+                    inputHeight = 40.dp,
+                    isDeviceWide = true
+            )
+        } else {
+            WideDummySearchBar { onEvent(LibraryUiEvent.SearchClicked) }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                uiState.isLoading || uiState.isImporting -> {
+                    CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = Primary
+                    )
+                }
+                visibleBooks.isEmpty() && uiState.searchState.isSearchMode.not() -> {
+                    when (uiState.selectedDrawerDestination) {
+                        LibraryDrawerDestination.Favorites -> {
+                            EmptyFavoritesScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    backgroundColor = TabletBlockBg
+                            )
+                        }
+
+                        LibraryDrawerDestination.Finished -> {
+                            EmptyFinishedScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    backgroundColor = TabletBlockBg
+                            )
+                        }
+
+                        LibraryDrawerDestination.Library -> {
+                            EmptyBooksScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    backgroundColor = TabletBlockBg,
+                                    imageSize = 114.dp,
+                                    iconSize = 64.dp,
+                                    onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
+                            )
+                        }
+                    }
+                }
+
+                visibleBooks.isNotEmpty() && uiState.searchState.isSearchMode.not() -> {
+                    LazyVerticalGrid(
+                            modifier = Modifier.fillMaxSize(),
+                            columns = GridCells.Adaptive(minSize = 280.dp),
+                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall),
+                            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
+                    ) {
+                        items(items = visibleBooks, key = { it.id }) { book ->
+                            BookCard(
+                                    modifier = Modifier,
+                                    book = book,
+                                    uiState = uiState,
+                                    onEvent = onEvent,
+                                    isDeviceWide = true
+                            )
+                        }
+                    }
+                }
+            }
+            LibraryDialog(
+                    uiState = uiState,
+                    onEvent = onEvent
+            )
+        }
+    }
+}
 
 @Composable
 fun LibraryScreenContent(
@@ -350,6 +491,37 @@ fun LibraryScreenContent(
     }
 }
 
+@Composable
+private fun LibraryDialog(
+    uiState: LibraryUiState,
+    onEvent: (LibraryUiEvent) -> Unit
+) {
+    uiState.dialog?.let { dialog ->
+        AppDialog(
+                dialogTitle = dialog.title,
+                dialogText = dialog.message,
+                positiveButtonText = dialog.positiveButtonText,
+                negativeButtonText = dialog.negativeButtonText,
+                isDeleteDialog = dialog.type == LibraryDialogType.DeleteBook ||
+                        dialog.type == LibraryDialogType.DeleteSelectedBooks,
+                onDismissRequest = { onEvent(LibraryUiEvent.DismissDialog) },
+                onConfirm = {
+                    when (dialog.type) {
+                        LibraryDialogType.DeleteBook -> {
+                            dialog.bookId?.let { onEvent(LibraryUiEvent.DeleteBook(it)) }
+                        }
+
+                        LibraryDialogType.DeleteSelectedBooks -> {
+                            onEvent(LibraryUiEvent.ConfirmDeleteSelectedClicked)
+                        }
+
+                        LibraryDialogType.UnsupportedFile -> onEvent(LibraryUiEvent.DismissDialog)
+                    }
+                }
+        )
+    }
+}
+
 private fun Context.getDisplayName(uri: Uri): String {
     val cursor: Cursor? = contentResolver.query(
             uri,
@@ -384,5 +556,3 @@ private fun Context.shareBook(bookId: String, uiState: LibraryUiState) {
     }
     startActivity(Intent.createChooser(intent, null))
 }
-
-

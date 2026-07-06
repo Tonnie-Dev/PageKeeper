@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -33,6 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.theme.BodyLargeRegular
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
@@ -47,6 +50,8 @@ fun AppInputField(
     textStyle: TextStyle = MaterialTheme.typography.BodyLargeRegular,
     placeholderTextStyle: TextStyle = MaterialTheme.typography.BodyLargeRegular,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    height: Dp = MaterialTheme.spacing.spaceTwelve * 6,
+    requestFocusOnStart: Boolean = true,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -55,18 +60,20 @@ fun AppInputField(
     var focused by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        awaitFrame()
-        focusRequester.requestFocus()
+    LaunchedEffect(requestFocusOnStart) {
+        if (requestFocusOnStart) {
+            awaitFrame()
+            focusRequester.requestFocus()
+        }
     }
 
     Row(
             modifier = modifier
                     .fillMaxWidth()
-                    .height(MaterialTheme.spacing.spaceTwelve * 6)
+                    .height(height)
                     .background(color = backgroundColor)
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-                    .padding(vertical = MaterialTheme.spacing.spaceExtraSmall),
+                  .padding(vertical = MaterialTheme.spacing.spaceExtraSmall),
             verticalAlignment = Alignment.CenterVertically,
     ) {
         leadingIcon?.invoke()
@@ -136,7 +143,11 @@ private fun SearchComponent_Preview() {
         ) {
 
             AppInputField(
+                    modifier = Modifier
+                            .clip(MaterialTheme.shapes.extraLarge)
+                            .background(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.extraLarge),
                     textFieldState = TextFieldState(initialText = "Hello"),
+                    height = 40.dp,
                     placeholderText = "",
                     leadingIcon = {
                         Column {
@@ -152,8 +163,8 @@ private fun SearchComponent_Preview() {
                                 painter = painterResource(R.drawable.ic_cancel),
                                 contentDescription = stringResource(id = R.string.cds_text_back),
                         )
-
-                    })
+                    }
+            )
         }
     }
 }

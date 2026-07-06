@@ -17,6 +17,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SelectionHa
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
+import timber.log.Timber
 
 typealias HomeBaseViewModel = BaseViewModel<LibraryUiState, LibraryUiEvent, LibraryActionEvent>
 
@@ -40,6 +41,9 @@ class LibraryViewModel(
     init {
         observeBooks()
         searchHandler.observeSearchQuery()
+
+
+        Timber.tag("LibVM").i("init called")
     }
 
     override fun onEvent(event: LibraryUiEvent) {
@@ -47,7 +51,7 @@ class LibraryViewModel(
             is LibraryUiEvent.OpenBook -> openBook(event.bookId)
             is LibraryUiEvent.FinishBook -> onFinishBook(event.bookId)
             is LibraryUiEvent.ConfirmDeleteDialog -> onConfirmDeleteDialog(event.bookId)
-            is LibraryUiEvent.DeleteBook -> onDelete(event.bookId)
+            is LibraryUiEvent.DeleteBook -> onDeleteBook(event.bookId)
             LibraryUiEvent.DismissDialog -> dismissDialog()
             is LibraryUiEvent.MarkFavorite -> onMarkFavorite(event.bookId)
             is LibraryUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
@@ -61,8 +65,8 @@ class LibraryViewModel(
             is LibraryUiEvent.BookLongClicked -> selectionHandler.enterSelectionMode(event.bookId)
             is LibraryUiEvent.BookSelectionToggled -> selectionHandler.toggleBookSelection(event.bookId)
             LibraryUiEvent.CancelDeleteSelectedClicked -> dismissDialog()
-            LibraryUiEvent.ConfirmDeleteSelectedClicked -> onDeleteSelected()
-            LibraryUiEvent.DeleteSelectedClicked -> onConfirmDeleteSelectedDialog()
+            LibraryUiEvent.ConfirmDeleteSelectedClicked -> onConfirmMultiSelectionDeleteDialog()
+            LibraryUiEvent.DeleteSelectedClicked -> onDeleteSelectedBooksFromTopbar()
             LibraryUiEvent.ExitSelectionModeClicked -> selectionHandler.exitSelectionMode()
             LibraryUiEvent.ShareSelectedClicked -> onShareSelected()
         }
@@ -113,7 +117,8 @@ class LibraryViewModel(
         }
     }
 
-    private fun onDelete(bookId: String) {
+    private fun onDeleteBook(bookId: String) {
+
         currentState.books.firstOrNull { it.id == bookId } ?: return
         launchCatching(
                 onError = { showToast("Unable to delete book.") },
@@ -192,7 +197,9 @@ class LibraryViewModel(
         sendActionEvent(LibraryActionEvent.ShareBook(bookId))
     }
 
-    private fun onConfirmDeleteSelectedDialog() {
+    private fun onDeleteSelectedBooksFromTopbar() {
+
+        Timber.tag("LibVM").i("onDeleteSelectedBooksFromTopbar clicked")
         val selectedCount = currentState.selectionState.selectedCount
         if (selectedCount == 0) return
 
@@ -209,7 +216,9 @@ class LibraryViewModel(
         }
     }
 
-    private fun onDeleteSelected() {
+    private fun onConfirmMultiSelectionDeleteDialog() {
+
+        Timber.tag("LibVM").i("onConfirmMultiSelectionDeleteDialog clicked")
         val selectedBookIds = selectionHandler.getSelectedBookIds()
         if (selectedBookIds.isEmpty()) return
 

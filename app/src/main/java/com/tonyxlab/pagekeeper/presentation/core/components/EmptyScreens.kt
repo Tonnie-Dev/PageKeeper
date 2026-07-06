@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.theme.BgActive
@@ -43,26 +44,29 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 @Composable
 fun EmptyBooksScreen(
     modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.background,
+    imageSize: Dp = 180.dp,
+    iconSize: Dp = 100.dp,
     onImportBookClick: () -> Unit = {}
 ) {
     Column(
             modifier = modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(backgroundColor)
                     .padding(MaterialTheme.spacing.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
     ) {
         Box(
                 modifier = Modifier
-                        .size(180.dp)
+                        .size(imageSize)
                         .background(BgActive, CircleShape),
                 contentAlignment = Alignment.Center
         ) {
             Icon(
                     painter = painterResource(id = R.drawable.ic_book),
                     contentDescription = stringResource(id = R.string.cds_text_book),
-                    modifier = Modifier.size(100.dp),
+                    modifier = Modifier.size(iconSize),
                     tint = Icons
             )
         }
@@ -114,12 +118,13 @@ fun EmptyBooksScreen(
 
 @Composable
 fun EmptyFavoritesScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
     Column(
             modifier = modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(backgroundColor)
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -169,12 +174,13 @@ fun EmptyFavoritesScreen(
 
 @Composable
 fun EmptyFinishedScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
     Column(
             modifier = modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(backgroundColor)
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {

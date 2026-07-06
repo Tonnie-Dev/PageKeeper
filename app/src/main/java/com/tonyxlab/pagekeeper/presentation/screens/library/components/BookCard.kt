@@ -52,7 +52,8 @@ fun BookCard(
     book: Book,
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isDeviceWide: Boolean = false
 ) {
     val selectionState = uiState.selectionState
     val isSelectionMode = uiState.selectionState.isSelectionMode
@@ -78,10 +79,18 @@ fun BookCard(
                             onLongClick = { onEvent(LibraryUiEvent.BookLongClicked(book.id)) }
                     ),
             shape = MaterialTheme.shapes.small,
-            color = if (isSelected)
-                MaterialTheme.colorScheme.secondary
-            else
-                MaterialTheme.colorScheme.background,
+            color = when {
+
+                isSelected -> MaterialTheme.colorScheme.secondary
+                isDeviceWide -> Color.Transparent
+                else -> MaterialTheme.colorScheme.background
+            },
+            /*
+                            if (isSelected)
+                            MaterialTheme.colorScheme.secondary
+                        else
+                            MaterialTheme.colorScheme.background,
+            */
             border = if (isSelectionMode) {
                 BorderStroke(
                         width = 1.dp,
@@ -95,10 +104,10 @@ fun BookCard(
                 modifier = Modifier
                         .fillMaxWidth()
                         .height(IntrinsicSize.Min)
-                        .ifThen(isSelectionMode){
+                        .ifThen(isSelectionMode) {
                             padding(vertical = MaterialTheme.spacing.spaceTwelve)
                         }
-                        .ifThen(isSelectionMode.not()){
+                        .ifThen(isSelectionMode.not()) {
                             padding(MaterialTheme.spacing.spaceTwelve)
                         },
                 verticalAlignment = Alignment.CenterVertically
@@ -194,7 +203,7 @@ fun BookCard(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    IconButton(onClick = { onEvent(LibraryUiEvent.DeleteBook(bookId = book.id)) }) {
+                    IconButton(onClick = { onEvent(LibraryUiEvent.ConfirmDeleteDialog(bookId = book.id)) }) {
                         Icon(
                                 painter = painterResource(id = R.drawable.ic_delete),
                                 contentDescription = stringResource(id = R.string.cds_text_delete),
