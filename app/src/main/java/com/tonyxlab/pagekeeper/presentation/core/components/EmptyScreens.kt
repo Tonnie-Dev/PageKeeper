@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.theme.BgActive
+import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumRegular
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
@@ -118,6 +119,7 @@ fun EmptyBooksScreen(
 
 @Composable
 fun EmptyFavoritesScreen(
+    isDeviceWide: Boolean,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
@@ -138,7 +140,13 @@ fun EmptyFavoritesScreen(
             Box(
                     modifier = Modifier
                             .size(MaterialTheme.spacing.spaceTwelve * 10)
-                            .background(BgActive, CircleShape),
+                            .then(
+                                if (isDeviceWide) {
+                                    Modifier.background(BgMain, CircleShape)
+                                } else {
+                                    Modifier.background(BgActive, CircleShape)
+                                }
+                            ),
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -174,6 +182,7 @@ fun EmptyFavoritesScreen(
 
 @Composable
 fun EmptyFinishedScreen(
+    isDeviceWide: Boolean,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
@@ -193,7 +202,13 @@ fun EmptyFinishedScreen(
             Box(
                     modifier = Modifier
                             .size(MaterialTheme.spacing.spaceTwelve * 10)
-                            .background(BgActive, CircleShape),
+                            .then(
+                                    if (isDeviceWide) {
+                                        Modifier.background(BgMain, CircleShape)
+                                    } else {
+                                        Modifier.background(BgActive, CircleShape)
+                                    }
+                            ),
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -239,7 +254,7 @@ private fun EmptyBooksScreenPreview() {
 @Composable
 private fun EmptyFavoritesScreenPreview() {
     PageKeeperTheme {
-        EmptyFavoritesScreen()
+        EmptyFavoritesScreen(isDeviceWide = false)
     }
 }
 
@@ -247,6 +262,6 @@ private fun EmptyFavoritesScreenPreview() {
 @Composable
 private fun EmptyFinishedScreenPreview() {
     PageKeeperTheme {
-        EmptyFinishedScreen()
+        EmptyFinishedScreen(isDeviceWide = false)
     }
 }

@@ -70,7 +70,7 @@ fun SearchComponent(
     val textFieldHasText = searchTextFieldState.text.isNotBlank()
 
     SearchBar(
-            modifier = modifier.wrapContentHeight(),
+            modifier = modifier,
             inputField = {
                 Column(verticalArrangement = Arrangement.Top) {
                     AppInputField(

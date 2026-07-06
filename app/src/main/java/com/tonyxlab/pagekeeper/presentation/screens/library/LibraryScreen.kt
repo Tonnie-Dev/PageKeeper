@@ -11,14 +11,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -81,96 +79,94 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
     val coroutineScope = rememberCoroutineScope()
     var isNavigationRailExpanded by rememberSaveable { mutableStateOf(false) }
 
+    val isDeviceWide = rememberIsDeviceWide()
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        if (maxWidth >= 600.dp) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                LibraryNavigationRail(
-                        selectedDestination = uiState.selectedDrawerDestination,
-                        expanded = isNavigationRailExpanded,
-                        onExpandedChange = { isNavigationRailExpanded = it },
-                        onImportBookClick = {
-                            viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
-                        },
-                        onDestinationClick = { destination ->
-                            viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
-                        },
-                        exitSearch = {
-                            viewModel.onEvent(LibraryUiEvent.SearchBackClicked)
-                        }
-                )
-
-                Box(
-                        modifier = Modifier
-                                .weight(1f)
-                                .fillMaxSize()
-                ) {
-                    BaseContent(
-                            showNavigationIcon = false,
-                            showImportFab = false,
-                            showTopBar = false,
-                            modifier = Modifier.padding(
-                                    top = MaterialTheme.spacing.spaceLarge,
-                                    start = MaterialTheme.spacing.spaceMedium,
-                                    end = MaterialTheme.spacing.spaceMedium,
-                                    bottom = MaterialTheme.spacing.spaceMedium
-                            ),
-                            onNavButtonClick = {},
-                            viewModel = viewModel,
-                    )
-                }
-            }
-        } else {
-            ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    gesturesEnabled = inSearchMode.not() && selectionState.isSelectionMode.not(),
-                    scrimColor = Color.Black.copy(alpha = 0.38f),
-                    drawerContent = {
-                        LibraryNavigationDrawer(
-                                selectedDestination = uiState.selectedDrawerDestination,
-                                onCloseClick = {
-                                    coroutineScope.launch { drawerState.close() }
-                                },
-                                onImportBookClick = {
-                                    coroutineScope.launch { drawerState.close() }
-                                    viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
-                                },
-                                onDestinationClick = { destination ->
-                                    viewModel.onEvent(
-                                            LibraryUiEvent.DrawerDestinationClicked(
-                                                    destination
-                                            )
-                                    )
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                        )
+    if (isDeviceWide) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            LibraryNavigationRail(
+                    selectedDestination = uiState.selectedDrawerDestination,
+                    expanded = isNavigationRailExpanded,
+                    onExpandedChange = { isNavigationRailExpanded = it },
+                    onImportBookClick = {
+                        viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
+                    },
+                    onDestinationClick = { destination ->
+                        viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
+                    },
+                    exitSearch = {
+                        viewModel.onEvent(LibraryUiEvent.SearchBackClicked)
                     }
+            )
+
+            Box(
+                    modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
             ) {
                 BaseContent(
-                        showNavigationIcon = true,
-                        showImportFab = true,
-                        showTopBar = true,
+                        showNavigationIcon = false,
+                        showImportFab = false,
+                        showTopBar = false,
+                        modifier = Modifier.padding(
+                                top = MaterialTheme.spacing.spaceLarge,
+                                start = MaterialTheme.spacing.spaceMedium,
+                                end = MaterialTheme.spacing.spaceMedium,
+                                bottom = MaterialTheme.spacing.spaceMedium
+                        ),
+                        onNavButtonClick = {},
                         viewModel = viewModel,
-
-                        onNavButtonClick = {
-                            coroutineScope.launch { drawerState.open() }
-                        }
                 )
             }
+        }
+    } else {
+        ModalNavigationDrawer(
+                drawerState = drawerState,
+                gesturesEnabled = inSearchMode.not() && selectionState.isSelectionMode.not(),
+                scrimColor = Color.Black.copy(alpha = 0.38f),
+                drawerContent = {
+                    LibraryNavigationDrawer(
+                            selectedDestination = uiState.selectedDrawerDestination,
+                            onCloseClick = {
+                                coroutineScope.launch { drawerState.close() }
+                            },
+                            onImportBookClick = {
+                                coroutineScope.launch { drawerState.close() }
+                                viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
+                            },
+                            onDestinationClick = { destination ->
+                                viewModel.onEvent(
+                                        LibraryUiEvent.DrawerDestinationClicked(
+                                                destination
+                                        )
+                                )
+                                coroutineScope.launch { drawerState.close() }
+                            }
+                    )
+                }
+        ) {
+            BaseContent(
+                    showNavigationIcon = true,
+                    showImportFab = true,
+                    showTopBar = true,
+                    viewModel = viewModel,
+
+                    onNavButtonClick = {
+                        coroutineScope.launch { drawerState.open() }
+                    }
+            )
         }
     }
 }
 
 @Composable
-fun BaseContent(
+private fun BaseContent(
     showNavigationIcon: Boolean,
     showImportFab: Boolean,
     showTopBar: Boolean,
     modifier: Modifier = Modifier,
     onNavButtonClick: () -> Unit,
     viewModel: LibraryViewModel,
-
-    ) {
+) {
 
     val isDeviceWide = rememberIsDeviceWide()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -190,6 +186,7 @@ fun BaseContent(
                 )
         )
     }
+
     BaseContentLayout(
             modifier = modifier,
             viewModel = viewModel,
@@ -276,7 +273,7 @@ fun BaseContent(
                     onEvent = viewModel::onEvent
             )
         } else {
-            LibraryScreenContent(
+            CompactLibraryLayout(
                     modifier = Modifier,
                     uiState = state,
                     onEvent = viewModel::onEvent
@@ -286,17 +283,13 @@ fun BaseContent(
 }
 
 @Composable
-fun WideLibraryLayout(
+private fun WideLibraryLayout(
     modifier: Modifier,
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit
 ) {
 
-    val visibleBooks = when (uiState.selectedDrawerDestination) {
-        LibraryDrawerDestination.Library -> uiState.books
-        LibraryDrawerDestination.Favorites -> uiState.books.filter { it.isFavorite }
-        LibraryDrawerDestination.Finished -> uiState.books.filter { it.isFinished }
-    }
+    val visibleBooks = uiState.visibleBooks()
 
     Column(
             modifier = modifier
@@ -316,7 +309,6 @@ fun WideLibraryLayout(
             SearchComponent(
                     modifier = Modifier
                             .clip(shape = MaterialTheme.shapes.extraLarge)
-                            .background(color = Color.Red)
                             .fillMaxWidth(),
                     uiState = uiState,
                     onEvent = onEvent,
@@ -338,19 +330,22 @@ fun WideLibraryLayout(
                             color = Primary
                     )
                 }
+
                 visibleBooks.isEmpty() && uiState.searchState.isSearchMode.not() -> {
                     when (uiState.selectedDrawerDestination) {
                         LibraryDrawerDestination.Favorites -> {
                             EmptyFavoritesScreen(
                                     modifier = Modifier.fillMaxSize(),
-                                    backgroundColor = TabletBlockBg
+                                    backgroundColor = TabletBlockBg,
+                                    isDeviceWide = true
                             )
                         }
 
                         LibraryDrawerDestination.Finished -> {
                             EmptyFinishedScreen(
                                     modifier = Modifier.fillMaxSize(),
-                                    backgroundColor = TabletBlockBg
+                                    backgroundColor = TabletBlockBg,
+                                    isDeviceWide = true
                             )
                         }
 
@@ -394,16 +389,12 @@ fun WideLibraryLayout(
 }
 
 @Composable
-fun LibraryScreenContent(
+private fun CompactLibraryLayout(
     modifier: Modifier,
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit
 ) {
-    val visibleBooks = when (uiState.selectedDrawerDestination) {
-        LibraryDrawerDestination.Library -> uiState.books
-        LibraryDrawerDestination.Favorites -> uiState.books.filter { it.isFavorite }
-        LibraryDrawerDestination.Finished -> uiState.books.filter { it.isFinished }
-    }
+    val visibleBooks = uiState.visibleBooks()
 
     Box(
             modifier = modifier
@@ -430,11 +421,11 @@ fun LibraryScreenContent(
                 when (uiState.selectedDrawerDestination) {
 
                     LibraryDrawerDestination.Favorites -> {
-                        EmptyFavoritesScreen()
+                        EmptyFavoritesScreen(isDeviceWide = false)
                     }
 
                     LibraryDrawerDestination.Finished -> {
-                        EmptyFinishedScreen()
+                        EmptyFinishedScreen(isDeviceWide = false)
                     }
 
                     LibraryDrawerDestination.Library -> {
@@ -464,30 +455,8 @@ fun LibraryScreenContent(
             }
         }
 
-        uiState.dialog?.let { dialog ->
-            AppDialog(
-                    dialogTitle = dialog.title,
-                    dialogText = dialog.message,
-                    positiveButtonText = dialog.positiveButtonText,
-                    negativeButtonText = dialog.negativeButtonText,
-                    isDeleteDialog = dialog.type == LibraryDialogType.DeleteBook ||
-                            dialog.type == LibraryDialogType.DeleteSelectedBooks,
-                    onDismissRequest = { onEvent(LibraryUiEvent.DismissDialog) },
-                    onConfirm = {
-                        when (dialog.type) {
-                            LibraryDialogType.DeleteBook -> {
-                                dialog.bookId?.let { onEvent(LibraryUiEvent.DeleteBook(it)) }
-                            }
+        LibraryDialog(uiState = uiState, onEvent = onEvent)
 
-                            LibraryDialogType.DeleteSelectedBooks -> {
-                                onEvent(LibraryUiEvent.ConfirmDeleteSelectedClicked)
-                            }
-
-                            LibraryDialogType.UnsupportedFile -> onEvent(LibraryUiEvent.DismissDialog)
-                        }
-                    }
-            )
-        }
     }
 }
 
@@ -520,6 +489,12 @@ private fun LibraryDialog(
                 }
         )
     }
+}
+
+private fun LibraryUiState.visibleBooks() = when (selectedDrawerDestination) {
+    LibraryDrawerDestination.Library -> books
+    LibraryDrawerDestination.Favorites -> books.filter { it.isFavorite }
+    LibraryDrawerDestination.Finished -> books.filter { it.isFinished }
 }
 
 private fun Context.getDisplayName(uri: Uri): String {
