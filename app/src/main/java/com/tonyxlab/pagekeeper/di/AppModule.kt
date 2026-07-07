@@ -3,6 +3,8 @@ package com.tonyxlab.pagekeeper.di
 import androidx.room.Room
 import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.data.local.PageKeeperDatabase
+import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
+import com.tonyxlab.pagekeeper.data.parser.Fb2PullParser
 import com.tonyxlab.pagekeeper.data.repository.BookRepositoryImpl
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryViewModel
@@ -35,9 +37,14 @@ val importerModule = module {
     single { BookImporter(androidContext(), get()) }
 }
 
+val parserModule = module {
+    single<Fb2Parser> { Fb2PullParser() }
+}
+
 val appModule = listOf(
         viewModelModule,
         databaseModule,
         repositoryModule,
-        importerModule
+        importerModule,
+        parserModule
 )
