@@ -8,12 +8,16 @@ import com.tonyxlab.pagekeeper.data.parser.Fb2PullParser
 import com.tonyxlab.pagekeeper.data.repository.BookRepositoryImpl
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.read.ReadViewModel
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-val viewModelModule = module { viewModelOf(::LibraryViewModel) }
+val viewModelModule = module {
+    viewModelOf(::LibraryViewModel)
+    viewModelOf(::ReadViewModel)
+}
 
 val databaseModule = module {
     single {
@@ -48,3 +52,4 @@ val appModule = listOf(
         importerModule,
         parserModule
 )
+
