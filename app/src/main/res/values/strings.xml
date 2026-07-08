@@ -10,6 +10,11 @@
     <string name="topbar_text_favorites">Favorites</string>
     <string name="topbar_text_finished">Finished</string>
 
+    <!-- Bottom Bar Texts-->
+    <string name="bottom_text_auto_rotate">Auto Rotate</string>
+    <string name="bottom_text_font_size">Font Size</string>
+    <string name="bottom_text_landscape">Landscape</string>
+
     <!--Header Texts-->
     <string name="header_text_edit_steps">Edit steps</string>
     <string name="header_text_date">Date</string>

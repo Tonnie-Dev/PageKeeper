@@ -8,6 +8,7 @@ val TextSecondary = Color(0xFF706C61)
 val BgMain = Color(0xFFFDFCF8)
 val BgCard = Color(0xFFE4CDA8)
 val BgActive = Color(0xFFF1EBDF)
+val BgBottomNav = Color(0xFFF4F1E6)
 
 val Primary = Color(0xFF8C7851)
 val Icons = Color(0xFF706C61)
