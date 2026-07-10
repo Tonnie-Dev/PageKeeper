@@ -46,12 +46,13 @@ abstract class BaseViewModel<S : UiState, E : UiEvent, A : ActionEvent>(
     abstract fun onEvent(event: E)
 
     inline fun launchCatching(
+        context: CoroutineContext = EmptyCoroutineContext,
         crossinline onError: (Throwable) -> Unit = {},
         crossinline onStart: () -> Unit = {},
         crossinline onCompletion: () -> Unit = {},
         crossinline block: suspend CoroutineScope.() -> Unit
     ): Job {
-        return viewModelScope.launch {
+        return viewModelScope.launch(context = context) {
             // fire before the work starts
             onStart()
             try {

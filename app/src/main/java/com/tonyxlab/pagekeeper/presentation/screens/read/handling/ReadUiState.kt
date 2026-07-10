@@ -12,7 +12,9 @@ data class ReadUiState(
 
     val document: ReaderBook? = null,
 
-    val areControlsVisible: Boolean = false,
+    val controlsVisible: Boolean = false,
+
+    val fontSliderVisible: Boolean = false,
 
     val orientation: ReadingOrientation =
         ReadingOrientation.AUTO_ROTATE,

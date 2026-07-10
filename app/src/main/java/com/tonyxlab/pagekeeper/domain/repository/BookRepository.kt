@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface BookRepository {
     fun observeBooks(): Flow<List<Book>>
 
+    suspend fun getBookById(id: String): Book
+
     suspend fun existsByHash(fileHash: String): Boolean
 
     suspend fun insertBook(book: Book)

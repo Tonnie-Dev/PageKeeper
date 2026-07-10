@@ -1,23 +1,75 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
+import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
+import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.domain.model.toReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
+import kotlinx.coroutines.Dispatchers
+import java.io.File
 
-class ReadViewModel : BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>(
+typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>
+class ReadViewModel (
+        private val fb2Parser: Fb2Parser
+): ReadBaseViewModel(
         initialState = ReadUiState()
+
 ) {
 
+    init {
+        //loadBook()
+    }
     override fun onEvent(event: ReadUiEvent) {
         when (event) {
+            is ReadUiEvent.LoadBook -> loadBook(event.book)
             ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
+            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
+            ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
+            ReadUiEvent.ChangeFontSize -> showFontSlider()
             is ReadUiEvent.SetFontSize -> onChangeFontSize(event.fontSizeSp)
-            ReadUiEvent.DecreaseFontSize -> TODO()
-            ReadUiEvent.IncreaseFontSize -> TODO()
-            ReadUiEvent.ChangeFontSize -> TODO()
         }
+    }
+
+    private fun loadBook(book: Book) {
+        if (
+            currentState.book?.filePath == book.filePath &&
+            (currentState.document != null || currentState.isLoading)
+        ) return
+
+        launchCatching(
+                context = Dispatchers.IO,
+                onStart = {
+                    updateState {
+                        it.copy(
+                                book = book,
+                                document = null,
+                                isLoading = true
+                        )
+                    }
+                },
+                onError = { error -> onBookLoadFailed(error) },
+                onCompletion = { updateState { it.copy(isLoading = false) } }
+        ) {
+            fb2Parser.parse(File(book.filePath))
+                    .fold(
+                            onSuccess = { parsedBook ->
+                                updateState { it.copy(document = parsedBook.toReaderBook()) }
+                            },
+                            onFailure = ::onBookLoadFailed
+                    )
+        }
+    }
+
+    private fun onBookLoadFailed(error: Throwable) {
+        updateState { it.copy(document = null) }
+        sendActionEvent(
+                ReadActionEvent.ShowToast(
+                        error.message ?: "Unable to read this book."
+                )
+        )
     }
 
     private fun onToggleAutoRotate() {
@@ -30,19 +82,12 @@ class ReadViewModel : BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>(
             )
         }
     }
+private fun showFontSlider() {
+    updateState { state ->
+        state.copy(fontSliderVisible = true)
+    }
+}
 
-    /* private fun onChangeFontSize() {
-         updateState { state ->
-             val currentIndex = FontSizeSteps.indexOf(state.fontSizeSp)
-             val nextIndex = if (currentIndex == -1) {
-                 DefaultFontSizeIndex
-             } else {
-                 (currentIndex + 1) % FontSizeSteps.size
-             }
-
-             state.copy(fontSizeSp = FontSizeSteps[nextIndex])
-         }
-     }*/
 
     private fun onDecreaseFontSize() {
         updateState { state ->
