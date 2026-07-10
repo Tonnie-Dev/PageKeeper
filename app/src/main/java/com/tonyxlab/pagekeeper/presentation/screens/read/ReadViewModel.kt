@@ -1,5 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
+import androidx.lifecycle.SavedStateHandle
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.toReaderBook
@@ -12,16 +13,17 @@ import kotlinx.coroutines.Dispatchers
 import java.io.File
 
 typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>
-class ReadViewModel (
-        private val fb2Parser: Fb2Parser
-): ReadBaseViewModel(
-        initialState = ReadUiState()
 
-) {
+class ReadViewModel(
+    private val fb2Parser: Fb2Parser,
+        savedStateHandle: SavedStateHandle
+) : ReadBaseViewModel(initialState = ReadUiState()) {
 
     init {
-        //loadBook()
+        //val bookId = savedStateHandle["bookId"]
+       // loadBook()
     }
+
     override fun onEvent(event: ReadUiEvent) {
         when (event) {
             is ReadUiEvent.LoadBook -> loadBook(event.book)
@@ -82,12 +84,12 @@ class ReadViewModel (
             )
         }
     }
-private fun showFontSlider() {
-    updateState { state ->
-        state.copy(fontSliderVisible = true)
-    }
-}
 
+    private fun showFontSlider() {
+        updateState { state ->
+            state.copy(fontSliderVisible = true)
+        }
+    }
 
     private fun onDecreaseFontSize() {
         updateState { state ->

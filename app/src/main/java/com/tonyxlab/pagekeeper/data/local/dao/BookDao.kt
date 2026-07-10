@@ -13,6 +13,9 @@ interface BookDao {
     @Query("SELECT * FROM books ORDER BY dateAdded DESC")
     fun observeBooks(): Flow<List<BookEntity>>
 
+    @Query("SELECT * FROM books WHERE id = :id")
+    suspend fun getBookById(id: String): BookEntity?
+
     @Query("SELECT EXISTS(SELECT 1 FROM books WHERE id = :id)")
     suspend fun existsByHash(id: String): Boolean
 

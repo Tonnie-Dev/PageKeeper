@@ -4,6 +4,7 @@ import com.tonyxlab.pagekeeper.data.local.dao.BookDao
 import com.tonyxlab.pagekeeper.data.local.entity.BookEntity
 import com.tonyxlab.pagekeeper.data.local.mapper.mapper.toEntity
 import com.tonyxlab.pagekeeper.data.local.mapper.mapper.toModel
+import com.tonyxlab.pagekeeper.domain.exception.ItemNotFoundException
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,11 @@ class BookRepositoryImpl(
             books.map(BookEntity::toModel)
 
         }
+    }
+
+    override suspend fun getBookById(id: String): Book {
+
+        return bookDao.getBookById(id)?.toModel() ?: throw ItemNotFoundException(id)
     }
 
     override suspend fun existsByHash(fileHash: String): Boolean = bookDao.existsByHash(fileHash)
