@@ -38,7 +38,7 @@ import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
-import com.tonyxlab.pagekeeper.presentation.theme.Icons
+import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
@@ -120,7 +120,7 @@ fun BookCard(
                         },
                         colors = CheckboxDefaults.colors(
                                 checkedColor = Primary,
-                                uncheckedColor = Icons,
+                                uncheckedColor = IconsTint,
                                 checkmarkColor = MaterialTheme.colorScheme.onPrimary
                         )
                 )
@@ -177,7 +177,7 @@ fun BookCard(
                                     painterResource(id = R.drawable.ic_star_outlined)
                                 },
                                 contentDescription = stringResource(id = R.string.cds_text_favorite),
-                                tint = if (book.isFavorite) Primary else Icons,
+                                tint = if (book.isFavorite) Primary else IconsTint,
                         )
                     }
 
@@ -189,7 +189,7 @@ fun BookCard(
                                     painterResource(id = R.drawable.ic_finished_outlined)
                                 },
                                 contentDescription = stringResource(id = R.string.cds_text_bookmark),
-                                tint = Icons
+                                tint = IconsTint
                         )
                     }
 
@@ -197,7 +197,7 @@ fun BookCard(
                         Icon(
                                 painter = painterResource(id = R.drawable.ic_share),
                                 contentDescription = stringResource(id = R.string.cds_text_share),
-                                tint = Icons,
+                                tint = IconsTint,
                         )
                     }
 
@@ -207,7 +207,7 @@ fun BookCard(
                         Icon(
                                 painter = painterResource(id = R.drawable.ic_delete),
                                 contentDescription = stringResource(id = R.string.cds_text_delete),
-                                tint = Icons,
+                                tint = IconsTint,
                         )
                     }
                 }

@@ -11,7 +11,7 @@ val BgActive = Color(0xFFF1EBDF)
 val BgBottomNav = Color(0xFFF4F1E6)
 
 val Primary = Color(0xFF8C7851)
-val Icons = Color(0xFF706C61)
+val IconsTint = Color(0xFF706C61)
 val Divider = Color(0xFFE1DDD0)
 
 val StateFinished = Color(0xFF14AF62)

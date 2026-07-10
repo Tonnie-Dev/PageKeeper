@@ -36,13 +36,12 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDraw
 import com.tonyxlab.pagekeeper.presentation.theme.BgActive
 import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
-import com.tonyxlab.pagekeeper.presentation.theme.Icons
+import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.RoundedCornerShape100
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
-import kotlin.math.exp
 
 @Composable
 fun LibraryNavigationRail(
@@ -90,7 +89,7 @@ fun LibraryNavigationRail(
                                 R.drawable.ic_menu
                     ),
                     contentDescription = stringResource(id = R.string.cds_text_menu),
-                    tint = Icons
+                    tint = IconsTint
             )
         }
 
@@ -283,7 +282,7 @@ private fun RailIcon(
             modifier = Modifier.size(MaterialTheme.spacing.spaceTwelve * 2),
             painter = painterResource(id = iconRes),
             contentDescription = label,
-            tint = Icons
+            tint = IconsTint
     )
 }
 

@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.theme.Icons
+import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
 import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
@@ -63,7 +63,7 @@ fun AppTopBar(
                                     .padding(MaterialTheme.spacing.spaceTwelve),
                             contentDescription = stringResource(id = R.string.cds_text_menu),
                             painter = painterResource(R.drawable.ic_menu),
-                            tint = Icons
+                            tint = IconsTint
                     )
                 }
             },
@@ -79,7 +79,7 @@ fun AppTopBar(
                                 .padding(MaterialTheme.spacing.spaceTwelve),
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = stringResource(id = R.string.cds_text_search),
-                        tint = Icons
+                        tint = IconsTint
                 )
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -113,7 +113,7 @@ fun SelectionTopBar(
                     Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = stringResource(id = R.string.cds_text_back),
-                            tint = Icons
+                            tint = IconsTint
                     )
                 }
             },
@@ -122,7 +122,7 @@ fun SelectionTopBar(
                     Icon(
                             painter = painterResource(id = R.drawable.ic_star_outlined),
                             contentDescription = stringResource(id = R.string.cds_text_favorite),
-                            tint = Icons
+                            tint = IconsTint
                     )
                 }
 
@@ -130,7 +130,7 @@ fun SelectionTopBar(
                     Icon(
                             painter = painterResource(id = R.drawable.ic_share),
                             contentDescription = stringResource(id = R.string.cds_text_share),
-                            tint = Icons
+                            tint = IconsTint
                     )
                 }
 
@@ -138,7 +138,7 @@ fun SelectionTopBar(
                     Icon(
                             painter = painterResource(id = R.drawable.ic_delete),
                             contentDescription = stringResource(id = R.string.cds_text_delete),
-                            tint = Icons
+                            tint = IconsTint
                     )
                 }
             },

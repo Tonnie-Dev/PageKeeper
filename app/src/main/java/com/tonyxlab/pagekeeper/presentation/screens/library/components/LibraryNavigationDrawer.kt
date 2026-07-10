@@ -39,7 +39,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.RoundedCornerShape20
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
-import com.tonyxlab.pagekeeper.presentation.theme.Icons as IconTint
+import com.tonyxlab.pagekeeper.presentation.theme.IconsTint as IconTint
 
 @Composable
 fun LibraryNavigationDrawer(

@@ -33,7 +33,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumRegular
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
-import com.tonyxlab.pagekeeper.presentation.theme.Icons
+import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
@@ -68,7 +68,7 @@ fun EmptyBooksScreen(
                     painter = painterResource(id = R.drawable.ic_book),
                     contentDescription = stringResource(id = R.string.cds_text_book),
                     modifier = Modifier.size(iconSize),
-                    tint = Icons
+                    tint = IconsTint
             )
         }
 
@@ -153,7 +153,7 @@ fun EmptyFavoritesScreen(
                         painter = painterResource(id = R.drawable.ic_star_big),
                         contentDescription = stringResource(id = R.string.cds_text_favorite),
                         modifier = Modifier.size(56.dp),
-                        tint = Icons
+                        tint = IconsTint
                 )
             }
 
@@ -215,7 +215,7 @@ fun EmptyFinishedScreen(
                         painter = painterResource(id = R.drawable.ic_finished_big),
                         contentDescription = stringResource(id = R.string.cds_text_finished),
                         modifier = Modifier.size(56.dp),
-                        tint = Icons
+                        tint = IconsTint
                 )
             }
 
