@@ -1,9 +1,8 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
-import androidx.lifecycle.SavedStateHandle
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
-import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.toReaderBook
+import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
@@ -16,37 +15,20 @@ typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadAction
 
 class ReadViewModel(
     private val fb2Parser: Fb2Parser,
-        savedStateHandle: SavedStateHandle
+    private val bookRepository: BookRepository
 ) : ReadBaseViewModel(initialState = ReadUiState()) {
 
-    init {
-        //val bookId = savedStateHandle["bookId"]
-       // loadBook()
-    }
-
-    override fun onEvent(event: ReadUiEvent) {
-        when (event) {
-            is ReadUiEvent.LoadBook -> loadBook(event.book)
-            ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
-            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
-            ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReadUiEvent.ChangeFontSize -> showFontSlider()
-            is ReadUiEvent.SetFontSize -> onChangeFontSize(event.fontSizeSp)
+    fun loadBook(bookId: String) {
+        if (currentState.book?.id == bookId && (currentState.document != null || currentState.isLoading)) {
+            return
         }
-    }
-
-    private fun loadBook(book: Book) {
-        if (
-            currentState.book?.filePath == book.filePath &&
-            (currentState.document != null || currentState.isLoading)
-        ) return
 
         launchCatching(
                 context = Dispatchers.IO,
                 onStart = {
                     updateState {
                         it.copy(
-                                book = book,
+                                book = null,
                                 document = null,
                                 isLoading = true
                         )
@@ -55,6 +37,9 @@ class ReadViewModel(
                 onError = { error -> onBookLoadFailed(error) },
                 onCompletion = { updateState { it.copy(isLoading = false) } }
         ) {
+            val book = bookRepository.getBookById(bookId)
+            updateState { it.copy(book = book) }
+
             fb2Parser.parse(File(book.filePath))
                     .fold(
                             onSuccess = { parsedBook ->
@@ -62,6 +47,16 @@ class ReadViewModel(
                             },
                             onFailure = ::onBookLoadFailed
                     )
+        }
+    }
+
+    override fun onEvent(event: ReadUiEvent) {
+        when (event) {
+            ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
+            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
+            ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
+            ReadUiEvent.ChangeFontSize -> showFontSlider()
+            is ReadUiEvent.SetFontSize -> onChangeFontSize(event.fontSizeSp)
         }
     }
 
@@ -120,7 +115,5 @@ class ReadViewModel(
         const val MinFontSizeSp = 16f
         const val MaxFontSizeSp = 24f
         const val FontSizeStep = 1f
-        val FontSizeSteps = listOf(16f, 18f, 20f, 22f, 24f)
-        const val DefaultFontSizeIndex = 1
     }
 }

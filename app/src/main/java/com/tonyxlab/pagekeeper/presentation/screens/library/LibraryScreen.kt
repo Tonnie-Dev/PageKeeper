@@ -52,6 +52,7 @@ import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.SelectionTopBar
+import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationRail
@@ -70,11 +71,15 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
+fun LibraryScreen(
+    navigator: Navigator,
+    viewModel: LibraryViewModel = koinViewModel(),
+) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val inSearchMode = uiState.searchState.isSearchMode
     val selectionState = uiState.selectionState
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
     var isNavigationRailExpanded by rememberSaveable { mutableStateOf(false) }
@@ -113,6 +118,7 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                                 end = MaterialTheme.spacing.spaceMedium,
                                 bottom = MaterialTheme.spacing.spaceMedium
                         ),
+                        navigator = navigator,
                         onNavButtonClick = {},
                         viewModel = viewModel,
                 )
@@ -148,8 +154,8 @@ fun LibraryScreen(viewModel: LibraryViewModel = koinViewModel()) {
                     showNavigationIcon = true,
                     showImportFab = true,
                     showTopBar = true,
+                    navigator = navigator,
                     viewModel = viewModel,
-
                     onNavButtonClick = {
                         coroutineScope.launch { drawerState.open() }
                     }
@@ -163,9 +169,10 @@ private fun BaseContent(
     showNavigationIcon: Boolean,
     showImportFab: Boolean,
     showTopBar: Boolean,
-    modifier: Modifier = Modifier,
     onNavButtonClick: () -> Unit,
+    navigator: Navigator,
     viewModel: LibraryViewModel,
+    modifier: Modifier = Modifier,
 ) {
 
     val isDeviceWide = rememberIsDeviceWide()
@@ -245,12 +252,7 @@ private fun BaseContent(
                 when (actionEvent) {
                     LibraryActionEvent.OpenFilePicker -> filePicker.launch("*/*")
                     is LibraryActionEvent.OpenBook -> {
-                        Toast.makeText(
-                                actionContext,
-                                "Reader is not available yet.",
-                                Toast.LENGTH_SHORT
-                        )
-                                .show()
+                        navigator.navigateToRead(actionEvent.bookId)
                     }
 
                     is LibraryActionEvent.ShareBook -> actionContext.shareBook(
@@ -454,9 +456,7 @@ private fun CompactLibraryLayout(
                 }
             }
         }
-
         LibraryDialog(uiState = uiState, onEvent = onEvent)
-
     }
 }
 
@@ -512,7 +512,6 @@ private fun Context.getDisplayName(uri: Uri): String {
                     .orEmpty()
         }
     }
-
     return uri.lastPathSegment.orEmpty()
 }
 
@@ -531,3 +530,5 @@ private fun Context.shareBook(bookId: String, uiState: LibraryUiState) {
     }
     startActivity(Intent.createChooser(intent, null))
 }
+
+
