@@ -9,14 +9,21 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>
 
 class ReadViewModel(
     private val fb2Parser: Fb2Parser,
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    bookId: String,
 ) : ReadBaseViewModel(initialState = ReadUiState()) {
+
+
+    init {
+        loadBook(bookId)
+    }
 
     fun loadBook(bookId: String) {
         if (currentState.book?.id == bookId && (currentState.document != null || currentState.isLoading)) {
@@ -57,6 +64,8 @@ class ReadViewModel(
             ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
             ReadUiEvent.ChangeFontSize -> showFontSlider()
             is ReadUiEvent.SetFontSize -> onChangeFontSize(event.fontSizeSp)
+            ReadUiEvent.ExitReader -> exitReader()
+            ReadUiEvent.ToggleFavorite -> toggleFavorite()
         }
     }
 
@@ -109,6 +118,30 @@ class ReadViewModel(
         return coerceIn(MinFontSizeSp, MaxFontSizeSp)
                 .toInt()
                 .toFloat()
+    }
+
+    private fun toggleFavorite() {
+        val book = currentState.book ?: return
+        val updatedFavorite = !book.isFavorite
+
+        updateState { state ->
+            state.copy(book = book.copy(isFavorite = updatedFavorite))
+        }
+
+        launchCatching(
+                context = Dispatchers.IO,
+                onError = {
+                    updateState { state ->
+                        state.copy(book = state.book?.copy(isFavorite = book.isFavorite))
+                    }
+                    sendActionEvent(ReadActionEvent.ShowToast("Unable to update favorite status."))
+                }
+        ) {
+            bookRepository.updateFavorite(book.id, updatedFavorite)
+        }
+    }
+    private fun exitReader() {
+       sendActionEvent(ReadActionEvent.ExitReader)
     }
 
     private companion object {

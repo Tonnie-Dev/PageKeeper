@@ -89,6 +89,9 @@ class LibraryViewModel(
     }
 
     private fun openBook(bookId: String) {
+        updateState { state ->
+            state.copy(searchState = state.searchState.copy(isSearchMode = false))
+        }
         sendActionEvent(LibraryActionEvent.OpenBook(bookId))
     }
 

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -159,7 +158,11 @@ fun SearchComponent(
                 key = { item -> item.id },
                 isDeviceWide = isDeviceWide
         ) { book ->
-            SearchResultItem(book = book, modifier = Modifier)
+            SearchResultItem(
+                    book = book,
+                    modifier = Modifier,
+                    onItemClick = { onEvent(LibraryUiEvent.OpenBook(book.id)) }
+            )
         }
     }
 }
@@ -168,11 +171,13 @@ fun SearchComponent(
 private fun SearchResultItem(
     book: Book,
     modifier: Modifier = Modifier,
+    onItemClick: () -> Unit
 ) {
     Row(
             modifier = modifier
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min)
+                    .clickable(onClick = onItemClick)
                     .padding(
                             horizontal = MaterialTheme.spacing.spaceMedium,
                             vertical = MaterialTheme.spacing.spaceSmall

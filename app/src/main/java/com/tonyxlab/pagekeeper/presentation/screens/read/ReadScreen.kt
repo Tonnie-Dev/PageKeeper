@@ -8,31 +8,41 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
+import com.tonyxlab.pagekeeper.presentation.screens.read.components.ReadTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.read.components.ReaderBottomBar
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun ReadScreen(
     bookId: String,
     navigator: Navigator,
-    viewModel: ReadViewModel = koinViewModel()
+    viewModel: ReadViewModel = koinViewModel(parameters = { parametersOf(bookId) })
 ) {
-    LaunchedEffect(bookId) {
-        viewModel.loadBook(bookId)
-    }
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     BaseContentLayout(
             viewModel = viewModel,
             onBackPressed = { navigator.popToLibrary() },
+            topBar = {
+                ReadTopBar(
+                        titleText = uiState.book?.title ?: "",
+                        isFavorite = uiState.book?.isFavorite ?: false,
+                        modifier = Modifier,
+                        onEvent = viewModel::onEvent
+                )
+            },
             bottomBar = { uiState ->
                 ReaderBottomBar(
                         uiState = uiState,
@@ -45,8 +55,7 @@ fun ReadScreen(
                         Toast.makeText(context, actionEvent.message, Toast.LENGTH_SHORT)
                                 .show()
                     }
-
-                    ReadActionEvent.ExitReadScreen -> {
+                    ReadActionEvent.ExitReader -> {
                         navigator.popToLibrary()
                     }
                 }

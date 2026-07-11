@@ -51,12 +51,13 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
-import com.tonyxlab.pagekeeper.presentation.core.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationRail
+import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
+import com.tonyxlab.pagekeeper.presentation.screens.library.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
@@ -216,7 +217,7 @@ private fun BaseContent(
                                 }
                         )
                     } else {
-                        AppTopBar(
+                        LibraryTopBar(
                                 titleText = stringResource(
                                         id = when (uiState.selectedDrawerDestination) {
                                             LibraryDrawerDestination.Library -> R.string.topbar_text_library
@@ -224,7 +225,7 @@ private fun BaseContent(
                                             LibraryDrawerDestination.Finished -> R.string.topbar_text_finished
                                         }
                                 ),
-                                showNavigationIcon = showNavigationIcon,
+                                showNavIcon = showNavigationIcon,
                                 onNavButtonClick = onNavButtonClick,
                                 onActionClick = {
                                     viewModel.onEvent(LibraryUiEvent.SearchClicked)
@@ -233,7 +234,6 @@ private fun BaseContent(
                     }
                 }
             },
-
             floatingActionButton = {
                 if (showImportFab && inSearchMode.not() && uiState.books.isNotEmpty()) {
                     FloatingActionButton(

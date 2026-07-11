@@ -9,6 +9,7 @@
     <string name="topbar_text_library">Library</string>
     <string name="topbar_text_favorites">Favorites</string>
     <string name="topbar_text_finished">Finished</string>
+    <string name="topbar_text_selected_count">%d selected</string>
 
     <!-- Bottom Bar Texts-->
     <string name="bottom_text_auto_rotate">Auto Rotate</string>

@@ -8,4 +8,6 @@ sealed interface ReadUiEvent : UiEvent {
     data object IncreaseFontSize : ReadUiEvent
     data object ChangeFontSize : ReadUiEvent
     data class SetFontSize(val fontSizeSp: Float) : ReadUiEvent
+    data object ToggleFavorite : ReadUiEvent
+    data object ExitReader : ReadUiEvent
 }

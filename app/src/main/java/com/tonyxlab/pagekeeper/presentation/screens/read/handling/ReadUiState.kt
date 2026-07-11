@@ -1,5 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read.handling
 
+import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.ReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState

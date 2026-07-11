@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.tonyxlab.pagekeeper.presentation.core.components
 
 import androidx.compose.foundation.background
@@ -5,15 +7,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,36 +24,44 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
-import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.TitleMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
     titleText: String,
     modifier: Modifier = Modifier,
+    titleStyle: TextStyle = MaterialTheme.typography.TitleMediumMedium,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    showNavigationIcon: Boolean = true,
+    showNavIcon: Boolean = true,
+    isLibraryScreen: Boolean = false,
+    textAlign: TextAlign = TextAlign.Center,
     onNavButtonClick: () -> Unit,
-    onActionClick: () -> Unit
+    actionIcon: @Composable RowScope.() -> Unit
 ) {
     CenterAlignedTopAppBar(
             modifier = modifier,
             title = {
                 Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = titleText,
-                        style = MaterialTheme.typography.TitleMediumMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = titleStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = textAlign,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
                 )
             },
             navigationIcon = {
-                if (showNavigationIcon) {
+                if (showNavIcon) {
                     Icon(
                             modifier = Modifier
                                     .clickable(
@@ -62,86 +72,17 @@ fun AppTopBar(
                                     )
                                     .padding(MaterialTheme.spacing.spaceTwelve),
                             contentDescription = stringResource(id = R.string.cds_text_menu),
-                            painter = painterResource(R.drawable.ic_menu),
+                            painter = painterResource(
+                                    id = if (isLibraryScreen)
+                                        R.drawable.ic_menu
+                                    else
+                                        R.drawable.ic_back
+                            ),
                             tint = IconsTint
                     )
                 }
             },
-            actions = {
-                Icon(
-                        modifier = Modifier
-                                .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        role = Role.Button,
-                                        onClick = onActionClick
-                                )
-                                .padding(MaterialTheme.spacing.spaceTwelve),
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = stringResource(id = R.string.cds_text_search),
-                        tint = IconsTint
-                )
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundColor
-            )
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SelectionTopBar(
-    selectedCount: Int,
-    modifier: Modifier = Modifier,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    onBackClick: () -> Unit,
-    onFavoriteClick: () -> Unit,
-    onShareClick: () -> Unit,
-    onDeleteClick: () -> Unit
-) {
-    TopAppBar(
-            modifier = modifier,
-            title = {
-                Text(
-                        text = "$selectedCount selected",
-                        style = MaterialTheme.typography.TitleMediumMedium,
-                        color = TextPrimary
-                )
-            },
-            navigationIcon = {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = stringResource(id = R.string.cds_text_back),
-                            tint = IconsTint
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = onFavoriteClick) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.ic_star_outlined),
-                            contentDescription = stringResource(id = R.string.cds_text_favorite),
-                            tint = IconsTint
-                    )
-                }
-
-                IconButton(onClick = onShareClick) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.ic_share),
-                            contentDescription = stringResource(id = R.string.cds_text_share),
-                            tint = IconsTint
-                    )
-                }
-
-                IconButton(onClick = onDeleteClick) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.ic_delete),
-                            contentDescription = stringResource(id = R.string.cds_text_delete),
-                            tint = IconsTint
-                    )
-                }
-            },
+            actions = { actionIcon() },
             colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backgroundColor
             )
@@ -164,17 +105,9 @@ private fun AppTopBarPreview() {
             AppTopBar(
                     titleText = stringResource(id = R.string.topbar_text_library),
                     backgroundColor = TabletBlockBg,
+                    isLibraryScreen = true,
                     onNavButtonClick = {},
-                    onActionClick = {}
-            )
-
-            SelectionTopBar(
-                    selectedCount = 2,
-                    backgroundColor = TabletBlockBg,
-                    onBackClick = {},
-                    onFavoriteClick = {},
-                    onShareClick = {},
-                    onDeleteClick = {}
+                    actionIcon = {}
             )
         }
     }
