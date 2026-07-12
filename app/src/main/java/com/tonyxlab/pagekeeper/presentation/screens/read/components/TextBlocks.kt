@@ -24,7 +24,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
+import com.tonyxlab.pagekeeper.presentation.theme.ChapterTitle
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
+import com.tonyxlab.pagekeeper.presentation.theme.ParagraphItalic
+import com.tonyxlab.pagekeeper.presentation.theme.TextModalPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @Composable
@@ -47,7 +50,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
     }
 
     val style = when (block.level) {
-        1 -> MaterialTheme.typography.headlineLarge
+        1 -> MaterialTheme.typography.ChapterTitle
         2 -> MaterialTheme.typography.headlineSmall
         3 -> MaterialTheme.typography.titleLarge
         else -> MaterialTheme.typography.titleMedium
@@ -68,7 +71,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
                         3 -> (fontSizeSp + 3).sp
                         else -> (fontSizeSp + 2).sp
                     },
-                    color = MaterialTheme.colorScheme.error
+                    color = TextModalPrimary
             ),
             textAlign = TextAlign.Center
     )
@@ -86,7 +89,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
             style = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = fontSizeSp.sp,
                     lineHeight = (fontSizeSp * 1.5f).sp,
-                    color = Color.Green
+                    color = TextModalPrimary
             )
     )
 }
@@ -112,11 +115,16 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
         Text(
                 text = block.text,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.ParagraphItalic.copy(
+                        fontSize = fontSizeSp.sp),
+                color = TextModalPrimary
+
+                /*.copy(
                         fontSize = fontSizeSp.sp,
                         lineHeight = (fontSizeSp * 1.5f).sp,
                         fontStyle = FontStyle.Italic
-                ),
+                ),*/
+                        ,
                 modifier = Modifier
                         .weight(1f)
                         .padding(start = MaterialTheme.spacing.spaceTwelve)

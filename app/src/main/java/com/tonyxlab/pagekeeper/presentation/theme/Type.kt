@@ -4,6 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.tonyxlab.pagekeeper.R
@@ -45,6 +46,33 @@ val Typography = Typography(
 )
 
 object ExtendedTypography {
+
+    val ChapterTitle = TextStyle(
+            fontFamily = LoraFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 25.sp,
+            lineHeight = 30.sp
+    )
+
+    val ParagraphRegular = TextStyle(
+            fontFamily = InterFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 18.sp,
+            lineHeight = 24.sp
+    )
+    val ParagraphBold = TextStyle(
+            fontFamily = InterFontFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            lineHeight = 24.sp
+    )
+
+    val ParagraphItalic = TextStyle(
+            fontFamily = InterFontFamily,
+          fontStyle = FontStyle.Italic,
+            fontSize = 18.sp,
+            lineHeight = 24.sp
+    )
 
     val TitleLargeBold = TextStyle(
             fontFamily = LoraFontFamily,
@@ -95,6 +123,19 @@ object ExtendedTypography {
             lineHeight = 16.sp
     )
 }
+
+
+val Typography.ChapterTitle
+    get() = ExtendedTypography.ChapterTitle
+
+val Typography.ParagraphRegular
+    get() = ExtendedTypography.ParagraphRegular
+
+val Typography.ParagraphBold
+    get() = ExtendedTypography.ParagraphBold
+
+val Typography.ParagraphItalic
+    get() = ExtendedTypography.ParagraphItalic
 
 val Typography.TitleLargeBold
     get() = ExtendedTypography.TitleLargeBold
