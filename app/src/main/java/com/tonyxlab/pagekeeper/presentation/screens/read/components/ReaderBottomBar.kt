@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,16 +56,14 @@ fun ReaderBottomBar(
     onEvent: (ReadUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-            modifier = modifier.fillMaxWidth(),
-            color = BgBottomNav
-    ) {
+
+    BottomAppBar(modifier = modifier, containerColor = BgBottomNav) {
+
         Row(
                 modifier = Modifier
                         .fillMaxWidth()
                         .padding(
                                 horizontal = MaterialTheme.spacing.spaceMedium,
-                                vertical = MaterialTheme.spacing.spaceSmall
                         ),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
