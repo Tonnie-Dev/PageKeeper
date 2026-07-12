@@ -1,5 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
+import androidx.lifecycle.viewModelScope
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.domain.model.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
@@ -9,8 +10,11 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.time.Duration.Companion.milliseconds
 
 typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>
 
@@ -20,6 +24,7 @@ class ReadViewModel(
     bookId: String,
 ) : ReadBaseViewModel(initialState = ReadUiState()) {
 
+    private var autoHideJob: Job?  = null
 
     init {
         loadBook(bookId)
@@ -65,6 +70,7 @@ class ReadViewModel(
             ReadUiEvent.ChangeFontSize -> showFontSlider()
             is ReadUiEvent.SetFontSize -> onChangeFontSize(event.fontSizeSp)
             ReadUiEvent.ExitReader -> exitReader()
+            ReadUiEvent.ToggleImmersiveMode -> toggleImmersiveMode()
             ReadUiEvent.ToggleFavorite -> toggleFavorite()
         }
     }
@@ -140,6 +146,38 @@ class ReadViewModel(
             bookRepository.updateFavorite(book.id, updatedFavorite)
         }
     }
+    private fun toggleImmersiveMode() {
+       if (currentState.immersiveMode) {
+           showScreenControls()
+       } else {
+           hideScreenControls()
+       }
+    }
+
+
+    private fun showScreenControls() {
+
+        autoHideJob?.cancel()
+        updateState { state -> state.copy(immersiveMode = false) }
+        autoHideJob = viewModelScope.launch {
+
+            delay(ControlAutoHideDelayMillis.milliseconds)
+
+            updateState { state -> state.copy(immersiveMode = true) }
+        }
+    }
+
+    private fun hideScreenControls() {
+        autoHideJob?.cancel()
+        autoHideJob = null
+        updateState { state -> state.copy(immersiveMode = true) }
+    }
+
+    private fun restartControlsAutoHideTimer() {
+        if (!currentState.immersiveMode) {
+           showScreenControls()
+        }
+    }
     private fun exitReader() {
        sendActionEvent(ReadActionEvent.ExitReader)
     }
@@ -148,5 +186,6 @@ class ReadViewModel(
         const val MinFontSizeSp = 16f
         const val MaxFontSizeSp = 24f
         const val FontSizeStep = 1f
+        const val ControlAutoHideDelayMillis = 3_000L
     }
 }

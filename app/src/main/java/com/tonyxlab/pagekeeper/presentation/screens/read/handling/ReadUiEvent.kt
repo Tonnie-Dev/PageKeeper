@@ -10,4 +10,5 @@ sealed interface ReadUiEvent : UiEvent {
     data class SetFontSize(val fontSizeSp: Float) : ReadUiEvent
     data object ToggleFavorite : ReadUiEvent
     data object ExitReader : ReadUiEvent
+    data object ToggleImmersiveMode : ReadUiEvent
 }

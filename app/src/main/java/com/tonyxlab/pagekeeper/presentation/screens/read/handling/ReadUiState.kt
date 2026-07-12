@@ -1,6 +1,5 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read.handling
 
-import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.ReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
@@ -20,7 +19,9 @@ data class ReadUiState(
     val orientation: ReadingOrientation =
         ReadingOrientation.AUTO_ROTATE,
 
-    val fontSizeSp: Float = 18f
+    val fontSizeSp: Float = 18f,
+
+    val immersiveMode: Boolean = true
 ) : UiState
 
 enum class ReadingOrientation {
