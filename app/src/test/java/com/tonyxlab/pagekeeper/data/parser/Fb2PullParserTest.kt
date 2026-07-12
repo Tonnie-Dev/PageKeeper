@@ -77,6 +77,61 @@ class Fb2PullParserTest {
         assertTrue(parse("<FictionBook/>").isFailure)
     }
 
+    @Test
+    fun `parse promotes chapter designation and following short paragraph when title is missing`() {
+        val book = parse(
+            """
+            <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+              <body><section id="chapter-1">
+                <p>Chapter I</p>
+                <p>An Unexpected Party</p>
+                <p>In a hole in the ground there lived a hobbit.</p>
+              </section></body>
+            </FictionBook>
+            """.trimIndent()
+        ).getOrThrow()
+
+        assertTrue(book.content[0] is ReaderBlock.ChapterTitle)
+        assertTrue(book.content[1] is ReaderBlock.ChapterTitle)
+        assertTrue(book.content[2] is ReaderBlock.Paragraph)
+        assertEquals("Chapter I An Unexpected Party", book.sections.single().title)
+    }
+
+    @Test
+    fun `parse promotes a leading bold paragraph when title is missing`() {
+        val book = parse(
+            """
+            <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+              <body><section>
+                <p><strong>The Richest Man in Babylon</strong></p>
+                <p>In old Babylon there once lived a certain very rich man.</p>
+              </section></body>
+            </FictionBook>
+            """.trimIndent()
+        ).getOrThrow()
+
+        assertTrue(book.content[0] is ReaderBlock.ChapterTitle)
+        assertTrue(book.content[1] is ReaderBlock.Paragraph)
+        assertEquals("The Richest Man in Babylon", book.sections.single().title)
+    }
+
+    @Test
+    fun `parse does not promote ordinary opening prose`() {
+        val book = parse(
+            """
+            <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+              <body><section>
+                <p>Once upon a time</p>
+                <p>There lived a reader who expected this to remain prose.</p>
+              </section></body>
+            </FictionBook>
+            """.trimIndent()
+        ).getOrThrow()
+
+        assertTrue(book.content[0] is ReaderBlock.Paragraph)
+        assertEquals(null, book.sections.single().title)
+    }
+
     private fun parse(xml: String) = createTempFile(suffix = ".fb2").let { path ->
         path.writeText(xml)
         try {

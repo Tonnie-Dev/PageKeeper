@@ -56,6 +56,8 @@ class Fb2PullParser : Fb2Parser {
         val startBlockIndex = content.size
         var title: String? = null
         val children = mutableListOf<BookSection>()
+        val leadingParagraphIndices = mutableListOf<Int>()
+        var isReadingSectionOpening = true
 
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             when (parser.eventType) {
@@ -68,27 +70,106 @@ class Fb2PullParser : Fb2Parser {
                             title = parsedTitle
                             content += ReaderBlock.ChapterTitle(parsedTitle, level)
                         }
+                        isReadingSectionOpening = false
                     }
 
-                    PARAGRAPH_TAG -> parser.readStyledTextUntilEnd(PARAGRAPH_TAG)
-                        .takeIf { it.text.isNotBlank() }
-                        ?.let { content += ReaderBlock.Paragraph(it) }
+                    PARAGRAPH_TAG -> {
+                        val paragraph = parser.readStyledTextUntilEnd(PARAGRAPH_TAG)
+                        if (paragraph.text.isNotBlank()) {
+                            if (isReadingSectionOpening &&
+                                leadingParagraphIndices.size < MAX_HEADING_PARAGRAPHS
+                            ) {
+                                leadingParagraphIndices += content.size
+                            } else {
+                                isReadingSectionOpening = false
+                            }
+                            content += ReaderBlock.Paragraph(paragraph)
+                        }
+                    }
 
-                    CITE_TAG, EPIGRAPH_TAG -> parser.readStyledTextUntilEnd(parser.name)
-                        .takeIf { it.text.isNotBlank() }
-                        ?.let { content += ReaderBlock.Quote(it) }
+                    CITE_TAG, EPIGRAPH_TAG -> {
+                        isReadingSectionOpening = false
+                        parser.readStyledTextUntilEnd(parser.name)
+                            .takeIf { it.text.isNotBlank() }
+                            ?.let { content += ReaderBlock.Quote(it) }
+                    }
 
-                    SECTION_TAG -> children += parseSection(parser, level + 1, content)
-                    else -> parser.skipTag()
+                    SECTION_TAG -> {
+                        isReadingSectionOpening = false
+                        children += parseSection(parser, level + 1, content)
+                    }
+
+                    else -> {
+                        isReadingSectionOpening = false
+                        parser.skipTag()
+                    }
                 }
 
                 XmlPullParser.END_TAG -> if (parser.name == SECTION_TAG) {
+                    if (title == null) {
+                        title = promoteFallbackHeading(
+                            content = content,
+                            paragraphIndices = leadingParagraphIndices,
+                            level = level
+                        )
+                    }
                     return BookSection(id, title, level, startBlockIndex, children)
                 }
             }
         }
 
         throw XmlPullParserException(UNCLOSED_SECTION_ERROR)
+    }
+
+    private fun promoteFallbackHeading(
+        content: MutableList<ReaderBlock>,
+        paragraphIndices: List<Int>,
+        level: Int
+    ): String? {
+        val paragraphs = paragraphIndices.mapNotNull { index ->
+            (content.getOrNull(index) as? ReaderBlock.Paragraph)?.let { index to it.text }
+        }
+        val first = paragraphs.firstOrNull() ?: return null
+        val firstText = first.second.text.normalizeText()
+        val firstIsDesignation = CHAPTER_DESIGNATION_REGEX.matches(firstText)
+        val firstIsHeading = firstIsDesignation ||
+            first.second.isMostlyBold() ||
+            firstText.isShortAllCapsHeading()
+        if (!firstIsHeading) return null
+
+        val promoted = mutableListOf(first)
+        if (firstIsDesignation) {
+            paragraphs.getOrNull(1)
+                ?.takeIf { (_, text) -> text.text.isPlausibleHeadingText() }
+                ?.let(promoted::add)
+        }
+
+        promoted.forEach { (index, text) ->
+            content[index] = ReaderBlock.ChapterTitle(text.text.normalizeText(), level)
+        }
+        return promoted.joinToString(" ") { (_, text) -> text.text.normalizeText() }
+    }
+
+    private fun AnnotatedString.isMostlyBold(): Boolean {
+        if (text.isBlank()) return false
+        val boldCharacters = spanStyles
+            .filter { it.item.fontWeight == FontWeight.Bold }
+            .sumOf { (it.end - it.start).coerceAtLeast(0) }
+        return boldCharacters >= text.length * MIN_BOLD_HEADING_RATIO
+    }
+
+    private fun String.isShortAllCapsHeading(): Boolean {
+        val letters = filter(Char::isLetter)
+        return isPlausibleHeadingText() &&
+            letters.length >= MIN_ALL_CAPS_LETTERS &&
+            letters.all(Char::isUpperCase)
+    }
+
+    private fun String.isPlausibleHeadingText(): Boolean {
+        val normalized = normalizeText()
+        return normalized.length <= MAX_HEADING_CHARACTERS &&
+            normalized.split(WHITESPACE_REGEX).size <= MAX_HEADING_WORDS &&
+            normalized.lastOrNull() !in SENTENCE_ENDINGS
     }
 
     private fun XmlPullParser.moveToBodyOrThrow() {
@@ -191,10 +272,21 @@ class Fb2PullParser : Fb2Parser {
         const val EMPHASIS_TAG = "emphasis"
         const val ID_ATTRIBUTE = "id"
         const val ROOT_SECTION_LEVEL = 1
+        const val MAX_HEADING_PARAGRAPHS = 3
+        const val MAX_HEADING_CHARACTERS = 100
+        const val MAX_HEADING_WORDS = 12
+        const val MIN_ALL_CAPS_LETTERS = 2
+        const val MIN_BOLD_HEADING_RATIO = 0.6
         const val MISSING_BODY_ERROR = "Failed to read the book. The file may be empty or corrupted."
         const val UNCLOSED_SECTION_ERROR = "Failed to read the book. A section is not closed."
 
         val WHITESPACE_REGEX = Regex("[ \\t\\x0B\\f\\r]+")
         val NEWLINE_SPACING_REGEX = Regex(" *\\n *")
+        val CHAPTER_DESIGNATION_REGEX = Regex(
+            "^(chapter|book|part|volume|act|scene)\\s+([ivxlcdm]+|[a-z]+|\\d+)$|" +
+                "^(prologue|epilogue|introduction|preface)$",
+            RegexOption.IGNORE_CASE
+        )
+        val SENTENCE_ENDINGS = setOf('.', '!', '?', ';')
     }
 }
