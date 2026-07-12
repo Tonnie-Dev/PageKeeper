@@ -106,6 +106,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(Testing.Kotest.assertions.core)
     testImplementation(Testing.Kotest.runner.junit5)
+    testImplementation("net.sf.kxml:kxml2:2.3.0")
 
     // Android Tests
     androidTestImplementation(libs.androidx.junit)

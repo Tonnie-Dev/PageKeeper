@@ -11,11 +11,15 @@ data class ReaderBook(
 )
 
 data class ReaderSection(
+    val id: String?,
     val title: String?,
+    val level: Int,
+    val startBlockIndex: Int,
     val children: List<ReaderSection> = emptyList()
 )
 
 sealed interface ReaderContentBlock {
+
     data class ChapterTitle(
         val text: String,
         val level: Int
@@ -39,19 +43,33 @@ fun ParsedBook.toReaderBook(): ReaderBook {
 
 private fun BookSection.toReaderSection(): ReaderSection {
     return ReaderSection(
+            id = id,
             title = title,
+            level = level,
+            startBlockIndex = startBlockIndex,
             children = children.map(BookSection::toReaderSection)
     )
 }
 
 private fun ReaderBlock.toReaderContentBlock(): ReaderContentBlock {
     return when (this) {
-        is ReaderBlock.ChapterTitle -> ReaderContentBlock.ChapterTitle(
-                text = text,
-                level = level
-        )
+        is ReaderBlock.ChapterTitle -> {
+            ReaderContentBlock.ChapterTitle(
+                    text = text,
+                    level = level
+            )
+        }
 
-        is ReaderBlock.Paragraph -> ReaderContentBlock.Paragraph(text = text)
-        is ReaderBlock.Quote -> ReaderContentBlock.Quote(text = text)
+        is ReaderBlock.Paragraph -> {
+            ReaderContentBlock.Paragraph(
+                    text = text
+            )
+        }
+
+        is ReaderBlock.Quote -> {
+            ReaderContentBlock.Quote(
+                    text = text
+            )
+        }
     }
 }
