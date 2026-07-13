@@ -1,12 +1,14 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,10 +21,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.read.components.ChapterTitleBlock
+import com.tonyxlab.pagekeeper.presentation.screens.read.components.FontSizeControlPanel
 import com.tonyxlab.pagekeeper.presentation.screens.read.components.ParagraphBlock
 import com.tonyxlab.pagekeeper.presentation.screens.read.components.QuoteBlock
 import com.tonyxlab.pagekeeper.presentation.screens.read.components.ReadTopBar
@@ -31,7 +35,9 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEven
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import com.tonyxlab.pagekeeper.utils.ReaderOrientationEffect
 import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
+import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -42,7 +48,14 @@ fun ReadScreen(
     viewModel: ReadViewModel = koinViewModel(parameters = { parametersOf(bookId) })
 ) {
 
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     SetStatusBarIconsColor(darkIcons = true)
+
+
+    ReaderOrientationEffect(
+            orientation = uiState.orientation,
+            isMobileDevice = rememberIsMobileDevice()
+    )
     BaseContentLayout(
             viewModel = viewModel,
             onBackPressed = { navigator.popToLibrary() },
@@ -50,7 +63,7 @@ fun ReadScreen(
                 AnimatedVisibility(
                         visible = !uiState.immersiveMode,
                         enter = fadeIn(
-                                animationSpec = tween(durationMillis =200)
+                                animationSpec = tween(durationMillis = 200)
                         ),
                         exit = fadeOut(
                                 animationSpec = tween(durationMillis = 350)
@@ -74,10 +87,51 @@ fun ReadScreen(
                                 animationSpec = tween(durationMillis = 350)
                         )
                 ) {
-                    ReaderBottomBar(
-                            uiState = uiState,
-                            onEvent = viewModel::onEvent
-                    )
+
+                    AnimatedContent(
+                            uiState.fontSizeState.showFontSizePanel,
+                            transitionSpec = {
+                                fadeIn(
+                                        animationSpec = tween(300)
+                                ) togetherWith fadeOut(
+                                        animationSpec = tween(200)
+                                )
+                            },
+                            label = "Reading controls"
+                    ) { status ->
+
+                        when (status) {
+                            true -> {
+                                FontSizeControlPanel(
+                                        fontSize = uiState.fontSizeState.previewFontSize,
+                                        onFontSizeChange = { fontSize ->
+                                            viewModel.onEvent(
+                                                    ReadUiEvent.PreviewFontSizeChange(
+                                                            fontSize
+                                                    )
+                                            )
+                                        },
+                                        onFontSizeChangeFinished = { fontSize ->
+                                            viewModel.onEvent(
+                                                    ReadUiEvent.FontSizeChangeFinished(
+                                                            fontSize
+                                                    )
+                                            )
+                                        }
+                                )
+
+                            }
+
+                            else -> {
+                                ReaderBottomBar(
+                                        uiState = uiState,
+                                        onEvent = viewModel::onEvent
+                                )
+
+                            }
+                        }
+                    }
+
                 }
             },
             actionEventHandler = { context, actionEvent ->
@@ -86,6 +140,7 @@ fun ReadScreen(
                         Toast.makeText(context, actionEvent.message, Toast.LENGTH_SHORT)
                                 .show()
                     }
+
                     ReadActionEvent.ExitReader -> navigator.popToLibrary()
                 }
             }
@@ -100,7 +155,7 @@ fun ReadScreen(
 @Composable
 fun ReadScreenContent(
     uiState: ReadUiState,
-    onEvent:(ReadUiEvent)-> Unit,
+    onEvent: (ReadUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val blocks = uiState.document?.blocks.orEmpty()
@@ -117,7 +172,7 @@ fun ReadScreenContent(
 
     val animatedBottomPadding by animateDpAsState(
             targetValue = if (uiState.immersiveMode) {
-               30.dp
+                30.dp
             } else {
                 100.dp
             },
@@ -128,11 +183,11 @@ fun ReadScreenContent(
 
     LazyColumn(
             modifier = modifier
-                    .animateContentSize( animationSpec = tween(durationMillis = 350) )
+                    .animateContentSize(animationSpec = tween(durationMillis = 350))
                     .fillMaxSize()
                     .pointerInput(uiState.immersiveMode) {
                         detectTapGestures {
-                          onEvent(ReadUiEvent.ToggleImmersiveMode)
+                            onEvent(ReadUiEvent.ToggleImmersiveMode)
                         }
                     },
             contentPadding = PaddingValues(
@@ -148,19 +203,21 @@ fun ReadScreenContent(
                 is ReaderContentBlock.ChapterTitle -> {
                     ChapterTitleBlock(
                             block = block,
-                            fontSizeSp = uiState.fontSizeSp
+                            fontSizeSp = uiState.fontSizeState.previewFontSize
                     )
                 }
+
                 is ReaderContentBlock.Paragraph -> {
                     ParagraphBlock(
                             block = block,
-                            fontSizeSp = uiState.fontSizeSp
+                            fontSizeSp = uiState.fontSizeState.previewFontSize
                     )
                 }
+
                 is ReaderContentBlock.Quote -> {
                     QuoteBlock(
                             block = block,
-                            fontSizeSp = uiState.fontSizeSp
+                            fontSizeSp = uiState.fontSizeState.previewFontSize
                     )
                 }
             }

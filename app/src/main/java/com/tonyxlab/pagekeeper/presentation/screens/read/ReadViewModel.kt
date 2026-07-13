@@ -9,6 +9,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEven
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
+import com.tonyxlab.pagekeeper.presentation.screens.read.handling.coercedFontSize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,7 +25,7 @@ class ReadViewModel(
     bookId: String,
 ) : ReadBaseViewModel(initialState = ReadUiState()) {
 
-    private var autoHideJob: Job?  = null
+    private var autoHideJob: Job? = null
 
     init {
         loadBook(bookId)
@@ -67,11 +68,12 @@ class ReadViewModel(
             ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
             ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
             ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReadUiEvent.ChangeFontSize -> showFontSlider()
-            is ReadUiEvent.SetFontSize -> onChangeFontSize(event.fontSizeSp)
+            ReadUiEvent.FontSizeClicked -> showFontSizePanel()
+            is ReadUiEvent.PreviewFontSizeChange -> onChangeFontSize(event.fontSizeSp)
             ReadUiEvent.ExitReader -> exitReader()
             ReadUiEvent.ToggleImmersiveMode -> toggleImmersiveMode()
             ReadUiEvent.ToggleFavorite -> toggleFavorite()
+            is ReadUiEvent.FontSizeChangeFinished -> TODO()
         }
     }
 
@@ -95,29 +97,62 @@ class ReadViewModel(
         }
     }
 
-    private fun showFontSlider() {
+    private fun showFontSizePanel() {
         updateState { state ->
-            state.copy(fontSliderVisible = true)
+            state.copy(
+                    fontSizeState = state.fontSizeState.copy(
+                            showFontSizePanel = true,
+                            previewFontSize = state.fontSizeState.fontSize
+                    )
+            )
         }
+        restartControlsAutoHideTimer()
+    }
+
+    private fun previewFontSize(fontSize: Float) {
+        updateState { state ->
+            state.copy(
+                    fontSizeState = state.fontSizeState.copy(
+                            previewFontSize = fontSize.coercedFontSize
+                    )
+            )
+
+        }
+    }
+
+    private fun finishAndSaveFontSizeChange(fontSize: Float) {
+
+        updateState { state ->
+            state.copy(
+                    fontSizeState = state.fontSizeState.copy(
+                            fontSize = fontSize.coercedFontSize,
+                            previewFontSize = fontSize.coercedFontSize
+                    )
+            )
+
+        }
+
+        // TODO: Add Prefs 
     }
 
     private fun onDecreaseFontSize() {
         updateState { state ->
-            state.copy(fontSizeSp = (state.fontSizeSp - FontSizeStep).coerceInFontRange())
+            state.copy(fontSizeState = state.fontSizeState.copy(fontSize = (state.fontSizeState.fontSize - FontSizeStep).coerceInFontRange()))
         }
+        restartControlsAutoHideTimer()
     }
 
     private fun onIncreaseFontSize() {
         updateState { state ->
-            state.copy(fontSizeSp = (state.fontSizeSp + FontSizeStep).coerceInFontRange())
+            state.copy(fontSizeState = state.fontSizeState.copy(fontSize = (state.fontSizeState.fontSize + FontSizeStep).coerceInFontRange()))
         }
+        restartControlsAutoHideTimer()
     }
 
     private fun onChangeFontSize(fontSizeSp: Float) {
         updateState { state ->
-            state.copy(fontSizeSp = fontSizeSp.coerceInFontRange())
+            state.copy(fontSizeState = state.fontSizeState.copy(fontSize = fontSizeSp.coerceInFontRange()))
         }
-
     }
 
     private fun Float.coerceInFontRange(): Float {
@@ -146,14 +181,14 @@ class ReadViewModel(
             bookRepository.updateFavorite(book.id, updatedFavorite)
         }
     }
-    private fun toggleImmersiveMode() {
-       if (currentState.immersiveMode) {
-           showScreenControls()
-       } else {
-           hideScreenControls()
-       }
-    }
 
+    private fun toggleImmersiveMode() {
+        if (currentState.immersiveMode) {
+            showScreenControls()
+        } else {
+            hideScreenControls()
+        }
+    }
 
     private fun showScreenControls() {
 
@@ -175,11 +210,12 @@ class ReadViewModel(
 
     private fun restartControlsAutoHideTimer() {
         if (!currentState.immersiveMode) {
-           showScreenControls()
+            showScreenControls()
         }
     }
+
     private fun exitReader() {
-       sendActionEvent(ReadActionEvent.ExitReader)
+        sendActionEvent(ReadActionEvent.ExitReader)
     }
 
     private companion object {
