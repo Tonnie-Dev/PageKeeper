@@ -9,13 +9,13 @@ sealed interface ReadUiEvent : UiEvent {
 
     data object ExitReader : ReadUiEvent
 
-    data object ToggleImmersiveMode : ReadUiEvent
+    data object ReadingAreaClicked : ReadUiEvent
 
     data object FontSizeClicked : ReadUiEvent
 
-    data class PreviewFontSizeChange(val fontSizeSp: Float) : ReadUiEvent
+    data class PreviewFontSizeChange(val fontSize: Float) : ReadUiEvent
 
-    data class FontSizeChangeFinished(val fontSizeSp: Float) : ReadUiEvent
+    data class FontSizeChangeFinished(val fontSize: Float) : ReadUiEvent
 
     data object IncreaseFontSize : ReadUiEvent
 

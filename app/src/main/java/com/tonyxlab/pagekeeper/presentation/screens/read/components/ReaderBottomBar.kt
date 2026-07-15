@@ -1,5 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,7 +56,10 @@ fun ReaderBottomBar(
             Column(
                     modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f), horizontalAlignment = Alignment.CenterHorizontally
+                            .clickable{ onEvent(ReadUiEvent.ToggleAutoRotate) }
+                            .weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+
             ) {
                 IconButton(onClick = { onEvent(ReadUiEvent.ToggleAutoRotate) }) {
                     Icon(
@@ -79,6 +83,7 @@ fun ReaderBottomBar(
             Column(
                     modifier = Modifier
                             .fillMaxWidth()
+                            .clickable{onEvent(ReadUiEvent.FontSizeClicked)}
                             .weight(1f), horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 IconButton(onClick = { onEvent(ReadUiEvent.FontSizeClicked) }) {

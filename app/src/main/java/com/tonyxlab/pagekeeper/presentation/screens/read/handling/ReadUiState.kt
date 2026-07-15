@@ -17,7 +17,7 @@ data class ReadUiState(
 
     val fontSizeState: FontSizeState = FontSizeState(),
 
-    val immersiveMode: Boolean = true
+    val controlMode: ReadingControlMode = ReadingControlMode.Immersive
 
 ) : UiState {
 
@@ -25,13 +25,19 @@ data class ReadUiState(
     data class FontSizeState(
         val fontSize: Float = ReaderFontSize.DEFAULT,
         val previewFontSize: Float = ReaderFontSize.DEFAULT,
-        val showFontSizePanel: Boolean = false,
+       // val showFontSizePanel: Boolean = false,
     )
 }
 
 enum class ReadingOrientation {
     AUTO_ROTATE,
     LANDSCAPE_LOCK
+}
+
+enum class ReadingControlMode {
+    Immersive,
+    DefaultToolbar,
+    FontSizePanel,
 }
 
 object ReaderFontSize {

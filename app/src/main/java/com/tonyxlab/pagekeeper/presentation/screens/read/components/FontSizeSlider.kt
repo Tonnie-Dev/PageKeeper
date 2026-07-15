@@ -24,9 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
@@ -44,17 +42,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReaderFontSize
-import com.tonyxlab.pagekeeper.presentation.theme.BgBottomNav
 import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
@@ -91,19 +85,31 @@ fun FontSizeControlPanel(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+
             FontSizeAdjustmentButton(
-                    text = "−",
-                    contentDescription = "Decrease font size",
+
                     enabled = sliderValue > ReaderFontSize.MIN,
+                    icon = {
+                        Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = stringResource(
+                                        id = R.string.bottom_text_decrease_font_size
+                                ),
+                                tint = BgMain
+                        )
+                    },
                     onClick = {
+
+
                         val newValue = (sliderValue - 1f)
                                 .coerceAtLeast(ReaderFontSize.MIN)
 
                         sliderValue = newValue
                         onFontSizeChange(newValue)
                         onFontSizeChangeFinished(newValue)
-                    },
+                    }
             )
+
 
             FontSizeSlider(
                     value = sliderValue,
@@ -118,18 +124,30 @@ fun FontSizeControlPanel(
             )
 
             FontSizeAdjustmentButton(
-                    text = "+",
-                    contentDescription = "Increase font size",
-                    enabled = sliderValue < ReaderFontSize.MAX,
+
+                    enabled = sliderValue > ReaderFontSize.MIN,
+                    icon = {
+                        Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(
+                                        id = R.string.bottom_text_increase_font_size
+                                ),
+                                tint = BgMain
+                        )
+                    },
                     onClick = {
+
+
                         val newValue = (sliderValue + 1f)
                                 .coerceAtMost(ReaderFontSize.MAX)
 
                         sliderValue = newValue
                         onFontSizeChange(newValue)
                         onFontSizeChangeFinished(newValue)
-                    },
+                    }
             )
+
+
         }
     }
 
@@ -242,36 +260,9 @@ private fun FontSizeSliderThumb(
 
 @Composable
 private fun FontSizeAdjustmentButton(
-    text: String,
-    contentDescription: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    FilledIconButton(
-            onClick = onClick,
-            enabled = enabled,
-            modifier = modifier.size(56.dp),
-            shape = CircleShape,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-    ) {
-        Text(
-                text = text,
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.semantics {
-                    this.contentDescription = contentDescription
-                },
-        )
-    }
-}
-
-@Composable
-private fun FontSizeButton(
     icon: @Composable () -> Unit,
     onClick: () -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
 
@@ -280,7 +271,7 @@ private fun FontSizeButton(
                     .size(width = 40.dp, height = 32.dp)
                     .clip(RoundedCornerShape(100))
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable(onClick = onClick),
+                    .clickable(enabled = enabled, onClick = onClick),
             contentAlignment = Alignment.Center
     ) {
         icon()
@@ -424,11 +415,13 @@ private fun ReaderBottomBarPreview() {
                     onEvent = {}
             )
 
-          /*  ReaderSliderBar(
+            FontSizeControlPanel(
+                    fontSize = 18.0f,
+                    onFontSizeChange = {},
+                    onFontSizeChangeFinished = {},
 
-                    uiState = ReadUiState(),
-                    onEvent = {}
-            )*/
+
+            )
         }
     }
 }

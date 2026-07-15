@@ -34,6 +34,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.components.ReaderBottom
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
+import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingControlMode
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ReaderOrientationEffect
 import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
@@ -61,7 +62,7 @@ fun ReadScreen(
             onBackPressed = { navigator.popToLibrary() },
             topBar = { uiState ->
                 AnimatedVisibility(
-                        visible = !uiState.immersiveMode,
+                        visible = uiState.controlMode != ReadingControlMode.Immersive,
                         enter = fadeIn(
                                 animationSpec = tween(durationMillis = 200)
                         ),
@@ -79,7 +80,7 @@ fun ReadScreen(
             },
             bottomBar = { uiState ->
                 AnimatedVisibility(
-                        visible = !uiState.immersiveMode,
+                        visible = uiState.controlMode != ReadingControlMode.Immersive,
                         enter = fadeIn(
                                 animationSpec = tween(durationMillis = 200)
                         ),
@@ -89,7 +90,7 @@ fun ReadScreen(
                 ) {
 
                     AnimatedContent(
-                            uiState.fontSizeState.showFontSizePanel,
+                            targetState = uiState.controlMode,
                             transitionSpec = {
                                 fadeIn(
                                         animationSpec = tween(300)
@@ -98,10 +99,21 @@ fun ReadScreen(
                                 )
                             },
                             label = "Reading controls"
-                    ) { status ->
+                    ) { controlMode ->
 
-                        when (status) {
-                            true -> {
+                        when (controlMode) {
+
+                            ReadingControlMode.Immersive -> Unit
+
+                            ReadingControlMode.DefaultToolbar -> {
+                                ReaderBottomBar(
+                                        uiState = uiState,
+                                        onEvent = viewModel::onEvent
+                                )
+
+                            }
+
+                            ReadingControlMode.FontSizePanel -> {
                                 FontSizeControlPanel(
                                         fontSize = uiState.fontSizeState.previewFontSize,
                                         onFontSizeChange = { fontSize ->
@@ -118,14 +130,6 @@ fun ReadScreen(
                                                     )
                                             )
                                         }
-                                )
-
-                            }
-
-                            else -> {
-                                ReaderBottomBar(
-                                        uiState = uiState,
-                                        onEvent = viewModel::onEvent
                                 )
 
                             }
@@ -161,7 +165,7 @@ fun ReadScreenContent(
     val blocks = uiState.document?.blocks.orEmpty()
 
     val animatedTopPadding by animateDpAsState(
-            targetValue = if (uiState.immersiveMode) {
+            targetValue = if (uiState.controlMode != ReadingControlMode.Immersive) {
                 20.dp
             } else {
                 84.dp
@@ -171,7 +175,7 @@ fun ReadScreenContent(
     )
 
     val animatedBottomPadding by animateDpAsState(
-            targetValue = if (uiState.immersiveMode) {
+            targetValue = if (uiState.controlMode != ReadingControlMode.Immersive) {
                 30.dp
             } else {
                 100.dp
@@ -185,9 +189,9 @@ fun ReadScreenContent(
             modifier = modifier
                     .animateContentSize(animationSpec = tween(durationMillis = 350))
                     .fillMaxSize()
-                    .pointerInput(uiState.immersiveMode) {
+                    .pointerInput(uiState.controlMode) {
                         detectTapGestures {
-                            onEvent(ReadUiEvent.ToggleImmersiveMode)
+                            onEvent(ReadUiEvent.ReadingAreaClicked)
                         }
                     },
             contentPadding = PaddingValues(
