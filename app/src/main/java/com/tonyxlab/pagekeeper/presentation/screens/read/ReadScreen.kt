@@ -116,20 +116,7 @@ fun ReadScreen(
                             ReadingControlMode.FontSizePanel -> {
                                 FontSizeControlPanel(
                                         fontSize = uiState.fontSizeState.previewFontSize,
-                                        onFontSizeChange = { fontSize ->
-                                            viewModel.onEvent(
-                                                    ReadUiEvent.PreviewFontSizeChange(
-                                                            fontSize
-                                                    )
-                                            )
-                                        },
-                                        onFontSizeChangeFinished = { fontSize ->
-                                            viewModel.onEvent(
-                                                    ReadUiEvent.FontSizeChangeFinished(
-                                                            fontSize
-                                                    )
-                                            )
-                                        }
+                                        onEvent = viewModel::onEvent
                                 )
 
                             }

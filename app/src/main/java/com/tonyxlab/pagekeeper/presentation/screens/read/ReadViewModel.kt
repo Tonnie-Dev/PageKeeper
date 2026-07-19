@@ -7,6 +7,7 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
+import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReaderFontSize
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingControlMode
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.coercedFontSize
@@ -72,7 +73,7 @@ class ReadViewModel(
             ReadUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
             ReadUiEvent.ToggleFavorite -> toggleFavorite()
             is ReadUiEvent.PreviewFontSizeChange -> previewFontSize(event.fontSize)
-            is ReadUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange(event.fontSize)
+            is ReadUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
         }
     }
 
@@ -116,49 +117,67 @@ class ReadViewModel(
                             previewFontSize = fontSize.coercedFontSize
                     )
             )
-
         }
+
         restartControlsAutoHideTimer()
     }
 
-    private fun finishAndSaveFontSizeChange(fontSize: Float) {
+    private fun finishAndSaveFontSizeChange() {
+        val updatedFontSize =
+            currentState.fontSizeState.previewFontSize.coercedFontSize
 
         updateState { state ->
             state.copy(
                     fontSizeState = state.fontSizeState.copy(
-                            fontSize = fontSize.coercedFontSize,
-                            previewFontSize = fontSize.coercedFontSize,
-
-                            )
+                            fontSize = updatedFontSize,
+                            previewFontSize = updatedFontSize
+                    )
             )
-
         }
 
-        // TODO: Add Prefs 
+        saveFontSize()
     }
 
     private fun onDecreaseFontSize() {
         updateState { state ->
-            state.copy(fontSizeState = state.fontSizeState.copy(fontSize = (state.fontSizeState.fontSize - FontSizeStep).coerceInFontRange()))
+            val updatedFontSize =
+                (state.fontSizeState.fontSize - FontSizeStep)
+                        .coerceInFontRange()
+
+            state.copy(
+                    fontSizeState = state.fontSizeState.copy(
+                            fontSize = updatedFontSize,
+                            previewFontSize = updatedFontSize
+                    )
+            )
         }
         restartControlsAutoHideTimer()
     }
 
     private fun onIncreaseFontSize() {
         updateState { state ->
-            state.copy(fontSizeState = state.fontSizeState.copy(fontSize = (state.fontSizeState.fontSize + FontSizeStep).coerceInFontRange()))
+            val updatedFontSize =
+                (state.fontSizeState.fontSize + FontSizeStep)
+                        .coerceInFontRange()
+
+            state.copy(
+                    fontSizeState = state.fontSizeState.copy(
+                            fontSize = updatedFontSize,
+                            previewFontSize = updatedFontSize
+                    )
+            )
         }
         restartControlsAutoHideTimer()
     }
 
-    private fun onChangeFontSize(fontSizeSp: Float) {
-        updateState { state ->
-            state.copy(fontSizeState = state.fontSizeState.copy(fontSize = fontSizeSp.coerceInFontRange()))
-        }
+    private fun saveFontSize() {
+        val fontSize = currentState.fontSizeState.fontSize
+
+        // TODO persist fontSize to DataStore/preferences
     }
 
     private fun Float.coerceInFontRange(): Float {
-        return coerceIn(MinFontSizeSp, MaxFontSizeSp)
+        return coerceIn(ReaderFontSize.MIN, ReaderFontSize.MAX)
                 .toInt()
                 .toFloat()
     }
@@ -185,14 +204,15 @@ class ReadViewModel(
     }
 
     private fun onReadingAreaClicked() {
-       when(currentState.controlMode) {
-           ReadingControlMode.Immersive -> {
-               showScreenControls()
-           }
-           else -> {
-               hideScreenControls()
-           }
-       }
+        when (currentState.controlMode) {
+            ReadingControlMode.Immersive -> {
+                showScreenControls()
+            }
+
+            else -> {
+                hideScreenControls()
+            }
+        }
     }
 
     private fun showScreenControls() {
@@ -227,8 +247,7 @@ class ReadViewModel(
     }
 
     private companion object {
-        const val MinFontSizeSp = 16f
-        const val MaxFontSizeSp = 24f
+
         const val FontSizeStep = 1f
         const val ControlAutoHideDelayMillis = 3_000L
     }

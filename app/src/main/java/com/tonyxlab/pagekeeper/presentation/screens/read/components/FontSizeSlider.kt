@@ -2,7 +2,6 @@
 
 package com.tonyxlab.pagekeeper.presentation.screens.read.components
 
-import android.R.attr.maxWidth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,34 +26,26 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tonyxlab.pagekeeper.R
+import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
 import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReaderFontSize
+import com.tonyxlab.pagekeeper.presentation.theme.BgBottomNav
 import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
-import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.TitleLargeBold
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import kotlin.math.roundToInt
@@ -63,290 +53,61 @@ import kotlin.math.roundToInt
 @Composable
 fun FontSizeControlPanel(
     fontSize: Float,
-    onFontSizeChange: (Float) -> Unit,
-    onFontSizeChangeFinished: (Float) -> Unit,
+    onEvent: (ReadUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    var sliderValue by rememberSaveable {
-        mutableFloatStateOf(fontSize.coerceIn(ReaderFontSize.range))
-    }
-
-    LaunchedEffect(fontSize) {
-        sliderValue = fontSize.coerceIn(ReaderFontSize.range)
-    }
 
     Box(
             modifier = modifier
                     .fillMaxWidth()
-                    .background(
-
-                            color = MaterialTheme.colorScheme.surfaceContainer,
-
-                            )
+                    .background(color = BgBottomNav)
     ) {
         Row(
                 modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                                horizontal = 24.dp,
-                                //vertical = 20.dp,
-                        )
-                        .padding(top = 28.dp, bottom = 12.dp)
-                ,
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 28.dp, bottom = 20.dp),
 
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
 
             FontSizeAdjustmentButton(
-
-                    enabled = sliderValue > ReaderFontSize.MIN,
+                    enabled = fontSize > ReaderFontSize.MIN,
                     icon = {
                         Icon(
                                 imageVector = Icons.Default.Remove,
                                 contentDescription = stringResource(
                                         id = R.string.bottom_text_decrease_font_size
                                 ),
-                                tint = BgMain
-                        )
-                    },
-                    onClick = {
-
-                        val newValue = (sliderValue - 1f)
-                                .coerceAtLeast(ReaderFontSize.MIN)
-
-                        sliderValue = newValue
-                        onFontSizeChange(newValue)
-                        onFontSizeChangeFinished(newValue)
-                    }
-            )
-
-
-            FontSizeSliders(
-                    value = sliderValue,
-                    onValueChange = { newValue ->
-                        sliderValue = newValue
-                        onFontSizeChange(newValue)
-                    },
-                    onValueChangeFinished = {
-                        onFontSizeChangeFinished(sliderValue)
-                    },
-                    modifier = Modifier.weight(1f),
-            )
-
-            FontSizeAdjustmentButton(
-
-                    enabled = sliderValue > ReaderFontSize.MIN,
-                    icon = {
-                        Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(
-                                        id = R.string.bottom_text_increase_font_size
-                                ),
-                                tint = BgMain
-                        )
-                    },
-                    onClick = {
-
-                        val newValue = (sliderValue + 1f)
-                                .coerceAtMost(ReaderFontSize.MAX)
-
-                        sliderValue = newValue
-                        onFontSizeChange(newValue)
-                        onFontSizeChangeFinished(newValue)
-                    }
-            )
-
-        }
-    }
-
-}
-
-@Composable
-private fun FontSizeSlider(
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    onValueChangeFinished: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
-
-    val sliderColors = SliderDefaults.colors(
-            thumbColor = MaterialTheme.colorScheme.primary,
-            activeTrackColor = MaterialTheme.colorScheme.primary,
-            inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-            activeTickColor = MaterialTheme.colorScheme.primary,
-            inactiveTickColor = MaterialTheme.colorScheme.primary,
-    )
-
-    // Use Box with Constraints to calculate the exact width of the track
-    // to position of the floating bubble horizontally
-
-    Box(
-           // modifier = modifier.height(112.dp),
-            contentAlignment = Alignment.BottomCenter,
-    ) {
-        Slider(
-                value = value,
-                onValueChange = {
-                    onValueChange(
-                            it.coerceIn(ReaderFontSize.range)
-                    )
-                },
-                onValueChangeFinished = onValueChangeFinished,
-                valueRange = ReaderFontSize.range,
-
-                /*
-                 * Zero means continuous adjustment.
-                 * We are not forcing the slider to jump by exactly 1 sp.
-                 */
-                steps = 0,
-
-                interactionSource = interactionSource,
-                colors = sliderColors,
-                modifier = Modifier.fillMaxWidth(),
-
-                thumb = {
-                    FontSizeSliderThumb(
-                            value = value,
-                            interactionSource = interactionSource,
-                            colors = sliderColors,
-                    )
-                },
-
-                track = { sliderState ->
-                    SliderDefaults.Track(
-                            sliderState = sliderState,
-                            colors = sliderColors,
-                            thumbTrackGapSize = 8.dp,
-                            trackInsideCornerSize = 8.dp,
-                    )
-                },
-        )
-    }
-}
-
-@Composable
-private fun FontSizeSliderThumb(
-    value: Float,
-    interactionSource: MutableInteractionSource,
-    colors: SliderColors,
-) {
-    Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                    .offset(y = (-26).dp)
-                    .background(Color.Red),
-    ) {
-        Surface(
-                modifier = Modifier.size(76.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 10.dp,
-                tonalElevation = 2.dp,
-        ) {
-            Box(
-                    contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                        text = value.roundToInt()
-                                .toString(),
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        SliderDefaults.Thumb(
-                interactionSource = interactionSource,
-                colors = colors,
-                modifier = Modifier
-                        .width(6.dp)
-                        .height(52.dp),
-        )
-    }
-}
-
-@Composable
-private fun FontSizeAdjustmentButton(
-    icon: @Composable () -> Unit,
-    onClick: () -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
-) {
-
-    Box(
-            modifier = modifier
-                    .size(width = 40.dp, height = 32.dp)
-                    .clip(RoundedCornerShape(100))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable(enabled = enabled, onClick = onClick),
-            contentAlignment = Alignment.Center
-    ) {
-        icon()
-    }
-
-}
-
-/*
-@Composable
-fun ReaderSliderBar(
-    uiState: ReadUiState,
-    onEvent: (ReadUiEvent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-            modifier = modifier.fillMaxWidth(),
-            color = BgBottomNav
-    ) {
-        Row(
-                modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                                horizontal = MaterialTheme.spacing.spaceLarge,
-                                vertical = MaterialTheme.spacing.spaceTen
-                        ),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-        ) {
-            FontSizeButton(
-
-                    icon = {
-                        Icon(
-                                imageVector = Icons.Default.Remove,
-                                contentDescription = stringResource(
-                                        id = R.string.bottom_text_decrease_font_size
-                                ),
-                                tint = BgMain
+                                tint = it
                         )
                     },
                     onClick = { onEvent(ReadUiEvent.DecreaseFontSize) }
             )
 
-            Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceTwelve))
-
             FontSizeSlider(
-                    fontSizeSp = uiState.fontSizeSp,
-                    onFontSizeChange = { onEvent(ReadUiEvent.SetFontSize(it)) },
-                    modifier = Modifier.weight(1f)
+                    value = fontSize,
+                    onValueChange = { newValue ->
+                        onEvent(
+                                ReadUiEvent.PreviewFontSizeChange(newValue)
+                        )
+                    },
+                    onValueChangeFinished = {
+                        onEvent(ReadUiEvent.FontSizeChangeFinished)
+                    },
+                    modifier = Modifier.weight(1f),
             )
 
-            Spacer(modifier = Modifier.width(MaterialTheme.spacing.spaceTwelve))
-
-            FontSizeButton(
+            FontSizeAdjustmentButton(
+                    enabled = fontSize < ReaderFontSize.MAX,
                     icon = {
                         Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = stringResource(
                                         id = R.string.bottom_text_increase_font_size
                                 ),
-                                tint = BgMain
+                                tint = it
                         )
                     },
                     onClick = { onEvent(ReadUiEvent.IncreaseFontSize) }
@@ -355,9 +116,8 @@ fun ReaderSliderBar(
     }
 }
 
-*/
 @Composable
-private fun FontSizeSliders(
+private fun FontSizeSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
@@ -365,6 +125,7 @@ private fun FontSizeSliders(
 ) {
 
     val interactionSource = remember { MutableInteractionSource() }
+
     val sliderColors = SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.primary,
             activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -385,26 +146,26 @@ private fun FontSizeSliders(
         val maxVal = ReaderFontSize.MAX
 
         val range = maxVal - minVal
-        val thumbWidth = 0.dp
-        // Calculate how far the slider is
 
-        val sliderFraction = if (range > 0f) (value - minVal)/range else 0f
+        // Calculate fraction (0.0 to 1.0) of how far along the slider is
+        val sliderFraction = if (range > 0f) ((value - minVal) / range)
+                .coerceIn(0f, 1f)
+        else
+            0f
 
         // Account for the bubble size to center nicely above the thumb
-
         val thumbCenterX =
-            (thumbWidth / 2) +
-                    ((maxWidth - thumbWidth) * sliderFraction)
+            (SliderWidth / 2) +
+                    ((maxWidth - SliderWidth) * sliderFraction)
 
         val bubbleOffsetX =
             thumbCenterX - (BubbleSize.width / 2)
 
-
-
         Surface(
                 modifier = Modifier
                         .align(Alignment.TopStart)
-                        .offset(x = bubbleOffsetX,
+                        .offset(
+                                x = bubbleOffsetX,
                                 y = (-54).dp
                         )
                         .size(BubbleSize),
@@ -420,7 +181,6 @@ private fun FontSizeSliders(
                                 .toString(),
                         style = MaterialTheme.typography.TitleLargeBold,
                         color = MaterialTheme.colorScheme.onSurface,
-
                 )
             }
         }
@@ -435,34 +195,58 @@ private fun FontSizeSliders(
                 interactionSource = interactionSource,
                 colors = sliderColors,
                 thumb = {
-                    Box(modifier = Modifier
-                            .width(SliderWidth)
-                            .height(SliderHeight)
-                            .background(color =MaterialTheme.colorScheme.primary,
-                                    shape = MaterialTheme.shapes.extraSmall)
-
+                    Box(
+                            modifier = Modifier
+                                    .width(SliderWidth)
+                                    .height(SliderHeight)
+                                    .background(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = MaterialTheme.shapes.extraSmall
+                                    )
                     )
                 },
                 track = { sliderState ->
-
                     SliderDefaults.Track(
                             sliderState = sliderState,
                             colors = sliderColors,
-                            thumbTrackGapSize = 0.dp,
-                            trackInsideCornerSize = 8.dp
+                            thumbTrackGapSize = MaterialTheme.spacing.spaceSmall,
+                            trackInsideCornerSize = MaterialTheme.spacing.spaceDefault
                     )
                 }
         )
     }
 }
 
-private val FontSizeButtonSize = 38.dp
+@Composable
+private fun FontSizeAdjustmentButton(
+    icon: @Composable (Color) -> Unit,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val (background, tint) = if (enabled) {
+        MaterialTheme.colorScheme.primary to BgMain
+    } else {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) to
+                MaterialTheme.colorScheme.onPrimary
+    }
+
+    Box(
+            modifier = modifier
+                    .size(FontAdjustmentButtonSize)
+                    .clip(RoundedCornerShape(100))
+                    .background(color = background)
+                    .clickable(enabled = enabled, onClick = onClick),
+            contentAlignment = Alignment.Center
+    ) {
+        icon(tint)
+    }
+}
+
 private val SliderWidth = 6.dp
 private val SliderHeight = 44.dp
 private val BubbleSize = DpSize(64.dp, 54.dp)
-private const val MinFontSizeSp = 16f
-private const val MaxFontSizeSp = 24f
-private const val FontSizeSliderSteps = 1
+private val FontAdjustmentButtonSize = DpSize(40.dp, 32.dp)
 
 @Preview(showBackground = true)
 @Composable
@@ -482,10 +266,8 @@ private fun ReaderBottomBarPreview() {
 
             FontSizeControlPanel(
                     fontSize = 18.0f,
-                    onFontSizeChange = {},
-                    onFontSizeChangeFinished = {},
-
-                    )
+                    onEvent = {}
+            )
         }
     }
 }

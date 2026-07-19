@@ -15,7 +15,7 @@ sealed interface ReadUiEvent : UiEvent {
 
     data class PreviewFontSizeChange(val fontSize: Float) : ReadUiEvent
 
-    data class FontSizeChangeFinished(val fontSize: Float) : ReadUiEvent
+    data object FontSizeChangeFinished : ReadUiEvent
 
     data object IncreaseFontSize : ReadUiEvent
 
