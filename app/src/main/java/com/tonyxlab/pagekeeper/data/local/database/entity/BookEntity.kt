@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.data.local.entity
+package com.tonyxlab.pagekeeper.data.local.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

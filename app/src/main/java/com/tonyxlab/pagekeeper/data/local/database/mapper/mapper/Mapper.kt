@@ -1,6 +1,6 @@
-package com.tonyxlab.pagekeeper.data.local.mapper.mapper
+package com.tonyxlab.pagekeeper.data.local.database.mapper.mapper
 
-import com.tonyxlab.pagekeeper.data.local.entity.BookEntity
+import com.tonyxlab.pagekeeper.data.local.database.entity.BookEntity
 import com.tonyxlab.pagekeeper.domain.model.Book
 
 fun BookEntity.toModel() =

@@ -1,9 +1,9 @@
-package com.tonyxlab.pagekeeper.data.local
+package com.tonyxlab.pagekeeper.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.tonyxlab.pagekeeper.data.local.dao.BookDao
-import com.tonyxlab.pagekeeper.data.local.entity.BookEntity
+import com.tonyxlab.pagekeeper.data.local.database.dao.BookDao
+import com.tonyxlab.pagekeeper.data.local.database.entity.BookEntity
 
 @Database(
         entities = [BookEntity::class],

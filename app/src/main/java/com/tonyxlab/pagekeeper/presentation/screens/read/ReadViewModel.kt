@@ -1,5 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
+import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.domain.model.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
@@ -14,6 +15,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.handling.coercedFontSiz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -22,13 +24,31 @@ typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadAction
 class ReadViewModel(
     private val fb2Parser: Fb2Parser,
     private val bookRepository: BookRepository,
+    private val fontDataStore: FontDataStore,
     bookId: String,
 ) : ReadBaseViewModel(initialState = ReadUiState()) {
 
     private var autoHideJob: Job? = null
 
     init {
+        loadFontSize()
         loadBook(bookId)
+    }
+
+    private fun loadFontSize() {
+
+        launch {
+
+            val savedFontSize = fontDataStore.fontSize.first()
+            updateState { state ->
+                state.copy(
+                        fontSizeState = state.fontSizeState.copy(
+                                fontSize = savedFontSize,
+                                previewFontSize = savedFontSize
+                        )
+                )
+            }
+        }
     }
 
     fun loadBook(bookId: String) {
@@ -141,7 +161,7 @@ class ReadViewModel(
     private fun onDecreaseFontSize() {
         updateState { state ->
             val updatedFontSize =
-                (state.fontSizeState.fontSize - FontSizeStep)
+                (state.fontSizeState.fontSize - FONT_SIZE_STEP)
                         .coerceInFontRange()
 
             state.copy(
@@ -151,13 +171,14 @@ class ReadViewModel(
                     )
             )
         }
+        saveFontSize()
         restartControlsAutoHideTimer()
     }
 
     private fun onIncreaseFontSize() {
         updateState { state ->
             val updatedFontSize =
-                (state.fontSizeState.fontSize + FontSizeStep)
+                (state.fontSizeState.fontSize + FONT_SIZE_STEP)
                         .coerceInFontRange()
 
             state.copy(
@@ -167,13 +188,21 @@ class ReadViewModel(
                     )
             )
         }
+        saveFontSize()
         restartControlsAutoHideTimer()
     }
 
     private fun saveFontSize() {
         val fontSize = currentState.fontSizeState.fontSize
 
-        // TODO persist fontSize to DataStore/preferences
+        launchCatching(
+                context = Dispatchers.IO,
+                onError = {
+                    sendActionEvent(ReadActionEvent.ShowToast("Unable to save font size."))
+                }
+        ) {
+            fontDataStore.saveFontSize(fontSize)
+        }
     }
 
     private fun Float.coerceInFontRange(): Float {
@@ -236,7 +265,7 @@ class ReadViewModel(
 
         autoHideJob = launch {
 
-            delay(ControlAutoHideDelayMillis.milliseconds)
+            delay(AUTOHIDE_TIMEOUT.milliseconds)
 
             updateState { state -> state.copy(controlMode = ReadingControlMode.Immersive) }
         }
@@ -247,8 +276,7 @@ class ReadViewModel(
     }
 
     private companion object {
-
-        const val FontSizeStep = 1f
-        const val ControlAutoHideDelayMillis = 3_000L
+        const val FONT_SIZE_STEP = 1f
+        const val AUTOHIDE_TIMEOUT = 3_000L
     }
 }

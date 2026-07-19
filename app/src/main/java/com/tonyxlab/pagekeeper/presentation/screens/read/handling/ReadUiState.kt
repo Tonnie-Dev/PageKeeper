@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.ReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
+import com.tonyxlab.pagekeeper.utils.AppDefaults
 
 data class ReadUiState(
 
@@ -24,8 +25,7 @@ data class ReadUiState(
     @Stable
     data class FontSizeState(
         val fontSize: Float = ReaderFontSize.DEFAULT,
-        val previewFontSize: Float = ReaderFontSize.DEFAULT,
-       // val showFontSizePanel: Boolean = false,
+        val previewFontSize: Float = ReaderFontSize.DEFAULT
     )
 }
 
@@ -41,9 +41,9 @@ enum class ReadingControlMode {
 }
 
 object ReaderFontSize {
-    const val MIN = 10f
-    const val MAX = 40f
-    const val DEFAULT = 18f
+    const val MIN = AppDefaults.MIN_FONT_SIZE
+    const val MAX = AppDefaults.MAX_FONT_SIZE
+    const val DEFAULT = AppDefaults.DEFAULT_FONT_SIZE
 
     val range: ClosedFloatingPointRange<Float> = MIN..MAX
 }
