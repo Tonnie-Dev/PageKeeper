@@ -85,7 +85,7 @@ fun <S : UiState, E : UiEvent, A : ActionEvent> BaseContentLayout(
             Box(
                     modifier = modifier
                             .padding(paddingValues)
-                            .statusBarsPadding()
+                            //.statusBarsPadding()
                            // .navigationBarsPadding()
             ) {
                 content(uiState)

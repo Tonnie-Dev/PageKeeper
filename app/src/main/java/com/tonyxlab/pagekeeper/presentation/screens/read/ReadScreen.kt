@@ -3,24 +3,25 @@ package com.tonyxlab.pagekeeper.presentation.screens.read
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
@@ -38,6 +39,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingControl
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ReaderOrientationEffect
 import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
+import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -64,10 +66,16 @@ fun ReadScreen(
                 AnimatedVisibility(
                         visible = uiState.controlMode != ReadingControlMode.Immersive,
                         enter = fadeIn(
-                                animationSpec = tween(durationMillis = 200)
+                                animationSpec = readerControlsTween()
+                        ) + expandVertically(
+                                animationSpec = readerControlsTween(),
+                                expandFrom = Alignment.Top
                         ),
                         exit = fadeOut(
-                                animationSpec = tween(durationMillis = 350)
+                                animationSpec = readerControlsTween()
+                        ) + shrinkVertically(
+                                animationSpec = readerControlsTween(),
+                                shrinkTowards = Alignment.Top
                         )
                 ) {
                     ReadTopBar(
@@ -82,10 +90,16 @@ fun ReadScreen(
                 AnimatedVisibility(
                         visible = uiState.controlMode != ReadingControlMode.Immersive,
                         enter = fadeIn(
-                                animationSpec = tween(durationMillis = 200)
+                                animationSpec = readerControlsTween()
+                        ) + expandVertically(
+                                animationSpec = readerControlsTween(),
+                                expandFrom = Alignment.Bottom
                         ),
                         exit = fadeOut(
-                                animationSpec = tween(durationMillis = 350)
+                                animationSpec = readerControlsTween()
+                        ) + shrinkVertically(
+                                animationSpec = readerControlsTween(),
+                                shrinkTowards = Alignment.Bottom
                         )
                 ) {
 
@@ -110,7 +124,6 @@ fun ReadScreen(
                                         uiState = uiState,
                                         onEvent = viewModel::onEvent
                                 )
-
                             }
 
                             ReadingControlMode.FontSizePanel -> {
@@ -137,6 +150,9 @@ fun ReadScreen(
             }
     ) { uiState ->
         ReadScreenContent(
+                modifier = Modifier.ifThen(uiState.controlMode == ReadingControlMode.Immersive) {
+                    statusBarsPadding()
+                },
                 uiState = uiState,
                 onEvent = viewModel::onEvent
         )
@@ -151,30 +167,8 @@ fun ReadScreenContent(
 ) {
     val blocks = uiState.document?.blocks.orEmpty()
 
-    val animatedTopPadding by animateDpAsState(
-            targetValue = if (uiState.controlMode != ReadingControlMode.Immersive) {
-                20.dp
-            } else {
-                84.dp
-            },
-            animationSpec = tween(durationMillis = 350),
-            label = "readerTopPadding"
-    )
-
-    val animatedBottomPadding by animateDpAsState(
-            targetValue = if (uiState.controlMode != ReadingControlMode.Immersive) {
-                30.dp
-            } else {
-                100.dp
-            },
-            animationSpec = tween(durationMillis = 350),
-            label = "readerBottomPadding"
-    )
-
-
     LazyColumn(
             modifier = modifier
-                    .animateContentSize(animationSpec = tween(durationMillis = 350))
                     .fillMaxSize()
                     .pointerInput(uiState.controlMode) {
                         detectTapGestures {
@@ -184,8 +178,6 @@ fun ReadScreenContent(
             contentPadding = PaddingValues(
                     start = MaterialTheme.spacing.spaceTen * 2,
                     end = MaterialTheme.spacing.spaceTen * 2,
-                    top = animatedTopPadding,
-                    bottom = animatedBottomPadding
             ),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTen * 2)
     ) {
@@ -215,3 +207,7 @@ fun ReadScreenContent(
         }
     }
 }
+
+private const val READER_ANIMATION_DURATION = 350
+private fun <T> readerControlsTween() =
+    tween<T>(durationMillis = READER_ANIMATION_DURATION)

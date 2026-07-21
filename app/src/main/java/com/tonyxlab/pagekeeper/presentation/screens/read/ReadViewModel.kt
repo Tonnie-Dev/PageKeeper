@@ -277,6 +277,6 @@ class ReadViewModel(
 
     private companion object {
         const val FONT_SIZE_STEP = 1f
-        const val AUTOHIDE_TIMEOUT = 3_000L
+        const val AUTOHIDE_TIMEOUT = 5_000L
     }
 }
