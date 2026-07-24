@@ -131,11 +131,9 @@ fun ReadScreen(
                                         fontSize = uiState.fontSizeState.previewFontSize,
                                         onEvent = viewModel::onEvent
                                 )
-
                             }
                         }
                     }
-
                 }
             },
             actionEventHandler = { context, actionEvent ->

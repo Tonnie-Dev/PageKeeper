@@ -13,6 +13,8 @@ data class BookEntity(
     val fileName: String,
     val filePath: String,
     val dateAdded: Long,
+    val lastReadBlockIndex: Int = 0,
+    val totalBlockCount: Int = 0,
     val isFavorite: Boolean = false,
     val isFinished: Boolean = false
 )

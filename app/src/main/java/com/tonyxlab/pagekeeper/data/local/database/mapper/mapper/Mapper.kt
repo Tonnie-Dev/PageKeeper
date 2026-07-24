@@ -12,6 +12,8 @@ fun BookEntity.toModel() =
             fileName = fileName,
             filePath = filePath,
             dateAdded = dateAdded,
+            lastReadBlockIndex = lastReadBlockIndex,
+            totalBlockCount = totalBlockCount,
             isFavorite = isFavorite,
             isFinished = isFinished
 
@@ -27,6 +29,8 @@ fun Book.toEntity() =
             fileName = fileName,
             filePath = filePath,
             dateAdded = dateAdded,
+            lastReadBlockIndex = lastReadBlockIndex,
+            totalBlockCount = totalBlockCount,
             isFavorite = isFavorite,
             isFinished = isFinished
     )

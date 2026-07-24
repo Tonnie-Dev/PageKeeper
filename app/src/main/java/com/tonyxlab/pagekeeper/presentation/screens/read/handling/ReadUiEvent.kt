@@ -21,6 +21,4 @@ sealed interface ReadUiEvent : UiEvent {
 
     data object DecreaseFontSize : ReadUiEvent
 
-
-
 }
