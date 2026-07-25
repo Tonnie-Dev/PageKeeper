@@ -40,4 +40,15 @@ interface BookDao {
     """
     )
     fun searchBooks(query: String): Flow<List<BookEntity>>
+
+    @Query(
+            """
+        UPDATE books
+        SET lastReadBlockIndex = :lastReadBlockIndex,
+totalBlockCount = :totalBlockCount
+WHERE id = :bookId
+    """
+    )
+
+    suspend fun updateReadingProgress(bookId: String, lastReadBlockIndex: Int, totalBlockCount: Int)
 }

@@ -46,4 +46,12 @@ class BookRepositoryImpl(
             books.map (BookEntity::toModel)
         }
 
+    override suspend fun updateReadingProgress(
+        bookId: String,
+        lastReadBlockIndex: Int,
+        totalBlockCount: Int
+    ) {
+        bookDao.updateReadingProgress(bookId, lastReadBlockIndex, totalBlockCount)
+    }
+
 }

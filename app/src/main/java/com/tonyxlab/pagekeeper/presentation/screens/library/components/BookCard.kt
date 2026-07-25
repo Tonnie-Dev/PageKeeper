@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.presentation.core.components.ReadProgressBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
@@ -85,12 +86,7 @@ fun BookCard(
                 isDeviceWide -> Color.Transparent
                 else -> MaterialTheme.colorScheme.background
             },
-            /*
-                            if (isSelected)
-                            MaterialTheme.colorScheme.secondary
-                        else
-                            MaterialTheme.colorScheme.background,
-            */
+
             border = if (isSelectionMode) {
                 BorderStroke(
                         width = 1.dp,
@@ -128,14 +124,14 @@ fun BookCard(
 
             book.coverPath?.let { cover ->
                 AsyncImage(
-                        model = cover,
-                        contentDescription = book.title,
                         modifier = Modifier
                                 .background(
                                         color = MaterialTheme.colorScheme.surfaceVariant,
                                         shape = MaterialTheme.shapes.small
                                 )
                                 .size(width = 104.dp, height = 156.dp),
+                        model = cover,
+                        contentDescription = book.title,
                         contentScale = ContentScale.Crop,
                         alignment = Alignment.Center
                 )
@@ -163,6 +159,13 @@ fun BookCard(
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
+
+                ReadProgressBar(
+                        modifier = Modifier.padding(vertical = MaterialTheme.spacing.spaceDoubleDp),
+                        progress = book.progress
+                )
+
+                // Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceExtraSmall))
 
                 Row(
                         modifier = Modifier.fillMaxWidth(),

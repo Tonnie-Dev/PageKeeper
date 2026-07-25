@@ -19,4 +19,6 @@ interface BookRepository {
     suspend fun deleteBookById(id: String)
 
     fun searchBooks(query: String): Flow<List<Book>>
+
+    suspend fun updateReadingProgress(bookId: String, lastReadBlockIndex: Int, totalBlockCount: Int)
 }

@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -41,6 +44,7 @@ import com.tonyxlab.pagekeeper.utils.ReaderOrientationEffect
 import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
 import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -164,6 +168,35 @@ fun ReadScreenContent(
     modifier: Modifier = Modifier
 ) {
     val blocks = uiState.document?.blocks.orEmpty()
+    val listState = rememberLazyListState()
+    /*
+    * save position
+    */
+
+    LaunchedEffect(listState) {
+
+        snapshotFlow { listState.firstVisibleItemIndex }
+                .distinctUntilChanged()
+                .collect { blockIndex ->
+                    onEvent(ReadUiEvent.ReadingPositionChanged(blockIndex))
+                }
+
+    }
+    /*
+       * retrieve position
+       */
+    LaunchedEffect(uiState.document) {
+
+        val document = uiState.document ?: return@LaunchedEffect
+        val savedIndex = uiState.book?.lastReadBlockIndex ?: 0
+
+        if (document.blocks.isNotEmpty()) {
+
+            val safeIndex = savedIndex.coerceIn(0, document.blocks.lastIndex)
+            listState.scrollToItem(safeIndex)
+        }
+    }
+
 
     LazyColumn(
             modifier = modifier
@@ -173,6 +206,7 @@ fun ReadScreenContent(
                             onEvent(ReadUiEvent.ReadingAreaClicked)
                         }
                     },
+            state = listState,
             contentPadding = PaddingValues(
                     start = MaterialTheme.spacing.spaceTen * 2,
                     end = MaterialTheme.spacing.spaceTen * 2,

@@ -29,10 +29,27 @@ class ReadViewModel(
 ) : ReadBaseViewModel(initialState = ReadUiState()) {
 
     private var autoHideJob: Job? = null
+    private var progressSaveJob: Job? = null
 
     init {
         loadFontSize()
         loadBook(bookId)
+    }
+
+    override fun onEvent(event: ReadUiEvent) {
+        when (event) {
+            ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
+            ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
+            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
+            ReadUiEvent.FontSizeClicked -> showFontSizePanel()
+            ReadUiEvent.ExitReader -> exitReader()
+            ReadUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
+            ReadUiEvent.ToggleFavorite -> toggleFavorite()
+            is ReadUiEvent.PreviewFontSizeChange -> previewFontSize(event.fontSize)
+            is ReadUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
+            is ReadUiEvent.ReadingPositionChanged ->
+                onReadingPositionChanged(blockIndex = event.blockIndex)
+        }
     }
 
     private fun loadFontSize() {
@@ -76,24 +93,19 @@ class ReadViewModel(
             fb2Parser.parse(File(book.filePath))
                     .fold(
                             onSuccess = { parsedBook ->
-                                updateState { it.copy(document = parsedBook.toReaderBook()) }
+
+                                val document = parsedBook.toReaderBook()
+                                updateState { state ->
+                                    state.copy(
+                                            document = document,
+                                            book = state.book?.copy(
+                                                    totalBlockCount = document.blocks.size
+                                            )
+                                    )
+                                }
                             },
                             onFailure = ::onBookLoadFailed
                     )
-        }
-    }
-
-    override fun onEvent(event: ReadUiEvent) {
-        when (event) {
-            ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
-            ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
-            ReadUiEvent.FontSizeClicked -> showFontSizePanel()
-            ReadUiEvent.ExitReader -> exitReader()
-            ReadUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
-            ReadUiEvent.ToggleFavorite -> toggleFavorite()
-            is ReadUiEvent.PreviewFontSizeChange -> previewFontSize(event.fontSize)
-            is ReadUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
         }
     }
 
@@ -268,6 +280,46 @@ class ReadViewModel(
             delay(AUTOHIDE_TIMEOUT.milliseconds)
 
             updateState { state -> state.copy(controlMode = ReadingControlMode.Immersive) }
+        }
+    }
+
+    private fun onReadingPositionChanged(blockIndex: Int) {
+        val document = currentState.document ?: return
+
+        val totalBlockCount = document.blocks.size
+
+        updateState { state ->
+            state.copy(
+                    book = state.book?.copy(
+                            lastReadBlockIndex = blockIndex,
+                            totalBlockCount = totalBlockCount
+                    )
+            )
+        }
+
+        progressSaveJob?.cancel()
+        progressSaveJob = launch {
+            delay(1000.milliseconds)
+            saveReadingPosition(
+                    blockIndex = blockIndex,
+                    totalBlockCount = totalBlockCount
+            )
+        }
+    }
+
+    private fun saveReadingPosition(
+        blockIndex: Int,
+        totalBlockCount: Int
+    ) {
+
+        val bookId = currentState.book?.id ?: return
+        launchCatching(context = Dispatchers.IO) {
+
+            bookRepository.updateReadingProgress(
+                    bookId = bookId,
+                    lastReadBlockIndex = blockIndex,
+                    totalBlockCount = totalBlockCount
+            )
         }
     }
 

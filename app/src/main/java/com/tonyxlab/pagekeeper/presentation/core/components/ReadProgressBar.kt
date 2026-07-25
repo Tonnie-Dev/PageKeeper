@@ -23,12 +23,12 @@ import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
  * Values outside the `0f..1f` range are coerced before being displayed.
  */
 @Composable
-fun ProgressBar(
+fun ReadProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
     progressColor: Color = MaterialTheme.colorScheme.primary,
     trackColor: Color = MaterialTheme.colorScheme.outline,
-    strokeWidth: Dp = 6.dp,
+    strokeWidth: Dp = 4.dp,
     trackGap: Dp = 8.dp,
 ) {
     val coercedProgress = progress.coerceIn(0f, 1f)
@@ -47,7 +47,7 @@ fun ProgressBar(
 
 @Preview(showBackground = true)
 @Composable
-private fun ProgressBarPreview() {
+private fun ReadProgressBarPreview() {
     PageKeeperTheme {
         Column(
                 modifier = Modifier
@@ -55,7 +55,7 @@ private fun ProgressBarPreview() {
                         .background(MaterialTheme.colorScheme.background),
                 verticalArrangement = Arrangement.Center
         ) {
-            ProgressBar(progress = 0.2f)
+            ReadProgressBar(progress = 0.2f)
         }
     }
 }
