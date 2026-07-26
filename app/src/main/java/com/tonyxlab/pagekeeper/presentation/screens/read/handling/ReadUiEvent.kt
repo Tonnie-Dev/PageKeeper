@@ -22,4 +22,7 @@ sealed interface ReadUiEvent : UiEvent {
     data object DecreaseFontSize : ReadUiEvent
 
     data class ReadingPositionChanged(val blockIndex: Int) : ReadUiEvent
+
+    data object ViewChapters : ReadUiEvent
+
 }

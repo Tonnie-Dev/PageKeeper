@@ -40,7 +40,7 @@ class ReadViewModel(
         when (event) {
             ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
             ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
+            ReadUiEvent.ViewChapters -> onDecreaseFontSize()
             ReadUiEvent.FontSizeClicked -> showFontSizePanel()
             ReadUiEvent.ExitReader -> exitReader()
             ReadUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
@@ -49,6 +49,8 @@ class ReadViewModel(
             is ReadUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
             is ReadUiEvent.ReadingPositionChanged ->
                 onReadingPositionChanged(blockIndex = event.blockIndex)
+
+            ReadUiEvent.DecreaseFontSize -> {}
         }
     }
 

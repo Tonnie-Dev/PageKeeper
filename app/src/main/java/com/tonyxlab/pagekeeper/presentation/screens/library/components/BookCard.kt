@@ -165,8 +165,6 @@ fun BookCard(
                         progress = book.progress
                 )
 
-                // Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceExtraSmall))
-
                 Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,

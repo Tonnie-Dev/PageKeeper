@@ -83,7 +83,7 @@ fun FontSizeControlPanel(
                                 tint = it
                         )
                     },
-                    onClick = { onEvent(ReadUiEvent.DecreaseFontSize) }
+                    onClick = { onEvent(ReadUiEvent.ViewChapters) }
             )
 
             FontSizeSlider(
