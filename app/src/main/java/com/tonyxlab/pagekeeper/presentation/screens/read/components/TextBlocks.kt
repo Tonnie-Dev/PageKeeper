@@ -16,9 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,7 +29,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.TextModalPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @Composable
- fun ChapterTitleBlock(
+fun ChapterTitleBlock(
     block: ReaderContentBlock.ChapterTitle,
     fontSizeSp: Float,
     modifier: Modifier = Modifier
@@ -49,36 +47,39 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
         else -> 12.dp
     }
 
-    val style = when (block.level) {
+    val baseStyle = when (block.level) {
         1 -> MaterialTheme.typography.ChapterTitle
         2 -> MaterialTheme.typography.headlineSmall
         3 -> MaterialTheme.typography.titleLarge
         else -> MaterialTheme.typography.titleMedium
     }
 
+    val titleFontSize = when (block.level) {
+        1 -> fontSizeSp + 8
+        2 -> fontSizeSp + 5
+        3 -> fontSizeSp + 3
+        else -> fontSizeSp + 2
+    }
+
     Text(
-            text = block.text,
             modifier = modifier
                     .fillMaxWidth()
                     .padding(
                             top = topSpacing,
                             bottom = bottomSpacing
                     ),
-            style = style.copy(
-                    fontSize = when (block.level) {
-                        1 -> (fontSizeSp + 8).sp
-                        2 -> (fontSizeSp + 5).sp
-                        3 -> (fontSizeSp + 3).sp
-                        else -> (fontSizeSp + 2).sp
-                    },
-                    color = TextModalPrimary
+            text = block.text,
+            style = baseStyle.copy(
+                    fontSize = titleFontSize.sp,
+                    lineHeight = (titleFontSize * 1.2f).sp
             ),
+            color = TextModalPrimary,
             textAlign = TextAlign.Center
     )
 }
 
 @Composable
- fun ParagraphBlock(
+fun ParagraphBlock(
     block: ReaderContentBlock.Paragraph,
     fontSizeSp: Float,
     modifier: Modifier = Modifier
@@ -94,9 +95,8 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
     )
 }
 
-
 @Composable
- fun QuoteBlock(
+fun QuoteBlock(
     block: ReaderContentBlock.Quote,
     fontSizeSp: Float,
     modifier: Modifier = Modifier
@@ -116,15 +116,15 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
         Text(
                 text = block.text,
                 style = MaterialTheme.typography.ParagraphItalic.copy(
-                        fontSize = fontSizeSp.sp),
+                        fontSize = fontSizeSp.sp
+                ),
                 color = TextModalPrimary
 
                 /*.copy(
                         fontSize = fontSizeSp.sp,
                         lineHeight = (fontSizeSp * 1.5f).sp,
                         fontStyle = FontStyle.Italic
-                ),*/
-                        ,
+                ),*/,
                 modifier = Modifier
                         .weight(1f)
                         .padding(start = MaterialTheme.spacing.spaceTwelve)
@@ -132,8 +132,6 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
         )
     }
 }
-
-
 
 @Preview(showBackground = true, backgroundColor = 0xFFFDFCF8)
 @Composable

@@ -169,9 +169,8 @@ private fun FontSizeSlider(
                                 y = (-54).dp
                         )
                         .size(BubbleSize),
-
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surface,
+                color = Color.White,
                 shadowElevation = 8.dp,
                 tonalElevation = 2.dp
         ) {

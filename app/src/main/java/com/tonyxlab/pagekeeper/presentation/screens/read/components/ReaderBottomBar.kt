@@ -31,6 +31,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
 import kotlin.math.roundToInt
 
 @Composable
@@ -42,6 +43,9 @@ fun ReaderBottomBar(
 
     val progress = uiState.book?.progress ?: 0f
     val progressText = (progress * 100).roundToInt()
+
+    val showOrientationControl = rememberIsMobileDevice()
+
     val (orientationText, orientationIcon) =
         if (uiState.orientation == ReadingOrientation.AUTO_ROTATE)
             stringResource(id = R.string.bottom_text_auto_rotate) to
@@ -60,19 +64,19 @@ fun ReaderBottomBar(
     ) {
 
         Text(
-                modifier = Modifier.padding(bottom = MaterialTheme.spacing.spaceExtraSmall),
+                modifier = Modifier.padding(vertical = MaterialTheme.spacing.spaceSmall),
                 text = stringResource(id = R.string.bottom_text_progress, progressText),
                 style = MaterialTheme.typography.BodyMediumMedium,
                 color = MaterialTheme.colorScheme.onSurface
         )
 
         ReadProgressBar(progress = progress)
+
         Row(
                 modifier = Modifier
-
                         .fillMaxWidth()
                         .padding(horizontal = MaterialTheme.spacing.spaceMedium),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.Absolute.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -82,20 +86,19 @@ fun ReaderBottomBar(
                     painter = painterResource(id = R.drawable.ic_chapters)
             ) { onEvent(ReadUiEvent.ViewChapters) }
 
-            BottomBarItem(
+            if (showOrientationControl) {
+                BottomBarItem(
+                        modifier = Modifier.weight(1f),
+                        text = orientationText,
+                        painter = orientationIcon
+                ) { onEvent(ReadUiEvent.ToggleAutoRotate) }
 
-                    modifier = Modifier.weight(1f),
-                    text = orientationText,
-                    painter = orientationIcon
-            ) { onEvent(ReadUiEvent.ToggleAutoRotate) }
-
-
+            }
             BottomBarItem(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.bottom_text_font_size),
                     painter = painterResource(id = R.drawable.ic_font_size)
             ) { onEvent(ReadUiEvent.FontSizeClicked) }
-
         }
     }
 }

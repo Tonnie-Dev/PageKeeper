@@ -47,7 +47,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
-import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
@@ -109,7 +108,7 @@ fun LibraryScreen(
                             .weight(1f)
                             .fillMaxSize()
             ) {
-                BaseContent(
+                MergedLibraryLayout(
                         showNavigationIcon = false,
                         showImportFab = false,
                         showTopBar = false,
@@ -151,7 +150,7 @@ fun LibraryScreen(
                     )
                 }
         ) {
-            BaseContent(
+            MergedLibraryLayout(
                     showNavigationIcon = true,
                     showImportFab = true,
                     showTopBar = true,
@@ -166,7 +165,7 @@ fun LibraryScreen(
 }
 
 @Composable
-private fun BaseContent(
+private fun MergedLibraryLayout(
     showNavigationIcon: Boolean,
     showImportFab: Boolean,
     showTopBar: Boolean,

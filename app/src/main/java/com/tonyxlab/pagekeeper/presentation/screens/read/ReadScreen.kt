@@ -11,9 +11,12 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,6 +28,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
@@ -43,6 +48,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ReaderOrientationEffect
 import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
 import com.tonyxlab.pagekeeper.utils.ifThen
+import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
@@ -167,6 +173,11 @@ fun ReadScreenContent(
     onEvent: (ReadUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val isDeviceWide  = rememberIsDeviceWide()
+    val maxWidth = if (isDeviceWide) MAX_WIDTH else Dp.Unspecified
+
+
     val blocks = uiState.document?.blocks.orEmpty()
     val listState = rememberLazyListState()
     /*
@@ -197,49 +208,56 @@ fun ReadScreenContent(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
-    LazyColumn(
-            modifier = modifier
-                    .fillMaxSize()
-                    .pointerInput(uiState.controlMode) {
-                        detectTapGestures {
-                            onEvent(ReadUiEvent.ReadingAreaClicked)
-                        }
-                    },
-            state = listState,
-            contentPadding = PaddingValues(
-                    start = MaterialTheme.spacing.spaceTen * 2,
-                    end = MaterialTheme.spacing.spaceTen * 2,
-            ),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTen * 2)
-    ) {
-        items(items = blocks) { block ->
-            when (block) {
-                is ReaderContentBlock.ChapterTitle -> {
-                    ChapterTitleBlock(
-                            block = block,
-                            fontSizeSp = uiState.fontSizeState.previewFontSize
-                    )
-                }
+        LazyColumn(
+                modifier = modifier
+                        .widthIn(max = maxWidth)
+                        .pointerInput(uiState.controlMode) {
+                            detectTapGestures {
+                                onEvent(ReadUiEvent.ReadingAreaClicked)
+                            }
+                        },
+                state = listState,
+                contentPadding = PaddingValues(
+                        start = MaterialTheme.spacing.spaceTen * 2,
+                        end = MaterialTheme.spacing.spaceTen * 2,
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTen * 2)
+        ) {
+            items(items = blocks) { block ->
+                when (block) {
+                    is ReaderContentBlock.ChapterTitle -> {
+                        ChapterTitleBlock(
+                                block = block,
+                                fontSizeSp = uiState.fontSizeState.previewFontSize
+                        )
+                    }
 
-                is ReaderContentBlock.Paragraph -> {
-                    ParagraphBlock(
-                            block = block,
-                            fontSizeSp = uiState.fontSizeState.previewFontSize
-                    )
-                }
+                    is ReaderContentBlock.Paragraph -> {
+                        ParagraphBlock(
+                                block = block,
+                                fontSizeSp = uiState.fontSizeState.previewFontSize
+                        )
+                    }
 
-                is ReaderContentBlock.Quote -> {
-                    QuoteBlock(
-                            block = block,
-                            fontSizeSp = uiState.fontSizeState.previewFontSize
-                    )
+                    is ReaderContentBlock.Quote -> {
+                        QuoteBlock(
+                                block = block,
+                                fontSizeSp = uiState.fontSizeState.previewFontSize
+                        )
+                    }
                 }
             }
         }
+
     }
 }
 
 private const val READER_ANIMATION_DURATION = 350
+
+private val MAX_WIDTH = 600.dp
+
 private fun <T> readerControlsTween() =
     tween<T>(durationMillis = READER_ANIMATION_DURATION)
