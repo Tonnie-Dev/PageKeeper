@@ -14,11 +14,10 @@ fun BookEntity.toModel() =
             dateAdded = dateAdded,
             lastReadBlockIndex = lastReadBlockIndex,
             totalBlockCount = totalBlockCount,
+            lastReadAt = lastReadAt,
             isFavorite = isFavorite,
             isFinished = isFinished
-
     )
-
 
 fun Book.toEntity() =
     BookEntity(
@@ -31,6 +30,7 @@ fun Book.toEntity() =
             dateAdded = dateAdded,
             lastReadBlockIndex = lastReadBlockIndex,
             totalBlockCount = totalBlockCount,
+            lastReadAt = lastReadAt,
             isFavorite = isFavorite,
             isFinished = isFinished
     )

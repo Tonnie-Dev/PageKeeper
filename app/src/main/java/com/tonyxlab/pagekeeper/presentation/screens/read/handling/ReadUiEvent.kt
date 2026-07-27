@@ -25,4 +25,5 @@ sealed interface ReadUiEvent : UiEvent {
 
     data object ViewChapters : ReadUiEvent
 
+
 }

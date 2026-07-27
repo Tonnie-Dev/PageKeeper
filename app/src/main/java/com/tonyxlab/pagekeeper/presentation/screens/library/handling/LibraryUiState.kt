@@ -7,6 +7,7 @@ import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
 
 data class LibraryUiState(
     val books: List<Book> = emptyList(),
+    val resumeBook:Book? = null,
     val isLoading: Boolean = true,
     val isImporting: Boolean = false,
     val dialog: LibraryDialog? = null,

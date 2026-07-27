@@ -11,12 +11,11 @@ data class Book(
     val lastReadBlockIndex: Int = 0,
     val totalBlockCount: Int = 0,
     val isFavorite: Boolean = false,
+    val lastReadAt: Long? = null,
     val isFinished: Boolean = false
 ) {
-
     val progress: Float
         get() = when {
-
             isFinished -> 1f
             totalBlockCount <= 0 -> 0f
             else -> {

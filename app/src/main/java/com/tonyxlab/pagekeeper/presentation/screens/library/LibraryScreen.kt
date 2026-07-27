@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -32,6 +33,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -182,6 +184,10 @@ private fun MergedLibraryLayout(
     val inSearchMode = uiState.searchState.isSearchMode
     val selectionState = uiState.selectionState
 
+    var isNavigatingAway by remember {
+        mutableStateOf(false)
+    }
+
     val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -234,9 +240,13 @@ private fun MergedLibraryLayout(
                 }
             },
             floatingActionButton = {
-                if (showImportFab && inSearchMode.not() && uiState.books.isNotEmpty()) {
+                if (uiState.resumeBook != null &&
+                    !inSearchMode &&
+                    !isNavigatingAway
+                ) {
                     FloatingActionButton(
-                            onClick = { viewModel.onEvent(LibraryUiEvent.ImportBookClicked) },
+                            modifier = Modifier.navigationBarsPadding(),
+                            onClick = { viewModel.onEvent(LibraryUiEvent.ResumeBook) },
                             containerColor = Primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                     ) {
@@ -251,6 +261,7 @@ private fun MergedLibraryLayout(
                 when (actionEvent) {
                     LibraryActionEvent.OpenFilePicker -> filePicker.launch("*/*")
                     is LibraryActionEvent.OpenBook -> {
+                        isNavigatingAway = true
                         navigator.navigateToRead(actionEvent.bookId)
                     }
 
@@ -299,7 +310,7 @@ private fun WideLibraryLayout(
                             color = TabletBlockBg,
                             shape = MaterialTheme.shapes.extraLarge
                     )
-                    .padding(horizontal = MaterialTheme.spacing.spaceMedium)
+                    .padding(start = MaterialTheme.spacing.spaceMedium)
                     .padding(top = MaterialTheme.spacing.spaceTwelve),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTwelve)
     ) {

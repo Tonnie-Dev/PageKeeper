@@ -43,4 +43,6 @@ sealed interface LibraryUiEvent: UiEvent{
 
     data object ConfirmDeleteSelectedClicked : LibraryUiEvent
     data object CancelDeleteSelectedClicked : LibraryUiEvent
+
+    data object ResumeBook: LibraryUiEvent
 }

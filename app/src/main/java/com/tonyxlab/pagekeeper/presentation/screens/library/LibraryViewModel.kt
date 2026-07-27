@@ -41,9 +41,7 @@ class LibraryViewModel(
     init {
         observeBooks()
         searchHandler.observeSearchQuery()
-
-
-        Timber.tag("LibVM").i("init called")
+        observeResumeBook()
     }
 
     override fun onEvent(event: LibraryUiEvent) {
@@ -69,6 +67,7 @@ class LibraryViewModel(
             LibraryUiEvent.DeleteSelectedClicked -> onDeleteSelectedBooksFromTopbar()
             LibraryUiEvent.ExitSelectionModeClicked -> selectionHandler.exitSelectionMode()
             LibraryUiEvent.ShareSelectedClicked -> onShareSelected()
+            LibraryUiEvent.ResumeBook -> resumeBook()
         }
     }
 
@@ -88,11 +87,29 @@ class LibraryViewModel(
         }
     }
 
+
+    private fun observeResumeBook() {
+        launch {
+            bookRepository.observeResumeBook()
+                    .collect { book ->
+                        updateState { state ->
+                            state.copy(resumeBook = book)
+                        }
+                    }
+        }
+    }
+
     private fun openBook(bookId: String) {
         updateState { state ->
             state.copy(searchState = state.searchState.copy(isSearchMode = false))
         }
         sendActionEvent(LibraryActionEvent.OpenBook(bookId))
+    }
+
+
+    private fun resumeBook() {
+        val book = currentState.resumeBook ?: return
+        sendActionEvent(LibraryActionEvent.OpenBook(book.id))
     }
 
     private fun onFinishBook(bookId: String) {

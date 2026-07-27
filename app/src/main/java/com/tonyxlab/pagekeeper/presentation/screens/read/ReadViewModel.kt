@@ -34,13 +34,14 @@ class ReadViewModel(
     init {
         loadFontSize()
         loadBook(bookId)
+
     }
 
     override fun onEvent(event: ReadUiEvent) {
         when (event) {
             ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
             ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReadUiEvent.ViewChapters -> onDecreaseFontSize()
+            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
             ReadUiEvent.FontSizeClicked -> showFontSizePanel()
             ReadUiEvent.ExitReader -> exitReader()
             ReadUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
@@ -50,7 +51,7 @@ class ReadViewModel(
             is ReadUiEvent.ReadingPositionChanged ->
                 onReadingPositionChanged(blockIndex = event.blockIndex)
 
-            ReadUiEvent.DecreaseFontSize -> {}
+            ReadUiEvent.ViewChapters -> {}
         }
     }
 
@@ -86,10 +87,12 @@ class ReadViewModel(
                         )
                     }
                 },
-                onError = { error -> onBookLoadFailed(error) },
+                onError = ::onBookLoadFailed,
                 onCompletion = { updateState { it.copy(isLoading = false) } }
         ) {
+            bookRepository.markAsOpened(bookId = bookId)
             val book = bookRepository.getBookById(bookId)
+
             updateState { it.copy(book = book) }
 
             fb2Parser.parse(File(book.filePath))
@@ -172,10 +175,10 @@ class ReadViewModel(
         saveFontSize()
     }
 
-    private fun onDecreaseFontSize() {
+    private fun onIncreaseFontSize() {
         updateState { state ->
             val updatedFontSize =
-                (state.fontSizeState.fontSize - FONT_SIZE_STEP)
+                (state.fontSizeState.fontSize + FONT_SIZE_STEP)
                         .coerceInFontRange()
 
             state.copy(
@@ -189,10 +192,10 @@ class ReadViewModel(
         restartControlsAutoHideTimer()
     }
 
-    private fun onIncreaseFontSize() {
+    private fun onDecreaseFontSize() {
         updateState { state ->
             val updatedFontSize =
-                (state.fontSizeState.fontSize + FONT_SIZE_STEP)
+                (state.fontSizeState.fontSize - FONT_SIZE_STEP)
                         .coerceInFontRange()
 
             state.copy(

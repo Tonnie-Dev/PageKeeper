@@ -9,22 +9,23 @@ import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.collections.map
 
 class BookRepositoryImpl(
     private val bookDao: BookDao
 ) : BookRepository {
 
     override fun observeBooks(): Flow<List<Book>> {
-        return bookDao.observeBooks().map {books ->
-            books.map(BookEntity::toModel)
+        return bookDao.observeBooks()
+                .map { books ->
+                    books.map(BookEntity::toModel)
 
-        }
+                }
     }
 
     override suspend fun getBookById(id: String): Book {
 
-        return bookDao.getBookById(id)?.toModel() ?: throw ItemNotFoundException(id)
+        return bookDao.getBookById(id)
+                ?.toModel() ?: throw ItemNotFoundException(id)
     }
 
     override suspend fun existsByHash(fileHash: String): Boolean = bookDao.existsByHash(fileHash)
@@ -41,10 +42,11 @@ class BookRepositoryImpl(
 
     override suspend fun deleteBookById(id: String) = bookDao.deleteBookById(id)
 
-    override fun searchBooks(query: String): Flow<List<Book>>  =
-        bookDao.searchBooks(query).map { books ->
-            books.map (BookEntity::toModel)
-        }
+    override fun searchBooks(query: String): Flow<List<Book>> =
+        bookDao.searchBooks(query)
+                .map { books ->
+                    books.map(BookEntity::toModel)
+                }
 
     override suspend fun updateReadingProgress(
         bookId: String,
@@ -54,4 +56,15 @@ class BookRepositoryImpl(
         bookDao.updateReadingProgress(bookId, lastReadBlockIndex, totalBlockCount)
     }
 
+    override fun observeResumeBook(): Flow<Book?> {
+        return bookDao.observeResumeBook()
+                .map { it?.toModel() }
+    }
+
+    override suspend fun markAsOpened(bookId: String) {
+        bookDao.updateLastOpenedAt(
+                bookId = bookId,
+                lastOpenedAt = System.currentTimeMillis()
+        )
+    }
 }

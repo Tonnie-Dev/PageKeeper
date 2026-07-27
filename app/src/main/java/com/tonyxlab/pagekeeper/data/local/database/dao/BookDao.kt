@@ -49,6 +49,25 @@ totalBlockCount = :totalBlockCount
 WHERE id = :bookId
     """
     )
-
     suspend fun updateReadingProgress(bookId: String, lastReadBlockIndex: Int, totalBlockCount: Int)
+
+    @Query(
+            """
+  UPDATE books
+  SET lastReadAt = :lastOpenedAt
+  WHERE id =:bookId
+   """
+    )
+    suspend fun updateLastOpenedAt(bookId: String, lastOpenedAt: Long)
+
+    @Query(
+            """
+SELECT * FROM books
+WHERE lastReadAt   IS NOT NULL
+AND isFinished = 0
+ORDER BY lastReadAt DESC
+LIMIT 1
+ """
+    )
+    fun observeResumeBook(): Flow<BookEntity?>
 }

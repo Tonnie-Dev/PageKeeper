@@ -251,7 +251,6 @@ fun ReadScreenContent(
                 }
             }
         }
-
     }
 }
 

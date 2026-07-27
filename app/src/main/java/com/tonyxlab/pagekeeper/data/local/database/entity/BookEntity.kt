@@ -16,5 +16,6 @@ data class BookEntity(
     val lastReadBlockIndex: Int = 0,
     val totalBlockCount: Int = 0,
     val isFavorite: Boolean = false,
+    val lastReadAt:Long? = null,
     val isFinished: Boolean = false
 )
