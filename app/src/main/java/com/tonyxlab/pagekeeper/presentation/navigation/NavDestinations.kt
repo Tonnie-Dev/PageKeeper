@@ -10,3 +10,6 @@ data object LibraryDestination : NavKey
 @Serializable
 data class ReadDestination(val bookId: String) : NavKey
 
+@Serializable
+data class ChaptersDestination(val bookId: String) : NavKey
+

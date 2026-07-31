@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -154,6 +153,8 @@ fun ReadScreen(
                     }
 
                     ReadActionEvent.ExitReader -> navigator.popToLibrary()
+                    ReadActionEvent.NavigateToChaptersView -> navigator.navigateToChapters(bookId = bookId)
+                    else -> Unit
                 }
             }
     ) { uiState ->
@@ -174,9 +175,8 @@ fun ReadScreenContent(
     modifier: Modifier = Modifier
 ) {
 
-    val isDeviceWide  = rememberIsDeviceWide()
+    val isDeviceWide = rememberIsDeviceWide()
     val maxWidth = if (isDeviceWide) MAX_WIDTH else Dp.Unspecified
-
 
     val blocks = uiState.document?.blocks.orEmpty()
     val listState = rememberLazyListState()
@@ -191,11 +191,12 @@ fun ReadScreenContent(
                 .collect { blockIndex ->
                     onEvent(ReadUiEvent.ReadingPositionChanged(blockIndex))
                 }
-
     }
+
     /*
-       * retrieve position
-       */
+    * retrieve position
+    */
+
     LaunchedEffect(uiState.document) {
 
         val document = uiState.document ?: return@LaunchedEffect
@@ -208,7 +209,27 @@ fun ReadScreenContent(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    LaunchedEffect(uiState.requestedBlockIndex) {
+
+        val targetIndex = uiState.requestedBlockIndex?: return@LaunchedEffect
+
+        val document = uiState.document ?: return@LaunchedEffect
+
+        if(document.blocks.isNotEmpty()) return@LaunchedEffect
+
+        val safeIndex =
+            targetIndex.coerceIn(0, document.blocks.lastIndex)
+
+        listState.scrollToItem(safeIndex)
+
+        onEvent(ReadUiEvent.ChaptersJumpConsumed)
+
+    }
+
+    Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+    ) {
 
         LazyColumn(
                 modifier = modifier

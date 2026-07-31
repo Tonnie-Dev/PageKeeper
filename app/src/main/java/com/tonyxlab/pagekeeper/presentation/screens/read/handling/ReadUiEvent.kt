@@ -2,7 +2,10 @@ package com.tonyxlab.pagekeeper.presentation.screens.read.handling
 
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiEvent
 
+
 sealed interface ReadUiEvent : UiEvent {
+
+    // Read UiEvents
     data object ToggleAutoRotate : ReadUiEvent
 
     data object ToggleFavorite : ReadUiEvent
@@ -25,5 +28,10 @@ sealed interface ReadUiEvent : UiEvent {
 
     data object ViewChapters : ReadUiEvent
 
+    data object ChaptersJumpConsumed : ReadUiEvent
 
+    // Chapters UiEvents
+    data object BackClicked: ReadUiEvent
+    data class ChapterSelected(val startBlockIndex: Int): ReadUiEvent
+    data class SectionClicked(val sectionIndex: Int): ReadUiEvent
 }

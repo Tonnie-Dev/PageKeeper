@@ -1,7 +1,9 @@
 package com.tonyxlab.pagekeeper.presentation.screens.read
 
+import androidx.lifecycle.viewModelScope
 import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
+import com.tonyxlab.pagekeeper.domain.model.toChapterSections
 import com.tonyxlab.pagekeeper.domain.model.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
@@ -16,6 +18,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -34,11 +38,11 @@ class ReadViewModel(
     init {
         loadFontSize()
         loadBook(bookId)
-
     }
 
     override fun onEvent(event: ReadUiEvent) {
         when (event) {
+            // Read UiEvents
             ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
             ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
             ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
@@ -51,7 +55,15 @@ class ReadViewModel(
             is ReadUiEvent.ReadingPositionChanged ->
                 onReadingPositionChanged(blockIndex = event.blockIndex)
 
-            ReadUiEvent.ViewChapters -> {}
+            ReadUiEvent.ViewChapters -> viewChapters()
+            ReadUiEvent.ChaptersJumpConsumed -> onConsumeChapterJump()
+
+            // Chapter UiEvents
+            ReadUiEvent.BackClicked -> exitChapters()
+            is ReadUiEvent.ChapterSelected -> selectChapter(event.startBlockIndex)
+            is ReadUiEvent.SectionClicked -> {
+                Timber.tag("ReadViewModel").i("Section clicked")
+            }
         }
     }
 
@@ -100,12 +112,20 @@ class ReadViewModel(
                             onSuccess = { parsedBook ->
 
                                 val document = parsedBook.toReaderBook()
+
+                                val currentBlockIndex = book.lastReadBlockIndex.coerceIn(
+                                        minimumValue = 0,
+                                        maximumValue = document.blocks.lastIndex.coerceAtLeast(0)
+                                )
+
                                 updateState { state ->
                                     state.copy(
                                             document = document,
                                             book = state.book?.copy(
                                                     totalBlockCount = document.blocks.size
-                                            )
+                                            ),
+                                            chapterSections = parsedBook.toChapterSections(),
+                                            currentBlockIndex = currentBlockIndex
                                     )
                                 }
                             },
@@ -328,8 +348,43 @@ class ReadViewModel(
         }
     }
 
+    private fun viewChapters() {
+        sendActionEvent(ReadActionEvent.NavigateToChaptersView)
+    }
+
+    private fun onConsumeChapterJump() {
+
+        updateState { state -> state.copy(requestedBlockIndex = null) }
+    }
+
     private fun exitReader() {
         sendActionEvent(ReadActionEvent.ExitReader)
+    }
+    private fun exitChapters() {
+        sendActionEvent(ReadActionEvent.CloseChapters)
+    }
+    private fun selectChapter(startBlockIndex: Int) {
+
+        val book = currentState.book ?: return
+        val safeIndex = startBlockIndex.coerceAtLeast(0)
+
+        updateState { state ->
+            state.copy(
+                    currentBlockIndex = safeIndex,
+                    requestedBlockIndex = safeIndex
+            )
+        }
+
+        viewModelScope.launch {
+            saveReadingPosition(
+                    blockIndex = safeIndex,
+                    totalBlockCount = book.totalBlockCount
+            )
+
+            sendActionEvent(
+                    ReadActionEvent.CloseChapters
+            )
+        }
     }
 
     private companion object {

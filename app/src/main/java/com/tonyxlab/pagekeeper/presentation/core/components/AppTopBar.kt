@@ -45,7 +45,7 @@ fun AppTopBar(
     isLibraryScreen: Boolean = false,
     textAlign: TextAlign = TextAlign.Center,
     onNavButtonClick: () -> Unit,
-    actionIcon: @Composable RowScope.() -> Unit
+    actionIcon: @Composable RowScope.() -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
             modifier = modifier,
@@ -109,7 +109,14 @@ private fun AppTopBarPreview() {
                     onNavButtonClick = {},
                     actionIcon = {}
             )
-        }
+
+
+            AppTopBar(
+                    titleText = stringResource(id = R.string.topbar_text_chapters),
+                    backgroundColor = TabletBlockBg,
+                    onNavButtonClick = {},
+                    actionIcon = {}
+            )        }
     }
 }
 

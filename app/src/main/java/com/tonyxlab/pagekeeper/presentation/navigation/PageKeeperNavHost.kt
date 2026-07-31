@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.tonyxlab.pagekeeper.presentation.screens.chapters.ChaptersScreen
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryScreen
 import com.tonyxlab.pagekeeper.presentation.screens.read.ReadScreen
 
@@ -22,6 +23,10 @@ fun PageKeeperNavHost() {
         }
         entry<ReadDestination> {
             ReadScreen(bookId = it.bookId, navigator = navigator)
+        }
+
+        entry<ChaptersDestination> {
+            ChaptersScreen(bookId = it.bookId, navigator = navigator)
         }
     }
 

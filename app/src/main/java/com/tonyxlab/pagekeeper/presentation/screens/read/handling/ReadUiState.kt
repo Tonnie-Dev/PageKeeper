@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.ReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
+import com.tonyxlab.pagekeeper.presentation.screens.chapters.model.ChapterUiSection
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 
 data class ReadUiState(
@@ -19,7 +20,11 @@ data class ReadUiState(
 
     val fontSizeState: FontSizeState = FontSizeState(),
 
-    val controlMode: ReadingControlMode = ReadingControlMode.Immersive
+    val controlMode: ReadingControlMode = ReadingControlMode.Immersive,
+
+    val chapterSections: List<ChapterUiSection> = emptyList(),
+    val currentBlockIndex: Int = 0,
+    val requestedBlockIndex: Int? = null
 
 ) : UiState {
 
