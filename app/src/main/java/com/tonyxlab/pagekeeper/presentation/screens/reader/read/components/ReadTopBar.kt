@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.read.components
+package com.tonyxlab.pagekeeper.presentation.screens.reader.read.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.theme.BgBottomNav
 import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
@@ -31,13 +31,13 @@ fun ReadTopBar(
     titleText: String,
     isFavorite: Boolean,
     modifier: Modifier = Modifier,
-    onEvent: (ReadUiEvent) -> Unit
+    onEvent: (ReaderUiEvent) -> Unit
 ) {
     AppTopBar(
             modifier = modifier,
             titleText = titleText,
             backgroundColor = BgBottomNav,
-            onNavButtonClick = { onEvent(ReadUiEvent.ExitReader) },
+            onNavButtonClick = { onEvent(ReaderUiEvent.ExitReader) },
             actionIcon = {
                 Icon(
                         modifier = Modifier
@@ -45,7 +45,7 @@ fun ReadTopBar(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
                                         role = Role.Button,
-                                        onClick = { onEvent(ReadUiEvent.ToggleFavorite) }
+                                        onClick = { onEvent(ReaderUiEvent.ToggleFavorite) }
                                 )
                                 .padding(MaterialTheme.spacing.spaceTwelve),
                         painter = painterResource(if (isFavorite) R.drawable.ic_star_filled else R.drawable.ic_star_outlined),

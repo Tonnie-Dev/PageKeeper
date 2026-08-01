@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.tonyxlab.pagekeeper.presentation.screens.read.components
+package com.tonyxlab.pagekeeper.presentation.screens.reader.read.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,9 +40,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReaderFontSize
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderFontSize
 import com.tonyxlab.pagekeeper.presentation.theme.BgBottomNav
 import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
@@ -53,7 +53,7 @@ import kotlin.math.roundToInt
 @Composable
 fun FontSizeControlPanel(
     fontSize: Float,
-    onEvent: (ReadUiEvent) -> Unit,
+    onEvent: (ReaderUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -83,18 +83,18 @@ fun FontSizeControlPanel(
                                 tint = it
                         )
                     },
-                    onClick = { onEvent(ReadUiEvent.ViewChapters) }
+                    onClick = { onEvent(ReaderUiEvent.ViewChapters) }
             )
 
             FontSizeSlider(
                     value = fontSize,
                     onValueChange = { newValue ->
                         onEvent(
-                                ReadUiEvent.PreviewFontSizeChange(newValue)
+                                ReaderUiEvent.PreviewFontSizeChange(newValue)
                         )
                     },
                     onValueChangeFinished = {
-                        onEvent(ReadUiEvent.FontSizeChangeFinished)
+                        onEvent(ReaderUiEvent.FontSizeChangeFinished)
                     },
                     modifier = Modifier.weight(1f),
             )
@@ -110,7 +110,7 @@ fun FontSizeControlPanel(
                                 tint = it
                         )
                     },
-                    onClick = { onEvent(ReadUiEvent.IncreaseFontSize) }
+                    onClick = { onEvent(ReaderUiEvent.IncreaseFontSize) }
             )
         }
     }
@@ -259,7 +259,7 @@ private fun ReaderBottomBarPreview() {
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceOneHundred)
         ) {
             ReaderBottomBar(
-                    uiState = ReadUiState(),
+                    uiState = ReaderUiState(),
                     onEvent = {}
             )
 

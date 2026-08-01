@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.read.components
+package com.tonyxlab.pagekeeper.presentation.screens.reader.read.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,9 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.components.ReadProgressBar
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadingOrientation
 import com.tonyxlab.pagekeeper.presentation.theme.BgBottomNav
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
@@ -36,8 +36,8 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ReaderBottomBar(
-    uiState: ReadUiState,
-    onEvent: (ReadUiEvent) -> Unit,
+    uiState: ReaderUiState,
+    onEvent: (ReaderUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -84,21 +84,21 @@ fun ReaderBottomBar(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.bottom_text_chapters),
                     painter = painterResource(id = R.drawable.ic_chapters)
-            ) { onEvent(ReadUiEvent.ViewChapters) }
+            ) { onEvent(ReaderUiEvent.ViewChapters) }
 
             if (showOrientationControl) {
                 BottomBarItem(
                         modifier = Modifier.weight(1f),
                         text = orientationText,
                         painter = orientationIcon
-                ) { onEvent(ReadUiEvent.ToggleAutoRotate) }
+                ) { onEvent(ReaderUiEvent.ToggleAutoRotate) }
 
             }
             BottomBarItem(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.bottom_text_font_size),
                     painter = painterResource(id = R.drawable.ic_font_size)
-            ) { onEvent(ReadUiEvent.FontSizeClicked) }
+            ) { onEvent(ReaderUiEvent.FontSizeClicked) }
         }
     }
 }
@@ -143,7 +143,7 @@ private fun ReaderBottomBarPreview() {
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceOneHundred)
         ) {
             ReaderBottomBar(
-                    uiState = ReadUiState(),
+                    uiState = ReaderUiState(),
                     onEvent = {}
             )
         }

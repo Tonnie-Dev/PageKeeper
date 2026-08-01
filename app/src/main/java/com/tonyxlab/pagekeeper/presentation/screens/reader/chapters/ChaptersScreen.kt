@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.chapters
+package com.tonyxlab.pagekeeper.presentation.screens.reader.chapters
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,38 +15,34 @@ import com.tonyxlab.pagekeeper.domain.model.findCurrentChapter
 import com.tonyxlab.pagekeeper.domain.model.findCurrentSectionIndex
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
-import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.components.ChaptersList
-import com.tonyxlab.pagekeeper.presentation.screens.read.ReadViewModel
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.components.ChaptersList
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun ChaptersScreen(
-    bookId: String,
-    navigator: Navigator,
-    viewModel: ReadViewModel = koinViewModel(parameters = { parametersOf(bookId) })
+    viewModel: ReadViewModel,
+    navigateToReadScreen:()->Unit
 ) {
 
     BaseContentLayout(
             viewModel = viewModel,
-            onBackPressed = navigator::popToLibrary,
+            onBackPressed = { navigateToReadScreen() },
             topBar = {
                 AppTopBar(
                         titleText = stringResource(id = R.string.topbar_text_chapters),
                         backgroundColor = TabletBlockBg,
-                        onNavButtonClick = {viewModel.onEvent(ReadUiEvent.BackClicked)}
+                        onNavButtonClick = {viewModel.onEvent(ReaderUiEvent.BackClicked)}
 
                 )
             },
             actionEventHandler = { _, actionEvent ->
                 when (actionEvent) {
 
-                    ReadActionEvent.CloseChapters -> navigator.popToLibrary()
+                    ReaderActionEvent.CloseChapters -> navigateToReadScreen()
                     else -> Unit
                 }
 
@@ -61,8 +57,8 @@ fun ChaptersScreen(
 
 @Composable
 private fun ChaptersScreenContent(
-    uiState: ReadUiState,
-    onEvent: (ReadUiEvent) -> Unit,
+    uiState: ReaderUiState,
+    onEvent: (ReaderUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -113,7 +109,7 @@ private fun ChaptersScreenContent(
                     }
             },
             onChapterClick = { item ->
-                onEvent(ReadUiEvent.ChapterSelected(item.startBlockIndex))
+                onEvent(ReaderUiEvent.ChapterSelected(item.startBlockIndex))
             },
     )
 }

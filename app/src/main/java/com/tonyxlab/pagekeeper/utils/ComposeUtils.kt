@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.core.view.WindowCompat
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadingOrientation
 
 inline fun Modifier.ifThen(flag: Boolean, modifierBuilder: Modifier.() -> Modifier): Modifier =
     if (flag) this.modifierBuilder() else this

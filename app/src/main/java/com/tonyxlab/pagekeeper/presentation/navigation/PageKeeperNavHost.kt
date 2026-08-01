@@ -7,12 +7,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.ChaptersScreen
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryScreen
-import com.tonyxlab.pagekeeper.presentation.screens.read.ReadScreen
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderFlow
 
 @Composable
 fun PageKeeperNavHost() {
+
     val backStack = rememberNavBackStack(LibraryDestination)
     val navigator = remember(backStack) { Navigator(backStack) }
 
@@ -21,12 +21,9 @@ fun PageKeeperNavHost() {
         entry<LibraryDestination> {
             LibraryScreen(navigator = navigator)
         }
-        entry<ReadDestination> {
-            ReadScreen(bookId = it.bookId, navigator = navigator)
-        }
 
-        entry<ChaptersDestination> {
-            ChaptersScreen(bookId = it.bookId, navigator = navigator)
+        entry<ReadDestination> { key ->
+            ReaderFlow(bookId = key.bookId, navigator = navigator)
         }
     }
 

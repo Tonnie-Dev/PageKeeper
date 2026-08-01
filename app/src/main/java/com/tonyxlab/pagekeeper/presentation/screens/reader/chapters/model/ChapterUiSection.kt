@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.chapters.model
+package com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model
 
 data class ChapterUiSection(
     val id: String,

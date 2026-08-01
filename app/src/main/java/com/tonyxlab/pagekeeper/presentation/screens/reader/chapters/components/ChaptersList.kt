@@ -1,10 +1,8 @@
-package com.tonyxlab.pagekeeper.presentation.screens.chapters.components
+package com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,14 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.model.ChapterUiItem
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.model.ChapterUiSection
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.ChapterUiItem
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.ChapterUiSection
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.TitleSmallMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import timber.log.Timber
 
 @Composable
 fun ChaptersList(
@@ -47,6 +45,7 @@ fun ChaptersList(
     LazyColumn(modifier = modifier) {
 
         sections.forEachIndexed { index, section ->
+
 
             val isExpanded = index == expandedIndex
 
@@ -65,6 +64,9 @@ fun ChaptersList(
                         key = { chapter -> "chapter-${chapter.id}" }
 
                 ) { chapter ->
+
+                    Timber.tag("ReadScreen")
+                            .i("The tittle is ${chapter.startBlockIndex}")
                     ChapterRow(
                             chapter = chapter,
                             selected = chapter.id == currentChapterId,
@@ -72,8 +74,6 @@ fun ChaptersList(
                     )
                 }
             }
-
-
         }
     }
 }

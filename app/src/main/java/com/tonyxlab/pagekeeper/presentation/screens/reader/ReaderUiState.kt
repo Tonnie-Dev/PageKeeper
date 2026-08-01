@@ -1,13 +1,13 @@
-package com.tonyxlab.pagekeeper.presentation.screens.read.handling
+package com.tonyxlab.pagekeeper.presentation.screens.reader
 
 import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.model.ReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.model.ChapterUiSection
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.ChapterUiSection
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 
-data class ReadUiState(
+data class ReaderUiState(
 
     val isLoading: Boolean = false,
 

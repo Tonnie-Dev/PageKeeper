@@ -4,8 +4,8 @@ import androidx.compose.ui.text.AnnotatedString
 import com.tonyxlab.pagekeeper.data.model.BookSection
 import com.tonyxlab.pagekeeper.data.model.ParsedBook
 import com.tonyxlab.pagekeeper.data.model.ReaderBlock
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.model.ChapterUiItem
-import com.tonyxlab.pagekeeper.presentation.screens.chapters.model.ChapterUiSection
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.ChapterUiItem
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.ChapterUiSection
 import kotlin.collections.flatMap
 import kotlin.collections.indexOfFirst
 
@@ -69,46 +69,39 @@ fun List<ChapterUiSection>.findCurrentSectionIndex(
 }
 fun ParsedBook.toChapterSections(): List<ChapterUiSection> {
     return sections.mapIndexed { sectionIndex, section ->
-        val sectionTitle =
-            section.title
-                    ?.takeIf(String::isNotBlank)
-                ?: "Section ${sectionIndex + 1}"
+        val chapterSources = section.children
+                .flattenSections()
+                .ifEmpty { listOf(section) }
 
-        val chapters =
-            if (section.children.isNotEmpty()) {
-                section.children.mapIndexed { chapterIndex, chapter ->
+        ChapterUiSection(
+                id = section.id ?: "section-$sectionIndex",
+                title = section.title.displayTitleOr("Section ${sectionIndex + 1}"),
+                startBlockIndex = section.startBlockIndex,
+                chapters = chapterSources.mapIndexed { chapterIndex, chapter ->
                     ChapterUiItem(
                             id = chapter.id
                                 ?: "section-$sectionIndex-chapter-$chapterIndex",
                             title = chapter.title
-                                    ?.takeIf(String::isNotBlank)
-                                ?: "Chapter ${chapterIndex + 1}",
+                                    .displayTitleOr("Chapter ${chapterIndex + 1}"),
                             startBlockIndex = chapter.startBlockIndex
                     )
                 }
-            } else {
-                /*
-                 * A top-level section with no children may itself represent
-                 * a chapter. We expose it as one selectable chapter.
-                 */
-                listOf(
-                        ChapterUiItem(
-                                id = section.id ?: "section-$sectionIndex-chapter-0",
-                                title = section.title
-                                        ?.takeIf(String::isNotBlank)
-                                    ?: "Chapter 1",
-                                startBlockIndex = section.startBlockIndex
-                        )
-                )
-            }
-
-        ChapterUiSection(
-                id = section.id ?: "section-$sectionIndex",
-                title = sectionTitle,
-                startBlockIndex = section.startBlockIndex,
-                chapters = chapters
         )
     }
+}
+
+/**
+ * Collapses an arbitrarily deep FB2 section tree into the chapter level required by
+ * the Chapters screen. Pre-order traversal keeps the same reading order as the source.
+ */
+private fun List<BookSection>.flattenSections(): List<BookSection> {
+    return flatMap { section ->
+        listOf(section) + section.children.flattenSections()
+    }
+}
+
+private fun String?.displayTitleOr(fallback: String): String {
+    return this?.trim()?.takeIf(String::isNotEmpty) ?: fallback
 }
 
 private fun BookSection.toReaderSection(): ReaderSection {

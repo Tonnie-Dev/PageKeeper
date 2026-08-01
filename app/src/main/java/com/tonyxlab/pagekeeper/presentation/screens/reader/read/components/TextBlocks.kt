@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.read.components
+package com.tonyxlab.pagekeeper.presentation.screens.reader.read.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.read
+package com.tonyxlab.pagekeeper.presentation.screens.reader.read
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
@@ -33,16 +33,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
-import com.tonyxlab.pagekeeper.presentation.screens.read.components.ChapterTitleBlock
-import com.tonyxlab.pagekeeper.presentation.screens.read.components.FontSizeControlPanel
-import com.tonyxlab.pagekeeper.presentation.screens.read.components.ParagraphBlock
-import com.tonyxlab.pagekeeper.presentation.screens.read.components.QuoteBlock
-import com.tonyxlab.pagekeeper.presentation.screens.read.components.ReadTopBar
-import com.tonyxlab.pagekeeper.presentation.screens.read.components.ReaderBottomBar
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingControlMode
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadingControlMode
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.ChapterTitleBlock
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.FontSizeControlPanel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.ParagraphBlock
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.QuoteBlock
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.ReadTopBar
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.ReaderBottomBar
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ReaderOrientationEffect
 import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
@@ -50,24 +51,23 @@ import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun ReadScreen(
-    bookId: String,
     navigator: Navigator,
-    viewModel: ReadViewModel = koinViewModel(parameters = { parametersOf(bookId) })
+    viewModel: ReadViewModel,
+    navigateToChaptersScreen: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    SetStatusBarIconsColor(darkIcons = true)
 
+    SetStatusBarIconsColor(darkIcons = true)
 
     ReaderOrientationEffect(
             orientation = uiState.orientation,
             isMobileDevice = rememberIsMobileDevice()
     )
+
     BaseContentLayout(
             viewModel = viewModel,
             onBackPressed = { navigator.popToLibrary() },
@@ -147,13 +147,13 @@ fun ReadScreen(
             },
             actionEventHandler = { context, actionEvent ->
                 when (actionEvent) {
-                    is ReadActionEvent.ShowToast -> {
+                    is ReaderActionEvent.ShowToast -> {
                         Toast.makeText(context, actionEvent.message, Toast.LENGTH_SHORT)
                                 .show()
                     }
 
-                    ReadActionEvent.ExitReader -> navigator.popToLibrary()
-                    ReadActionEvent.NavigateToChaptersView -> navigator.navigateToChapters(bookId = bookId)
+                    ReaderActionEvent.ExitReader -> navigator.popToLibrary()
+                    ReaderActionEvent.NavigateToChaptersView -> navigateToChaptersScreen()
                     else -> Unit
                 }
             }
@@ -170,8 +170,8 @@ fun ReadScreen(
 
 @Composable
 fun ReadScreenContent(
-    uiState: ReadUiState,
-    onEvent: (ReadUiEvent) -> Unit,
+    uiState: ReaderUiState,
+    onEvent: (ReaderUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -189,7 +189,7 @@ fun ReadScreenContent(
         snapshotFlow { listState.firstVisibleItemIndex }
                 .distinctUntilChanged()
                 .collect { blockIndex ->
-                    onEvent(ReadUiEvent.ReadingPositionChanged(blockIndex))
+                    onEvent(ReaderUiEvent.ReadingPositionChanged(blockIndex))
                 }
     }
 
@@ -209,21 +209,24 @@ fun ReadScreenContent(
         }
     }
 
+    /*
+   * jump to position
+   */
+
     LaunchedEffect(uiState.requestedBlockIndex) {
 
-        val targetIndex = uiState.requestedBlockIndex?: return@LaunchedEffect
+        val targetIndex = uiState.requestedBlockIndex ?: return@LaunchedEffect
 
         val document = uiState.document ?: return@LaunchedEffect
 
-        if(document.blocks.isNotEmpty()) return@LaunchedEffect
+        if (document.blocks.isEmpty()) return@LaunchedEffect
 
         val safeIndex =
             targetIndex.coerceIn(0, document.blocks.lastIndex)
 
         listState.scrollToItem(safeIndex)
 
-        onEvent(ReadUiEvent.ChaptersJumpConsumed)
-
+        onEvent(ReaderUiEvent.ChaptersJumpConsumed)
     }
 
     Box(
@@ -236,7 +239,7 @@ fun ReadScreenContent(
                         .widthIn(max = maxWidth)
                         .pointerInput(uiState.controlMode) {
                             detectTapGestures {
-                                onEvent(ReadUiEvent.ReadingAreaClicked)
+                                onEvent(ReaderUiEvent.ReadingAreaClicked)
                             }
                         },
                 state = listState,

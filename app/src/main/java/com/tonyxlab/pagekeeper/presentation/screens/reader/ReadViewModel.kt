@@ -1,36 +1,26 @@
-package com.tonyxlab.pagekeeper.presentation.screens.read
+package com.tonyxlab.pagekeeper.presentation.screens.reader
 
-import androidx.lifecycle.viewModelScope
 import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.domain.model.toChapterSections
 import com.tonyxlab.pagekeeper.domain.model.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadActionEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadUiState
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReaderFontSize
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingControlMode
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.ReadingOrientation
-import com.tonyxlab.pagekeeper.presentation.screens.read.handling.coercedFontSize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
-typealias ReadBaseViewModel = BaseViewModel<ReadUiState, ReadUiEvent, ReadActionEvent>
+typealias ReadBaseViewModel = BaseViewModel<ReaderUiState, ReaderUiEvent, ReaderActionEvent>
 
 class ReadViewModel(
     private val fb2Parser: Fb2Parser,
     private val bookRepository: BookRepository,
     private val fontDataStore: FontDataStore,
     bookId: String,
-) : ReadBaseViewModel(initialState = ReadUiState()) {
+) : ReadBaseViewModel(initialState = ReaderUiState()) {
 
     private var autoHideJob: Job? = null
     private var progressSaveJob: Job? = null
@@ -40,29 +30,29 @@ class ReadViewModel(
         loadBook(bookId)
     }
 
-    override fun onEvent(event: ReadUiEvent) {
+    override fun onEvent(event: ReaderUiEvent) {
         when (event) {
             // Read UiEvents
-            ReadUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
-            ReadUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReadUiEvent.DecreaseFontSize -> onDecreaseFontSize()
-            ReadUiEvent.FontSizeClicked -> showFontSizePanel()
-            ReadUiEvent.ExitReader -> exitReader()
-            ReadUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
-            ReadUiEvent.ToggleFavorite -> toggleFavorite()
-            is ReadUiEvent.PreviewFontSizeChange -> previewFontSize(event.fontSize)
-            is ReadUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
-            is ReadUiEvent.ReadingPositionChanged ->
+            ReaderUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
+            ReaderUiEvent.IncreaseFontSize -> onIncreaseFontSize()
+            ReaderUiEvent.DecreaseFontSize -> onDecreaseFontSize()
+            ReaderUiEvent.FontSizeClicked -> showFontSizePanel()
+            ReaderUiEvent.ExitReader -> exitReader()
+            ReaderUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
+            ReaderUiEvent.ToggleFavorite -> toggleFavorite()
+            is ReaderUiEvent.PreviewFontSizeChange -> previewFontSize(event.fontSize)
+            is ReaderUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
+            is ReaderUiEvent.ReadingPositionChanged ->
                 onReadingPositionChanged(blockIndex = event.blockIndex)
 
-            ReadUiEvent.ViewChapters -> viewChapters()
-            ReadUiEvent.ChaptersJumpConsumed -> onConsumeChapterJump()
+            ReaderUiEvent.ViewChapters -> viewChapters()
+            ReaderUiEvent.ChaptersJumpConsumed -> onConsumeChapterJump()
 
             // Chapter UiEvents
-            ReadUiEvent.BackClicked -> exitChapters()
-            is ReadUiEvent.ChapterSelected -> selectChapter(event.startBlockIndex)
-            is ReadUiEvent.SectionClicked -> {
-                Timber.tag("ReadViewModel").i("Section clicked")
+            ReaderUiEvent.BackClicked -> exitChapters()
+            is ReaderUiEvent.ChapterSelected -> selectChapter(event.startBlockIndex)
+            is ReaderUiEvent.SectionClicked -> {
+
             }
         }
     }
@@ -137,7 +127,7 @@ class ReadViewModel(
     private fun onBookLoadFailed(error: Throwable) {
         updateState { it.copy(document = null) }
         sendActionEvent(
-                ReadActionEvent.ShowToast(
+                ReaderActionEvent.ShowToast(
                         error.message ?: "Unable to read this book."
                 )
         )
@@ -235,7 +225,7 @@ class ReadViewModel(
         launchCatching(
                 context = Dispatchers.IO,
                 onError = {
-                    sendActionEvent(ReadActionEvent.ShowToast("Unable to save font size."))
+                    sendActionEvent(ReaderActionEvent.ShowToast("Unable to save font size."))
                 }
         ) {
             fontDataStore.saveFontSize(fontSize)
@@ -262,7 +252,7 @@ class ReadViewModel(
                     updateState { state ->
                         state.copy(book = state.book?.copy(isFavorite = book.isFavorite))
                     }
-                    sendActionEvent(ReadActionEvent.ShowToast("Unable to update favorite status."))
+                    sendActionEvent(ReaderActionEvent.ShowToast("Unable to update favorite status."))
                 }
         ) {
             bookRepository.updateFavorite(book.id, updatedFavorite)
@@ -349,7 +339,7 @@ class ReadViewModel(
     }
 
     private fun viewChapters() {
-        sendActionEvent(ReadActionEvent.NavigateToChaptersView)
+        sendActionEvent(ReaderActionEvent.NavigateToChaptersView)
     }
 
     private fun onConsumeChapterJump() {
@@ -358,14 +348,41 @@ class ReadViewModel(
     }
 
     private fun exitReader() {
-        sendActionEvent(ReadActionEvent.ExitReader)
+        sendActionEvent(ReaderActionEvent.ExitReader)
     }
-    private fun exitChapters() {
-        sendActionEvent(ReadActionEvent.CloseChapters)
-    }
-    private fun selectChapter(startBlockIndex: Int) {
 
-        val book = currentState.book ?: return
+    private fun exitChapters() {
+        sendActionEvent(ReaderActionEvent.CloseChapters)
+    }
+
+    /*
+
+        private fun selectChapter(startBlockIndex: Int) {
+
+            val book = currentState.book ?: return
+            val safeIndex = startBlockIndex.coerceAtLeast(0)
+
+            updateState { state ->
+                state.copy(
+                        currentBlockIndex = safeIndex,
+                        requestedBlockIndex = safeIndex
+                )
+            }
+
+            viewModelScope.launch {
+                saveReadingPosition(
+                        blockIndex = safeIndex,
+                        totalBlockCount = book.totalBlockCount
+                )
+
+                sendActionEvent(
+                        ReadActionEvent.CloseChapters
+                )
+            }
+        }
+
+    */
+    private fun selectChapter(startBlockIndex: Int) {
         val safeIndex = startBlockIndex.coerceAtLeast(0)
 
         updateState { state ->
@@ -375,16 +392,7 @@ class ReadViewModel(
             )
         }
 
-        viewModelScope.launch {
-            saveReadingPosition(
-                    blockIndex = safeIndex,
-                    totalBlockCount = book.totalBlockCount
-            )
-
-            sendActionEvent(
-                    ReadActionEvent.CloseChapters
-            )
-        }
+        sendActionEvent(ReaderActionEvent.CloseChapters)
     }
 
     private companion object {
