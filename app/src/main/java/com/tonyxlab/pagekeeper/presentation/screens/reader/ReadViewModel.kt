@@ -2,10 +2,10 @@ package com.tonyxlab.pagekeeper.presentation.screens.reader
 
 import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
-import com.tonyxlab.pagekeeper.domain.model.toChapterSections
-import com.tonyxlab.pagekeeper.domain.model.toReaderBook
+import com.tonyxlab.pagekeeper.data.parser.mapper.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.mapper.toChapterSections
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -114,7 +114,7 @@ class ReadViewModel(
                                             book = state.book?.copy(
                                                     totalBlockCount = document.blocks.size
                                             ),
-                                            chapterSections = parsedBook.toChapterSections(),
+                                            chapterSections =document.toChapterSections(),
                                             currentBlockIndex = currentBlockIndex
                                     )
                                 }

@@ -11,8 +11,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.domain.model.findCurrentChapter
-import com.tonyxlab.pagekeeper.domain.model.findCurrentSectionIndex
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
@@ -20,6 +18,8 @@ import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.components.C
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.util.findCurrentChapter
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.util.findCurrentSectionIndex
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
 
 @Composable
@@ -41,11 +41,9 @@ fun ChaptersScreen(
             },
             actionEventHandler = { _, actionEvent ->
                 when (actionEvent) {
-
                     ReaderActionEvent.CloseChapters -> navigateToReadScreen()
                     else -> Unit
                 }
-
             }
     ) { state ->
         ChaptersScreenContent(
