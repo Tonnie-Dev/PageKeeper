@@ -1,5 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader.chapters
 
+import androidx.annotation.Keep
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,18 +15,19 @@ import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
-import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.components.ChaptersList
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.components.ChaptersList
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.util.findCurrentChapter
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.util.findCurrentSectionIndex
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
+import kotlin.text.Typography.section
 
 @Composable
 fun ChaptersScreen(
     viewModel: ReadViewModel,
-    navigateToReadScreen:()->Unit
+    navigateToReadScreen: () -> Unit
 ) {
 
     BaseContentLayout(
@@ -35,7 +37,7 @@ fun ChaptersScreen(
                 AppTopBar(
                         titleText = stringResource(id = R.string.topbar_text_chapters),
                         backgroundColor = TabletBlockBg,
-                        onNavButtonClick = {viewModel.onEvent(ReaderUiEvent.BackClicked)}
+                        onNavButtonClick = { viewModel.onEvent(ReaderUiEvent.BackClicked) }
 
                 )
             },

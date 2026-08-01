@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -64,9 +66,6 @@ fun ChaptersList(
                         key = { chapter -> "chapter-${chapter.id}" }
 
                 ) { chapter ->
-
-                    Timber.tag("ReadScreen")
-                            .i("The tittle is ${chapter.startBlockIndex}")
                     ChapterRow(
                             chapter = chapter,
                             selected = chapter.id == currentChapterId,
@@ -102,9 +101,9 @@ private fun ChapterSectionHeader(
         ) {
             Icon(
                     imageVector = if (expanded)
-                        Icons.Default.ExpandLess
+                        Icons.Default.ArrowDropUp
                     else
-                        Icons.Default.ExpandMore,
+                        Icons.Default.ArrowDropDown,
                     contentDescription = if (expanded)
                         stringResource(id = R.string.cds_text_expand_less)
                     else
@@ -132,14 +131,14 @@ private fun ChapterRow(
 ) {
     val containerColor =
         if (selected) {
-            MaterialTheme.colorScheme.secondaryContainer
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
         } else {
             Color.Transparent
         }
 
     val contentColor =
         if (selected) {
-            MaterialTheme.colorScheme.onSecondaryContainer
+            MaterialTheme.colorScheme.onSurfaceVariant
         } else {
             MaterialTheme.colorScheme.onSurface
         }
@@ -158,6 +157,9 @@ private fun ChapterRow(
                 verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                    modifier = Modifier
+                            .weight(1f)
+                            .padding(start = MaterialTheme.spacing.spaceLargeMedium),
                     text = chapter.title,
                     style = MaterialTheme.typography.BodySmallRegular,
                     fontWeight =
@@ -165,15 +167,15 @@ private fun ChapterRow(
                             FontWeight.SemiBold
                         } else {
                             FontWeight.Normal
-                        },
-                    modifier = Modifier.weight(1f)
+                        }
             )
 
             if (selected) {
                 Icon(
+                        modifier = Modifier.size(MaterialTheme.spacing.spaceTen * 2),
                         imageVector = Icons.Default.Bookmark,
-                        contentDescription = "Current chapter",
-                        modifier = Modifier.size(18.dp)
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = "Current chapter"
                 )
             }
         }
