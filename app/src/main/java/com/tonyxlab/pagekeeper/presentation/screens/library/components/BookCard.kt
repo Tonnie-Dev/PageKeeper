@@ -1,7 +1,5 @@
 package com.tonyxlab.pagekeeper.presentation.screens.library.components
 
-import android.R.attr.maxLines
-import android.R.attr.text
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -67,6 +65,23 @@ fun BookCard(
     val isSelectionMode = uiState.selectionState.isSelectionMode
     val isSelected = selectionState.selectedBooksIds.isSelected(book.id)
 
+    val containerColor = when {
+        isSelected ->
+            MaterialTheme.colorScheme.secondary
+
+        isResumeBook ->
+            MaterialTheme.colorScheme.background
+
+        isDeviceWide && isSelectionMode ->
+            MaterialTheme.colorScheme.background
+
+        isDeviceWide ->
+            Color.Transparent
+
+        else ->
+            MaterialTheme.colorScheme.background
+    }
+
     Surface(
             modifier = modifier
                     .fillMaxWidth()
@@ -87,13 +102,7 @@ fun BookCard(
                             onLongClick = { onEvent(LibraryUiEvent.BookLongClicked(book.id)) }
                     ),
             shape = MaterialTheme.shapes.small,
-            color = when {
-                isSelected -> MaterialTheme.colorScheme.secondary
-                isResumeBook -> MaterialTheme.colorScheme.background
-                isDeviceWide -> Color.Transparent
-                else -> MaterialTheme.colorScheme.background
-            },
-
+            color = containerColor,
             border = if (isSelectionMode) {
                 BorderStroke(
                         width = 1.dp,
@@ -109,6 +118,7 @@ fun BookCard(
                         .height(IntrinsicSize.Min)
                         .ifThen(isSelectionMode) {
                             padding(vertical = MaterialTheme.spacing.spaceTwelve)
+                                    .padding(horizontal = MaterialTheme.spacing.spaceTwelve)
                         }
                         .ifThen(isSelectionMode.not()) {
                             padding(MaterialTheme.spacing.spaceTwelve)
@@ -158,9 +168,9 @@ fun BookCard(
                     Text(
                             modifier = Modifier.weight(1f),
                             text = book.title,
-                            style =if (isResumeBook)
+                            style = if (isResumeBook)
                                 MaterialTheme.typography.TitleLargeBold
-                               else
+                            else
                                 MaterialTheme.typography.TitleSmallMedium,
                             color = TextPrimary,
                             maxLines = 3,
@@ -178,13 +188,14 @@ fun BookCard(
                 }
 
                 Text(
+                        modifier = Modifier.padding(top = MaterialTheme.spacing.spaceExtraSmall),
                         text = book.author,
-                        style =if (isResumeBook)
+                        style = if (isResumeBook)
                             MaterialTheme.typography.BodyMediumRegular
-                                    else
+                        else
                             MaterialTheme.typography.BodySmallRegular,
                         color = TextSecondary,
-                        modifier = Modifier.padding(top = MaterialTheme.spacing.spaceExtraSmall)
+                        maxLines = 2
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -199,36 +210,41 @@ fun BookCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
                 ) {
-                    IconButton(onClick = { onEvent(LibraryUiEvent.MarkFavorite(book.id)) }) {
-                        Icon(
-                                painter = if (book.isFavorite) {
-                                    painterResource(id = R.drawable.ic_star_filled)
-                                } else {
-                                    painterResource(id = R.drawable.ic_star_outlined)
-                                },
-                                contentDescription = stringResource(id = R.string.cds_text_favorite),
-                                tint = if (book.isFavorite) Primary else IconsTint,
-                        )
-                    }
+                    Row(
 
-                    IconButton(onClick = { onEvent(LibraryUiEvent.FinishBook(book.id)) }) {
-                        Icon(
-                                painter = if (book.isFinished) {
-                                    painterResource(id = R.drawable.ic_mark_finished)
-                                } else {
-                                    painterResource(id = R.drawable.ic_finished_outlined)
-                                },
-                                contentDescription = stringResource(id = R.string.cds_text_bookmark),
-                                tint = IconsTint
-                        )
-                    }
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        IconButton(onClick = { onEvent(LibraryUiEvent.MarkFavorite(book.id)) }) {
+                            Icon(
+                                    painter = if (book.isFavorite) {
+                                        painterResource(id = R.drawable.ic_star_filled)
+                                    } else {
+                                        painterResource(id = R.drawable.ic_star_outlined)
+                                    },
+                                    contentDescription = stringResource(id = R.string.cds_text_favorite),
+                                    tint = if (book.isFavorite) Primary else IconsTint,
+                            )
+                        }
 
-                    IconButton(onClick = { onEvent(LibraryUiEvent.ShareBook(bookId = book.id)) }) {
-                        Icon(
-                                painter = painterResource(id = R.drawable.ic_share),
-                                contentDescription = stringResource(id = R.string.cds_text_share),
-                                tint = IconsTint,
-                        )
+                        IconButton(onClick = { onEvent(LibraryUiEvent.FinishBook(book.id)) }) {
+                            Icon(
+                                    painter = if (book.isFinished) {
+                                        painterResource(id = R.drawable.ic_mark_finished)
+                                    } else {
+                                        painterResource(id = R.drawable.ic_finished_outlined)
+                                    },
+                                    contentDescription = stringResource(id = R.string.cds_text_bookmark),
+                                    tint = IconsTint
+                            )
+                        }
+
+                        IconButton(onClick = { onEvent(LibraryUiEvent.ShareBook(bookId = book.id)) }) {
+                            Icon(
+                                    painter = painterResource(id = R.drawable.ic_share),
+                                    contentDescription = stringResource(id = R.string.cds_text_share),
+                                    tint = IconsTint,
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.weight(1f))

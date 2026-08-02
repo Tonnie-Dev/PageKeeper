@@ -33,7 +33,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -306,7 +305,7 @@ private fun WideLibraryLayout(
 
     val visibleBooks = uiState.visibleBooks()
 
-    val regularBooks = remember (visibleBooks, uiState.resumeBook){
+    val regularBooks = remember(visibleBooks, uiState.resumeBook) {
         visibleBooks.filter { it.id != uiState.resumeBook?.id }
     }
 
@@ -317,28 +316,51 @@ private fun WideLibraryLayout(
                             color = TabletBlockBg,
                             shape = MaterialTheme.shapes.extraLarge
                     )
-                    .padding(start = MaterialTheme.spacing.spaceMedium)
+                    .padding(horizontal = MaterialTheme.spacing.spaceTwelve)
                     .padding(top = MaterialTheme.spacing.spaceTwelve),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTwelve)
     ) {
 
         val isSearchActive = uiState.searchState.isSearchMode
 
-        if (isSearchActive) {
-            SearchComponent(
-                    modifier = Modifier
-                            .clip(shape = MaterialTheme.shapes.extraLarge)
-                            .fillMaxWidth(),
-                    uiState = uiState,
-                    onEvent = onEvent,
-                    expanded = uiState.searchState.isSearchMode,
-                    showBackButton = false,
-                    showSearchIconWhenEmpty = uiState.searchState.isSearchMode.not(),
-                    inputHeight = 40.dp,
-                    isDeviceWide = true
-            )
-        } else {
-            WideDummySearchBar { onEvent(LibraryUiEvent.SearchClicked) }
+        when {
+            isSearchActive -> {
+                SearchComponent(
+                        modifier = Modifier
+                                .clip(shape = MaterialTheme.shapes.extraLarge)
+                                .fillMaxWidth(),
+                        uiState = uiState,
+                        onEvent = onEvent,
+                        expanded = uiState.searchState.isSearchMode,
+                        showBackButton = false,
+                        showSearchIconWhenEmpty = uiState.searchState.isSearchMode.not(),
+                        inputHeight = 40.dp,
+                        isDeviceWide = true
+                )
+            }
+
+            uiState.selectionState.isSelectionMode -> {
+                SelectionTopBar(
+                        selectedCount = uiState.selectionState.selectedCount,
+                        backgroundColor = TabletBlockBg,
+                        onBackClick = {
+                            onEvent(LibraryUiEvent.ExitSelectionModeClicked)
+                        },
+                        onFavoriteClick = {
+                            onEvent(LibraryUiEvent.AddSelectedToFavoritesClicked)
+                        },
+                        onShareClick = {
+                            onEvent(LibraryUiEvent.ShareSelectedClicked)
+                        },
+                        onDeleteClick = {
+                            onEvent(LibraryUiEvent.DeleteSelectedClicked)
+                        }
+                )
+            }
+
+            else -> {
+                WideDummySearchBar { onEvent(LibraryUiEvent.SearchClicked) }
+            }
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
