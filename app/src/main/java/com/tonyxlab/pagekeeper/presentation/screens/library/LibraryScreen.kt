@@ -14,21 +14,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -112,7 +117,6 @@ fun LibraryScreen(
             ) {
                 MergedLibraryLayout(
                         showNavigationIcon = false,
-                        showImportFab = false,
                         showTopBar = false,
                         modifier = Modifier.padding(
                                 top = MaterialTheme.spacing.spaceLarge,
@@ -154,7 +158,6 @@ fun LibraryScreen(
         ) {
             MergedLibraryLayout(
                     showNavigationIcon = true,
-                    showImportFab = true,
                     showTopBar = true,
                     navigator = navigator,
                     viewModel = viewModel,
@@ -169,7 +172,6 @@ fun LibraryScreen(
 @Composable
 private fun MergedLibraryLayout(
     showNavigationIcon: Boolean,
-    showImportFab: Boolean,
     showTopBar: Boolean,
     onNavButtonClick: () -> Unit,
     navigator: Navigator,
@@ -242,7 +244,8 @@ private fun MergedLibraryLayout(
             floatingActionButton = {
                 if (uiState.resumeBook != null &&
                     !inSearchMode &&
-                    !isNavigatingAway
+                    !isNavigatingAway &&
+                    !isDeviceWide
                 ) {
                     FloatingActionButton(
                             modifier = Modifier.navigationBarsPadding(),
@@ -302,6 +305,10 @@ private fun WideLibraryLayout(
 ) {
 
     val visibleBooks = uiState.visibleBooks()
+
+    val regularBooks = remember (visibleBooks, uiState.resumeBook){
+        visibleBooks.filter { it.id != uiState.resumeBook?.id }
+    }
 
     Column(
             modifier = modifier
@@ -376,11 +383,39 @@ private fun WideLibraryLayout(
                 visibleBooks.isNotEmpty() && uiState.searchState.isSearchMode.not() -> {
                     LazyVerticalGrid(
                             modifier = Modifier.fillMaxSize(),
-                            columns = GridCells.Adaptive(minSize = 280.dp),
+                            columns = GridCells.Fixed(count = 2),
                             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall),
                             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceSmall)
                     ) {
-                        items(items = visibleBooks, key = { it.id }) { book ->
+
+                        uiState.resumeBook?.let { resumeBook ->
+                            item(
+                                    key = "resume_book_${resumeBook.id}",
+                                    span = { GridItemSpan(maxLineSpan) }
+                            ) {
+
+                                Column(modifier = Modifier.padding(all = MaterialTheme.spacing.spaceSmall)) {
+                                    BookCard(
+                                            modifier = Modifier,
+                                            book = resumeBook,
+                                            uiState = uiState,
+                                            onEvent = onEvent,
+                                            isDeviceWide = true,
+                                            isResumeBook = true
+
+                                    )
+                                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceMedium))
+                                    HorizontalDivider(
+                                            thickness = MaterialTheme.spacing.spaceDoubleDp,
+                                            color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
+                            }
+
+                        }
+                        items(
+                                items = regularBooks,
+                                key = { it.id }) { book ->
                             BookCard(
                                     modifier = Modifier,
                                     book = book,

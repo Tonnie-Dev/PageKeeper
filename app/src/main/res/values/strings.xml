@@ -54,6 +54,7 @@
     <!--Button Texts-->
     <string name="button_text_start">Start</string>
     <string name="button_text_import_book">Import Book</string>
+    <string name="button_text_continue">Continue</string>
 
     <!--Text Button Texts-->
     <string name="text_button_cancel">Cancel</string>

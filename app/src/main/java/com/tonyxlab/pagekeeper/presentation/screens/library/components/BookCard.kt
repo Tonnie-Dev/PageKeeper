@@ -1,5 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.library.components
 
+import android.R.attr.maxLines
+import android.R.attr.text
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -25,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -35,15 +38,18 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.presentation.core.components.AppButton
 import com.tonyxlab.pagekeeper.presentation.core.components.ReadProgressBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
+import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumRegular
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.IconsTint
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
+import com.tonyxlab.pagekeeper.presentation.theme.TitleLargeBold
 import com.tonyxlab.pagekeeper.presentation.theme.TitleSmallMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ifThen
@@ -54,7 +60,8 @@ fun BookCard(
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isDeviceWide: Boolean = false
+    isDeviceWide: Boolean = false,
+    isResumeBook: Boolean = false
 ) {
     val selectionState = uiState.selectionState
     val isSelectionMode = uiState.selectionState.isSelectionMode
@@ -81,8 +88,8 @@ fun BookCard(
                     ),
             shape = MaterialTheme.shapes.small,
             color = when {
-
                 isSelected -> MaterialTheme.colorScheme.secondary
+                isResumeBook -> MaterialTheme.colorScheme.background
                 isDeviceWide -> Color.Transparent
                 else -> MaterialTheme.colorScheme.background
             },
@@ -125,17 +132,21 @@ fun BookCard(
             book.coverPath?.let { cover ->
                 AsyncImage(
                         modifier = Modifier
+                                .clip(shape = MaterialTheme.shapes.small)
                                 .background(
                                         color = MaterialTheme.colorScheme.surfaceVariant,
                                         shape = MaterialTheme.shapes.small
                                 )
-                                .size(width = 104.dp, height = 156.dp),
+                                .size(
+                                        width = isResumeBook.coverWidth(),
+                                        height = isResumeBook.coverHeight()
+                                ),
                         model = cover,
                         contentDescription = book.title,
                         contentScale = ContentScale.Crop,
                         alignment = Alignment.Center
                 )
-            } ?: BookCoverPlaceholder()
+            } ?: BookCoverPlaceholder(isResumeBook = isResumeBook)
 
             Column(
                     modifier = Modifier
@@ -143,17 +154,35 @@ fun BookCard(
                             .padding(start = MaterialTheme.spacing.spaceTwelve)
                             .fillMaxHeight()
             ) {
-                Text(
-                        text = book.title,
-                        style = MaterialTheme.typography.TitleSmallMedium,
-                        color = TextPrimary,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                )
+                Row {
+                    Text(
+                            modifier = Modifier.weight(1f),
+                            text = book.title,
+                            style =if (isResumeBook)
+                                MaterialTheme.typography.TitleLargeBold
+                               else
+                                MaterialTheme.typography.TitleSmallMedium,
+                            color = TextPrimary,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                    )
+
+                    if (isDeviceWide && isResumeBook) {
+
+                        AppButton(
+                                buttonText = "Continue",
+                                leadingIcon = painterResource(id = R.drawable.ic_import_book),
+                                onClick = { onEvent(LibraryUiEvent.ResumeBook) }
+                        )
+                    }
+                }
 
                 Text(
                         text = book.author,
-                        style = MaterialTheme.typography.BodySmallRegular,
+                        style =if (isResumeBook)
+                            MaterialTheme.typography.BodyMediumRegular
+                                    else
+                            MaterialTheme.typography.BodySmallRegular,
                         color = TextSecondary,
                         modifier = Modifier.padding(top = MaterialTheme.spacing.spaceExtraSmall)
                 )
@@ -218,7 +247,10 @@ fun BookCard(
 }
 
 @Composable
-private fun BookCoverPlaceholder(modifier: Modifier = Modifier) {
+private fun BookCoverPlaceholder(
+    isResumeBook: Boolean,
+    modifier: Modifier = Modifier
+) {
     Box(
             modifier = modifier
                     .background(
@@ -226,8 +258,8 @@ private fun BookCoverPlaceholder(modifier: Modifier = Modifier) {
                             shape = MaterialTheme.shapes.small
                     )
                     .size(
-                            width = 104.dp,
-                            height = 156.dp
+                            width = isResumeBook.coverWidth(),
+                            height = isResumeBook.coverHeight()
                     ),
             contentAlignment = Alignment.Center
     ) {
@@ -294,3 +326,9 @@ fun BookCardPreview() {
         }
     }
 }
+
+private fun Boolean.coverWidth() =
+    if (this) 160.dp else 104.dp
+
+private fun Boolean.coverHeight() =
+    if (this) 240.dp else 156.dp
