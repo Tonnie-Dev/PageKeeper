@@ -50,13 +50,6 @@ fun LibraryNavigationDrawer(
     modifier: Modifier = Modifier,
 ) {
 
-    val (libSelected, favSelected, finishedSelected) =
-        Triple(
-                first = selectedDestination == LibraryDrawerDestination.Library,
-                second = selectedDestination == LibraryDrawerDestination.Favorites,
-                third = selectedDestination == LibraryDrawerDestination.Finished
-        )
-
     ModalDrawerSheet(
             modifier = modifier
                     .width(DrawerWidth)
@@ -115,21 +108,28 @@ fun LibraryNavigationDrawer(
 
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_library),
-                    iconRes = if (libSelected) R.drawable.books_filled else R.drawable.books_outlined,
-                    selected = libSelected,
+                    iconRes = if (selectedDestination == LibraryDrawerDestination.Library) R.drawable.books_filled else R.drawable.books_outlined,
+                    selected = selectedDestination == LibraryDrawerDestination.Library,
                     onClick = { onDestinationClick(LibraryDrawerDestination.Library) }
             )
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_favorites),
-                    iconRes = if (favSelected) R.drawable.ic_star_filled else R.drawable.ic_star_outlined,
-                    selected = favSelected,
+                    iconRes = if (selectedDestination == LibraryDrawerDestination.Favorites) R.drawable.ic_star_filled else R.drawable.ic_star_outlined,
+                    selected = selectedDestination == LibraryDrawerDestination.Favorites,
                     onClick = { onDestinationClick(LibraryDrawerDestination.Favorites) }
             )
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_finished),
-                    iconRes = if (finishedSelected) R.drawable.ic_mark_finished else R.drawable.ic_finished_outlined,
-                    selected = finishedSelected,
+                    iconRes = if (selectedDestination == LibraryDrawerDestination.Finished) R.drawable.ic_mark_finished else R.drawable.ic_finished_outlined,
+                    selected = selectedDestination == LibraryDrawerDestination.Finished,
                     onClick = { onDestinationClick(LibraryDrawerDestination.Finished) }
+            )
+
+            DrawerItem(
+                    label = stringResource(id = R.string.nav_drawer_bookmarks),
+                    iconRes = if (selectedDestination == LibraryDrawerDestination.Bookmarks) R.drawable.ic_bookmark_big else R.drawable.ic_bookmark,
+                    selected = selectedDestination == LibraryDrawerDestination.Bookmarks,
+                    onClick = { onDestinationClick(LibraryDrawerDestination.Bookmarks) }
             )
         }
     }

@@ -208,4 +208,33 @@ fun testBookImport_success() {
 - **Current state**: Single screen app; future work needs Navigation3 integration (library already included)
 - **When adding routes**: Define sealed `NavigationEvent`, send via `ActionEvent`, handle in `MainActivity`
 
+## Creating a New Screen
+
+When creating a new screen feature:
+
+Create the following structure:
+
+screens/
+└── <screen-name>/
+├── <ScreenName>Screen.kt
+├── <ScreenName>ViewModel.kt
+├── handling/
+│   ├── <ScreenName>UiState.kt
+│   ├── <ScreenName>UiEvent.kt
+│   └── <ScreenName>ActionEvent.kt
+├── components/
+└── model/
+
+Requirements:
+
+- Follow the BaseViewModel architecture.
+- Use BaseContentLayout.
+- Do not create navigation.
+- Do not create repository code.
+- Keep implementations compile-safe.
+- Add the ViewModel to AppModule when required.
+- Run:
+
+./gradlew :app:compileDebugKotlin
+
 

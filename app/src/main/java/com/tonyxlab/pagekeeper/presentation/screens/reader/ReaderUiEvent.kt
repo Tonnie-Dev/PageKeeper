@@ -28,6 +28,9 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data object ViewChapters : ReaderUiEvent
 
+    data object ViewBookmarks : ReaderUiEvent
+
+
     data object ChaptersJumpConsumed : ReaderUiEvent
 
     // Chapters UiEvents

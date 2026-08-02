@@ -86,6 +86,12 @@ fun ReaderBottomBar(
                     painter = painterResource(id = R.drawable.ic_chapters)
             ) { onEvent(ReaderUiEvent.ViewChapters) }
 
+            BottomBarItem(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(id = R.string.bottom_text_bookmarks),
+                    painter = painterResource(id = R.drawable.ic_bookmark_big)
+            ) { onEvent(ReaderUiEvent.ViewBookmarks) }
+
             if (showOrientationControl) {
                 BottomBarItem(
                         modifier = Modifier.weight(1f),
@@ -99,6 +105,7 @@ fun ReaderBottomBar(
                     text = stringResource(id = R.string.bottom_text_font_size),
                     painter = painterResource(id = R.drawable.ic_font_size)
             ) { onEvent(ReaderUiEvent.FontSizeClicked) }
+
         }
     }
 }

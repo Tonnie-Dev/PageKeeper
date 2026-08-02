@@ -10,6 +10,7 @@
     <string name="topbar_text_favorites">Favorites</string>
     <string name="topbar_text_finished">Finished</string>
     <string name="topbar_text_chapters">Chapters</string>
+    <string name="topbar_text_bookmarks">Bookmarks</string>
     <string name="topbar_text_selected_count">%d selected</string>
 
     <!-- Bottom Bar Texts-->
@@ -19,6 +20,7 @@
     <string name="bottom_text_decrease_font_size">Decrease Font Size</string>
     <string name="bottom_text_increase_font_size">Increase Font Size</string>
     <string name="bottom_text_chapters">Chapters</string>
+    <string name="bottom_text_bookmarks">Bookmarks</string>
     <string name="bottom_text_progress">%1$d%% </string>
 
     <!--Header Texts-->
@@ -28,11 +30,13 @@
     <!--Caption Texts-->
     <string name="caption_text_empty_library">Your library is empty</string>
     <string name="caption_text_import_book">Import your first book to start building your library</string>
-    <string name="caption_text_boo_title">The Fellowship of the Ring (Book 1) (Illustrated Edition)</string>
+    <string name="caption_text_book_title">The Fellowship of the Ring (Book 1) (Illustrated Edition)</string>
     <string name="caption_text_author">J.R.R. Tolkien</string>
     <string name="caption_text_no_results">No results found</string>
     <string name="caption_text_favs_empty">Your favorites is empty</string>
     <string name="caption_text_favs_empty_desc">Books you add to Favorites will appear here.</string>
+    <string name="caption_text_bookmarks_empty">No bookmarks added</string>
+    <string name="caption_text_bookmarks_empty_desc">Bookmarks from your books will appear here</string>
     <string name="caption_text_finished_empty">Your finished is empty</string>
     <string name="caption_text_finished_empty_desc">Books you mark as Finished will appear here.</string>
 
@@ -95,5 +99,6 @@
     <string name="nav_drawer_library">Library</string>
     <string name="nav_drawer_favorites">Favorites</string>
     <string name="nav_drawer_finished">Finished</string>
+    <string name="nav_drawer_bookmarks">Bookmarks</string>
 
 </resources>

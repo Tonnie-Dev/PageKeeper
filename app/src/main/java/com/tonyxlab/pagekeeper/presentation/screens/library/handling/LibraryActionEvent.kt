@@ -10,5 +10,7 @@ sealed interface LibraryActionEvent : ActionEvent {
 
     data object OpenFilePicker : LibraryActionEvent
 
+    data object NavigateToBookmarks: LibraryActionEvent
+
     data class ShowToast(val message: String) : LibraryActionEvent
 }

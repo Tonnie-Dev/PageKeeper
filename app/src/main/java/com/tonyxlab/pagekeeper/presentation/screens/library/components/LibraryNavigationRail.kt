@@ -138,6 +138,19 @@ fun LibraryNavigationRail(
                     expanded = expanded,
                     onClick = { onDestinationClick(LibraryDrawerDestination.Finished) }
             )
+
+
+            RailDestinationItem(
+                    label = stringResource(id = R.string.nav_drawer_bookmarks),
+                    iconRes = if (selectedDestination == LibraryDrawerDestination.Bookmarks) {
+                        R.drawable.ic_bookmark_filled
+                    } else {
+                        R.drawable.ic_bookmark
+                    },
+                    selected = selectedDestination == LibraryDrawerDestination.Bookmarks,
+                    expanded = expanded,
+                    onClick = { onDestinationClick(LibraryDrawerDestination.Bookmarks) }
+            )
         }
     }
 }

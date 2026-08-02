@@ -154,6 +154,7 @@ fun ReadScreen(
 
                     ReaderActionEvent.ExitReader -> navigator.popToLibrary()
                     ReaderActionEvent.NavigateToChaptersView -> navigateToChaptersScreen()
+                    ReaderActionEvent.NavigateToBookmarksView -> navigator.navigateToBookmark("")
                     else -> Unit
                 }
             }

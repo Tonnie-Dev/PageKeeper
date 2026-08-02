@@ -152,7 +152,7 @@ fun EmptyFavoritesScreen(
                 Icon(
                         painter = painterResource(id = R.drawable.ic_star_big),
                         contentDescription = stringResource(id = R.string.cds_text_favorite),
-                        modifier = Modifier.size(56.dp),
+                        modifier = Modifier.size(ICON_SIZE),
                         tint = IconsTint
                 )
             }
@@ -214,7 +214,7 @@ fun EmptyFinishedScreen(
                 Icon(
                         painter = painterResource(id = R.drawable.ic_finished_big),
                         contentDescription = stringResource(id = R.string.cds_text_finished),
-                        modifier = Modifier.size(56.dp),
+                        modifier = Modifier.size(ICON_SIZE),
                         tint = IconsTint
                 )
             }
@@ -239,8 +239,72 @@ fun EmptyFinishedScreen(
             )
         }
     }
-
 }
+
+
+
+@Composable
+fun EmptyBookmarkScreen(
+    isDeviceWide: Boolean,
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.background
+) {
+    Column(
+            modifier = modifier
+                    .fillMaxSize()
+                    .background(backgroundColor)
+                    .padding(horizontal = MaterialTheme.spacing.spaceMedium),
+            horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Spacer(modifier = Modifier.height(176.dp))
+        Column(
+                modifier = Modifier,
+                horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                    modifier = Modifier
+                            .size(MaterialTheme.spacing.spaceTwelve * 10)
+                            .then(
+                                    if (isDeviceWide) {
+                                        Modifier.background(BgMain, CircleShape)
+                                    } else {
+                                        Modifier.background(BgActive, CircleShape)
+                                    }
+                            ),
+                    contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                        painter = painterResource(id = R.drawable.ic_bookmark),
+                        contentDescription = stringResource(id = R.string.cds_text_bookmark),
+                        modifier = Modifier.size(ICON_SIZE),
+                        tint = IconsTint
+                )
+            }
+
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceMedium))
+
+            Text(
+                    text = stringResource(id = R.string.caption_text_bookmarks_empty),
+                    style = MaterialTheme.typography.TitleMediumMedium,
+                    color = TextPrimary,
+                    textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceSmall))
+
+            Text(
+                    modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceLarge),
+                    text = stringResource(id = R.string.caption_text_finished_empty_desc),
+                    style = MaterialTheme.typography.BodySmallRegular,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+private val ICON_SIZE = 72.dp
 
 @Preview(showBackground = true)
 @Composable
@@ -265,3 +329,14 @@ private fun EmptyFinishedScreenPreview() {
         EmptyFinishedScreen(isDeviceWide = false)
     }
 }
+
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyBookmarkScreenPreview() {
+    PageKeeperTheme {
+        EmptyBookmarkScreen(isDeviceWide = false)
+    }
+}
+
+

@@ -53,5 +53,6 @@ enum class LibraryDrawerDestination {
     Library,
     Favorites,
     Finished,
+    Bookmarks
 }
 

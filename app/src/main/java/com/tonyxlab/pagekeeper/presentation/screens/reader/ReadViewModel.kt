@@ -54,6 +54,8 @@ class ReadViewModel(
             is ReaderUiEvent.SectionClicked -> {
 
             }
+
+            ReaderUiEvent.ViewBookmarks -> viewBookmarks()
         }
     }
 
@@ -355,33 +357,7 @@ class ReadViewModel(
         sendActionEvent(ReaderActionEvent.CloseChapters)
     }
 
-    /*
 
-        private fun selectChapter(startBlockIndex: Int) {
-
-            val book = currentState.book ?: return
-            val safeIndex = startBlockIndex.coerceAtLeast(0)
-
-            updateState { state ->
-                state.copy(
-                        currentBlockIndex = safeIndex,
-                        requestedBlockIndex = safeIndex
-                )
-            }
-
-            viewModelScope.launch {
-                saveReadingPosition(
-                        blockIndex = safeIndex,
-                        totalBlockCount = book.totalBlockCount
-                )
-
-                sendActionEvent(
-                        ReadActionEvent.CloseChapters
-                )
-            }
-        }
-
-    */
     private fun selectChapter(startBlockIndex: Int) {
         val safeIndex = startBlockIndex.coerceAtLeast(0)
 
@@ -393,6 +369,10 @@ class ReadViewModel(
         }
 
         sendActionEvent(ReaderActionEvent.CloseChapters)
+    }
+
+    private fun viewBookmarks() {
+        sendActionEvent(ReaderActionEvent.NavigateToBookmarksView)
     }
 
     private companion object {

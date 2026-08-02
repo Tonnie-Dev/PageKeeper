@@ -256,6 +256,11 @@ class LibraryViewModel(
     }
 
     private fun onDrawerDestinationClicked(destination: LibraryDrawerDestination) {
+
+        if (destination == LibraryDrawerDestination.Bookmarks){
+
+            sendActionEvent(LibraryActionEvent.NavigateToBookmarks)
+        }
         updateState { it.copy(selectedDrawerDestination = destination) }
     }
 

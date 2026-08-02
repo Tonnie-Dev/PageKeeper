@@ -53,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
+import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
@@ -65,6 +66,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchCom
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SelectionTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialog
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
@@ -229,6 +231,7 @@ private fun MergedLibraryLayout(
                                             LibraryDrawerDestination.Library -> R.string.topbar_text_library
                                             LibraryDrawerDestination.Favorites -> R.string.topbar_text_favorites
                                             LibraryDrawerDestination.Finished -> R.string.topbar_text_finished
+                                            LibraryDrawerDestination.Bookmarks -> R.string.topbar_text_bookmarks
                                         }
                                 ),
                                 showNavIcon = showNavigationIcon,
@@ -261,21 +264,27 @@ private fun MergedLibraryLayout(
             },
             actionEventHandler = { actionContext, actionEvent ->
                 when (actionEvent) {
-                    LibraryActionEvent.OpenFilePicker -> filePicker.launch("*/*")
+                    LibraryActionEvent.OpenFilePicker -> {
+                        filePicker.launch("*/*")
+                    }
                     is LibraryActionEvent.OpenBook -> {
                         isNavigatingAway = true
                         navigator.navigateToRead(actionEvent.bookId)
                     }
 
-                    is LibraryActionEvent.ShareBook -> actionContext.shareBook(
-                            actionEvent.bookId,
-                            viewModel.uiState.value
-                    )
+                    is LibraryActionEvent.ShareBook -> {
+                        actionContext.shareBook(
+                                actionEvent.bookId,
+                                viewModel.uiState.value
+                        )
+                    }
 
                     is LibraryActionEvent.ShowToast -> {
                         Toast.makeText(actionContext, actionEvent.message, Toast.LENGTH_SHORT)
                                 .show()
                     }
+
+                    LibraryActionEvent.NavigateToBookmarks -> {}
                 }
             }
     ) { state ->
@@ -399,6 +408,15 @@ private fun WideLibraryLayout(
                                     onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
                             )
                         }
+
+                        LibraryDrawerDestination.Bookmarks -> {
+                            EmptyBookmarkScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    backgroundColor = TabletBlockBg,
+                                    isDeviceWide = true
+                            )
+
+                        }
                     }
                 }
 
@@ -502,6 +520,10 @@ private fun CompactLibraryLayout(
                                 onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
                         )
                     }
+
+                    LibraryDrawerDestination.Bookmarks -> {
+                        EmptyBookmarkScreen(isDeviceWide = false)
+                    }
                 }
             }
 
@@ -559,9 +581,10 @@ private fun LibraryDialog(
 }
 
 private fun LibraryUiState.visibleBooks() = when (selectedDrawerDestination) {
-    LibraryDrawerDestination.Library -> books
+
     LibraryDrawerDestination.Favorites -> books.filter { it.isFavorite }
     LibraryDrawerDestination.Finished -> books.filter { it.isFinished }
+    else -> books
 }
 
 private fun Context.getDisplayName(uri: Uri): String {
