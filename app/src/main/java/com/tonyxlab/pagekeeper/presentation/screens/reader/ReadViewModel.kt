@@ -1,15 +1,18 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader
 
+import androidx.lifecycle.viewModelScope
 import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.data.parser.mapper.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.handling.ChapterHandler
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.mapper.toChapterSections
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.handling.ControlsHandler
+import com.tonyxlab.pagekeeper.presentation.screens.reader.read.handling.FontHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -18,60 +21,67 @@ typealias ReadBaseViewModel = BaseViewModel<ReaderUiState, ReaderUiEvent, Reader
 class ReadViewModel(
     private val fb2Parser: Fb2Parser,
     private val bookRepository: BookRepository,
-    private val fontDataStore: FontDataStore,
+    fontDataStore: FontDataStore,
     bookId: String,
 ) : ReadBaseViewModel(initialState = ReaderUiState()) {
 
     private var autoHideJob: Job? = null
     private var progressSaveJob: Job? = null
 
+    private val chapterHandler = ChapterHandler(
+            updateState = ::updateState,
+            sendActionEvent = ::sendActionEvent
+    )
+
+    private val controlsHandler = ControlsHandler(
+            currentState = { currentState },
+            updateState = ::updateState,
+            restartControlsAutoHideTimer = ::restartControlsAutoHideTimer,
+            cancelControlsAutoHideTimer = ::cancelControlsAutoHideTimer
+    )
+
+    private val fontHandler = FontHandler(
+            fontDataStore = fontDataStore,
+            coroutineScope = viewModelScope,
+            currentState = { currentState },
+            updateState = ::updateState,
+            restartControlsAutoHideTimer = ::restartControlsAutoHideTimer,
+            onSaveError = {
+                sendActionEvent(ReaderActionEvent.ShowToast("Unable to save font size."))
+            }
+    )
+
     init {
-        loadFontSize()
+        fontHandler.loadFontSize()
         loadBook(bookId)
     }
 
     override fun onEvent(event: ReaderUiEvent) {
         when (event) {
             // Read UiEvents
-            ReaderUiEvent.ToggleAutoRotate -> onToggleAutoRotate()
-            ReaderUiEvent.IncreaseFontSize -> onIncreaseFontSize()
-            ReaderUiEvent.DecreaseFontSize -> onDecreaseFontSize()
-            ReaderUiEvent.FontSizeClicked -> showFontSizePanel()
+            ReaderUiEvent.ToggleAutoRotate -> controlsHandler.onToggleAutoRotate()
+            ReaderUiEvent.IncreaseFontSize -> fontHandler.onIncreaseFontSize()
+            ReaderUiEvent.DecreaseFontSize -> fontHandler.onDecreaseFontSize()
+            ReaderUiEvent.FontSizeClicked -> fontHandler.showFontSizePanel()
             ReaderUiEvent.ExitReader -> exitReader()
-            ReaderUiEvent.ReadingAreaClicked -> onReadingAreaClicked()
+            ReaderUiEvent.ReadingAreaClicked -> controlsHandler.onReadingAreaClicked()
             ReaderUiEvent.ToggleFavorite -> toggleFavorite()
-            is ReaderUiEvent.PreviewFontSizeChange -> previewFontSize(event.fontSize)
-            is ReaderUiEvent.FontSizeChangeFinished -> finishAndSaveFontSizeChange()
+            is ReaderUiEvent.PreviewFontSizeChange -> fontHandler.previewFontSize(event.fontSize)
+            is ReaderUiEvent.FontSizeChangeFinished -> fontHandler.finishAndSaveFontSizeChange()
             is ReaderUiEvent.ReadingPositionChanged ->
                 onReadingPositionChanged(blockIndex = event.blockIndex)
 
-            ReaderUiEvent.ViewChapters -> viewChapters()
-            ReaderUiEvent.ChaptersJumpConsumed -> onConsumeChapterJump()
+            ReaderUiEvent.ViewChapters -> chapterHandler.viewChapters()
+            ReaderUiEvent.ChaptersJumpConsumed -> chapterHandler.onConsumeChapterJump()
 
             // Chapter UiEvents
-            ReaderUiEvent.BackClicked -> exitChapters()
-            is ReaderUiEvent.ChapterSelected -> selectChapter(event.startBlockIndex)
+            ReaderUiEvent.BackClicked -> chapterHandler.exitChapters()
+            is ReaderUiEvent.ChapterSelected -> chapterHandler.selectChapter(event.startBlockIndex)
             is ReaderUiEvent.SectionClicked -> {
 
             }
 
             ReaderUiEvent.ViewBookmarks -> viewBookmarks()
-        }
-    }
-
-    private fun loadFontSize() {
-
-        launch {
-
-            val savedFontSize = fontDataStore.fontSize.first()
-            updateState { state ->
-                state.copy(
-                        fontSizeState = state.fontSizeState.copy(
-                                fontSize = savedFontSize,
-                                previewFontSize = savedFontSize
-                        )
-                )
-            }
         }
     }
 
@@ -135,111 +145,6 @@ class ReadViewModel(
         )
     }
 
-    private fun onToggleAutoRotate() {
-        updateState { state ->
-            state.copy(
-                    orientation = when (state.orientation) {
-                        ReadingOrientation.AUTO_ROTATE -> ReadingOrientation.LANDSCAPE_LOCK
-                        ReadingOrientation.LANDSCAPE_LOCK -> ReadingOrientation.AUTO_ROTATE
-                    }
-            )
-        }
-    }
-
-    private fun showFontSizePanel() {
-        updateState { state ->
-            state.copy(
-                    controlMode = ReadingControlMode.FontSizePanel,
-                    fontSizeState = state.fontSizeState.copy(
-                            previewFontSize = state.fontSizeState.fontSize
-                    )
-            )
-        }
-        restartControlsAutoHideTimer()
-
-    }
-
-    private fun previewFontSize(fontSize: Float) {
-        updateState { state ->
-            state.copy(
-                    fontSizeState = state.fontSizeState.copy(
-                            previewFontSize = fontSize.coercedFontSize
-                    )
-            )
-        }
-
-        restartControlsAutoHideTimer()
-    }
-
-    private fun finishAndSaveFontSizeChange() {
-        val updatedFontSize =
-            currentState.fontSizeState.previewFontSize.coercedFontSize
-
-        updateState { state ->
-            state.copy(
-                    fontSizeState = state.fontSizeState.copy(
-                            fontSize = updatedFontSize,
-                            previewFontSize = updatedFontSize
-                    )
-            )
-        }
-
-        saveFontSize()
-    }
-
-    private fun onIncreaseFontSize() {
-        updateState { state ->
-            val updatedFontSize =
-                (state.fontSizeState.fontSize + FONT_SIZE_STEP)
-                        .coerceInFontRange()
-
-            state.copy(
-                    fontSizeState = state.fontSizeState.copy(
-                            fontSize = updatedFontSize,
-                            previewFontSize = updatedFontSize
-                    )
-            )
-        }
-        saveFontSize()
-        restartControlsAutoHideTimer()
-    }
-
-    private fun onDecreaseFontSize() {
-        updateState { state ->
-            val updatedFontSize =
-                (state.fontSizeState.fontSize - FONT_SIZE_STEP)
-                        .coerceInFontRange()
-
-            state.copy(
-                    fontSizeState = state.fontSizeState.copy(
-                            fontSize = updatedFontSize,
-                            previewFontSize = updatedFontSize
-                    )
-            )
-        }
-        saveFontSize()
-        restartControlsAutoHideTimer()
-    }
-
-    private fun saveFontSize() {
-        val fontSize = currentState.fontSizeState.fontSize
-
-        launchCatching(
-                context = Dispatchers.IO,
-                onError = {
-                    sendActionEvent(ReaderActionEvent.ShowToast("Unable to save font size."))
-                }
-        ) {
-            fontDataStore.saveFontSize(fontSize)
-        }
-    }
-
-    private fun Float.coerceInFontRange(): Float {
-        return coerceIn(ReaderFontSize.MIN, ReaderFontSize.MAX)
-                .toInt()
-                .toFloat()
-    }
-
     private fun toggleFavorite() {
         val book = currentState.book ?: return
         val updatedFavorite = !book.isFavorite
@@ -261,34 +166,14 @@ class ReadViewModel(
         }
     }
 
-    private fun onReadingAreaClicked() {
-        when (currentState.controlMode) {
-            ReadingControlMode.Immersive -> {
-                showScreenControls()
-            }
-
-            else -> {
-                hideScreenControls()
-            }
-        }
-    }
-
-    private fun showScreenControls() {
-
-        updateState { state -> state.copy(controlMode = ReadingControlMode.DefaultToolbar) }
-        restartControlsAutoHideTimer()
-    }
-
-    private fun hideScreenControls() {
+    private fun cancelControlsAutoHideTimer() {
         autoHideJob?.cancel()
         autoHideJob = null
-        updateState { state -> state.copy(controlMode = ReadingControlMode.Immersive) }
     }
 
     private fun restartControlsAutoHideTimer() {
-        autoHideJob?.cancel()
+        cancelControlsAutoHideTimer()
         if (currentState.controlMode == ReadingControlMode.Immersive) {
-            autoHideJob = null
             return
         }
 
@@ -340,35 +225,8 @@ class ReadViewModel(
         }
     }
 
-    private fun viewChapters() {
-        sendActionEvent(ReaderActionEvent.NavigateToChaptersView)
-    }
-
-    private fun onConsumeChapterJump() {
-
-        updateState { state -> state.copy(requestedBlockIndex = null) }
-    }
-
     private fun exitReader() {
         sendActionEvent(ReaderActionEvent.ExitReader)
-    }
-
-    private fun exitChapters() {
-        sendActionEvent(ReaderActionEvent.CloseChapters)
-    }
-
-
-    private fun selectChapter(startBlockIndex: Int) {
-        val safeIndex = startBlockIndex.coerceAtLeast(0)
-
-        updateState { state ->
-            state.copy(
-                    currentBlockIndex = safeIndex,
-                    requestedBlockIndex = safeIndex
-            )
-        }
-
-        sendActionEvent(ReaderActionEvent.CloseChapters)
     }
 
     private fun viewBookmarks() {
@@ -376,7 +234,6 @@ class ReadViewModel(
     }
 
     private companion object {
-        const val FONT_SIZE_STEP = 1f
         const val AUTOHIDE_TIMEOUT = 5_000L
     }
 }
