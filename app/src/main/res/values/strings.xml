@@ -59,6 +59,7 @@
     <string name="button_text_start">Start</string>
     <string name="button_text_import_book">Import Book</string>
     <string name="button_text_continue">Continue</string>
+    <string name="button_text_add_bookmark">Add Bookmark</string>
 
     <!--Text Button Texts-->
     <string name="text_button_cancel">Cancel</string>

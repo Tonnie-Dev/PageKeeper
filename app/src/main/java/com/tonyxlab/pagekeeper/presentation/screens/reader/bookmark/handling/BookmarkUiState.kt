@@ -1,5 +1,8 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.handling
 
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.BookmarkUiItem
 
-class BookmarkUiState : UiState
+data class BookmarkUiState(
+        val bookMarks:List<BookmarkUiItem> = emptyList()
+) : UiState
