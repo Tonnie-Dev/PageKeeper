@@ -32,13 +32,14 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 fun AppButton(
     buttonText: String,
     leadingIcon: Painter,
+    modifier: Modifier = Modifier,
     buttonColor: Color = MaterialTheme.colorScheme.primary,
     buttonTextStyle: TextStyle = MaterialTheme.typography.BodyMediumMedium,
     buttonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
     onClick: () -> Unit,
 ) {
     Box(
-            modifier = Modifier
+            modifier = modifier
                     .clip(RoundedCornerShape(16.dp))
                     .background(buttonColor)
                     .clickable(onClick = onClick)

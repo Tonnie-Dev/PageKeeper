@@ -63,14 +63,23 @@
 
     <!--Text Button Texts-->
     <string name="text_button_cancel">Cancel</string>
+    <string name="text_button_save">Save</string>
 
     <!--Label Texts-->
-    <string name="label_text_gender">Gender</string>
+    <string name="label_text_title">Title</string>
+
+    <!--Bookmark Colors-->
+    <string name="bookmark_color_blue">Blue color</string>
+    <string name="bookmark_color_green">Green color</string>
+    <string name="bookmark_color_yellow">Yellow color</string>
+    <string name="bookmark_color_red">Red color</string>
+    <string name="bookmark_color_purple">Purple color</string>
 
     <!--Dialog Texts-->
     <string name="dialog_text_delete_book">Delete \"%s\"?</string>
     <string name="dialog_text_unsupported_format">Unsupported file format</string>
     <string name="dialog_text_remove_action">This action will remove the book from your library.</string>
+    <string name="dialog_text_add_bookmark">Add bookmark</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
