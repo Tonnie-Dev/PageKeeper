@@ -1,6 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,16 +13,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,141 +47,200 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
+import com.tonyxlab.pagekeeper.presentation.core.components.AppInputField
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.toColor
-import com.tonyxlab.pagekeeper.presentation.theme.BodyLargeRegular
+import com.tonyxlab.pagekeeper.presentation.theme.BgModalInput
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
+import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumRegular
+import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.TitleMediumMedium
+import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
-/**
- * Dialog used to create or edit a bookmark.
- *
- * The title and selected color are owned by the caller so the dialog can be
- * driven directly from screen state.
- */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BookmarkDialog(
-    title: String ,
+    textFieldState: TextFieldState,
     selectedColor: BookmarkColor,
-    onTitleChange: (String) -> Unit,
     onColorSelected: (BookmarkColor) -> Unit,
     onDismissRequest: () -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+
     var isColorMenuExpanded by remember { mutableStateOf(false) }
 
+    val hasText = textFieldState.text.isNotEmpty()
+
+    val fieldShape = MaterialTheme.shapes.large
+    val borderColor = MaterialTheme.colorScheme.outlineVariant
+    val borderWidth = MaterialTheme.spacing.spaceSingleDp
+
     Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+            onDismissRequest = {
+                isColorMenuExpanded = false
+                onDismissRequest()
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .widthIn(max = 356.dp),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surface,
+                modifier = modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = MaterialTheme.spacing.spaceTwelve * 2)
+                        .widthIn(max = dialogMaxWidth),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surface,
         ) {
-            Column(modifier = Modifier.padding(28.dp)) {
+            Column(modifier = Modifier.padding(MaterialTheme.spacing.spaceDoubleDp * 14)) {
+
                 Text(
-                    text = stringResource(R.string.dialog_text_add_bookmark),
-                    style = MaterialTheme.typography.TitleMediumMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                        text = stringResource(R.string.dialog_text_add_bookmark),
+                        style = MaterialTheme.typography.TitleMediumMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(MaterialTheme.spacing.spaceTen * 2))
 
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = onTitleChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.label_text_title)) },
-                    textStyle = MaterialTheme.typography.BodyLargeRegular,
-                    minLines = 2,
-                    maxLines = 2,
-                    shape = MaterialTheme.shapes.large,
+                AppInputField(
+                        modifier = Modifier
+                                .border(
+                                        width = borderWidth,
+                                        color = borderColor,
+                                        shape = fieldShape
+                                ),
+                        textFieldState = textFieldState,
+                        placeholderText = stringResource(id = R.string.label_text_title),
+                        height = inputFieldHeight,
+                        textStyle = MaterialTheme.typography.BodyMediumRegular.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        backgroundColor = BgModalInput,
+                        labelText = {
+                            Text(
+                                    modifier = Modifier
+                                            .padding(start = MaterialTheme.spacing.spaceSmall)
+                                            .padding(top = MaterialTheme.spacing.spaceSmall),
+                                    text = stringResource(id = R.string.label_text_title),
+                                    style = MaterialTheme.typography.BodySmallRegular,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(MaterialTheme.spacing.spaceMedium))
 
                 ExposedDropdownMenuBox(
-                    expanded = isColorMenuExpanded,
-                    onExpandedChange = { isColorMenuExpanded = it },
+                        expanded = isColorMenuExpanded,
+                        onExpandedChange = { isColorMenuExpanded = it },
                 ) {
+
                     OutlinedTextField(
-                        value = selectedColor.displayName(),
-                        onValueChange = {},
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.BodyLargeRegular,
-                        leadingIcon = {
-                            ColorIndicator(color = selectedColor.toColor())
-                        },
-                        trailingIcon = {
-                            if (isColorMenuExpanded) {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = true)
-                            } else {
-                                androidx.compose.material3.Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                                    contentDescription = stringResource(R.string.cds_text_expand_more),
-                                )
-                            }
-                        },
-                        shape = MaterialTheme.shapes.large,
+                            modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(
+                                            width = borderWidth,
+                                            color = borderColor,
+                                            shape = fieldShape,
+                                    )
+                                    .menuAnchor(
+                                            type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                    ),
+                            value = selectedColor.displayName(),
+                            onValueChange = {},
+                            readOnly = true,
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.BodyMediumRegular.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    disabledBorderColor = Color.Transparent,
+                                    errorBorderColor = Color.Transparent,
+                                    focusedContainerColor = BgModalInput,
+                                    unfocusedContainerColor = BgModalInput,
+                            ),
+                            leadingIcon = {
+                                ColorIndicator(color = selectedColor.toColor())
+                            },
+                            trailingIcon = {
+                                if (isColorMenuExpanded) {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = true)
+                                } else {
+                                    Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowRight,
+                                            contentDescription = stringResource(R.string.cds_text_expand_more),
+                                    )
+                                }
+                            },
+                            shape = MaterialTheme.shapes.large,
                     )
 
                     ExposedDropdownMenu(
-                        expanded = isColorMenuExpanded,
-                        onDismissRequest = { isColorMenuExpanded = false },
+                            modifier = Modifier,
+                            expanded = isColorMenuExpanded,
+                            shape = MaterialTheme.shapes.large,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            tonalElevation = 0.dp,
+                            shadowElevation = 8.dp,
+                            onDismissRequest = { isColorMenuExpanded = false },
                     ) {
                         BookmarkColor.entries.forEach { color ->
                             DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = color.displayName(),
-                                        style = MaterialTheme.typography.BodyLargeRegular,
-                                    )
-                                },
-                                onClick = {
-                                    onColorSelected(color)
-                                    isColorMenuExpanded = false
-                                },
-                                leadingIcon = { ColorIndicator(color = color.toColor()) },
-                                modifier = if (color == selectedColor) {
-                                    Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
-                                } else {
-                                    Modifier
-                                },
+                                    modifier = if (color == selectedColor) {
+                                        Modifier
+                                                .padding(MaterialTheme.spacing.spaceSmall)
+                                                .background(
+                                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                                        shape = MaterialTheme.shapes.small
+                                                )
+
+                                    } else {
+                                        Modifier.background(MaterialTheme.colorScheme.surface)
+                                    },
+                                    text = {
+                                        Text(
+                                                text = color.displayName(),
+                                                style = MaterialTheme.typography.BodyMediumRegular.copy(
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                        )
+                                    },
+                                    onClick = {
+                                        onColorSelected(color)
+                                        isColorMenuExpanded = false
+                                    },
+                                    leadingIcon = { ColorIndicator(color = color.toColor()) }
                             )
                         }
                     }
                 }
 
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(MaterialTheme.spacing.spaceTen * 2))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                Spacer(Modifier.height(22.dp))
+                Spacer(Modifier.height(MaterialTheme.spacing.spaceTen * 2))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(
-                            text = stringResource(R.string.text_button_cancel),
-                            style = MaterialTheme.typography.BodyMediumMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                                text = stringResource(R.string.text_button_cancel),
+                                style = MaterialTheme.typography.BodyMediumMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
-                    TextButton(onClick = onSave, enabled = title.isNotBlank()) {
+                    TextButton(
+                            onClick = onSave,
+                            enabled = textFieldState.text.isNotEmpty()
+                    ) {
                         Text(
-                            text = stringResource(R.string.text_button_save),
-                            style = MaterialTheme.typography.BodyMediumMedium,
+                                text = stringResource(R.string.text_button_save),
+                                style = MaterialTheme.typography.BodyMediumMedium,
+                                color = if (hasText) MaterialTheme.colorScheme.onSurface else
+                                    Color.Unspecified
                         )
                     }
                 }
@@ -184,13 +249,16 @@ fun BookmarkDialog(
     }
 }
 
+private val dialogMaxWidth = 312.dp
+private val inputFieldHeight = 90.dp
+
 @Composable
 private fun ColorIndicator(color: Color) {
     Box(
-        modifier = Modifier
-            .size(16.dp)
-            .clip(CircleShape)
-            .background(color),
+            modifier = Modifier
+                    .size(MaterialTheme.spacing.spaceMedium)
+                    .clip(CircleShape)
+                    .background(color),
     )
 }
 
@@ -208,12 +276,11 @@ private fun BookmarkColor.displayName(): String = when (this) {
 private fun BookmarkDialogPreview() {
     PageKeeperTheme {
         BookmarkDialog(
-            title = "The forest was unusually quiet that evening",
-            selectedColor = BookmarkColor.Blue,
-            onTitleChange = {},
-            onColorSelected = {},
-            onDismissRequest = {},
-            onSave = {},
+                textFieldState = TextFieldState(initialText = "Hello There"),
+                selectedColor = BookmarkColor.Blue,
+                onColorSelected = {},
+                onDismissRequest = {},
+                onSave = {},
         )
     }
 }

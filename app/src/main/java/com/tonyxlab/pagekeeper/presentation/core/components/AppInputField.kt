@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,6 +56,7 @@ fun AppInputField(
     requestFocusOnStart: Boolean = true,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    labelText: (@Composable () -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
 ) {
 
@@ -73,32 +76,42 @@ fun AppInputField(
                     .height(height)
                     .background(color = backgroundColor)
                     .padding(horizontal = MaterialTheme.spacing.spaceMedium)
-                  .padding(vertical = MaterialTheme.spacing.spaceExtraSmall),
+                    .padding(vertical = MaterialTheme.spacing.spaceExtraSmall),
             verticalAlignment = Alignment.CenterVertically,
     ) {
         leadingIcon?.invoke()
 
-        BasicTextField(
-                modifier = Modifier
-                        .weight(1f)
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focused = it.isFocused },
-                state = textFieldState,
-                textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = keyboardOptions,
-                decorator = { innerTextField ->
-                    TextDecorator(
-                            isEmpty = textFieldState.text.isEmpty(),
-                            innerTextField = innerTextField,
-                            focused = focused,
-                            placeholderText = placeholderText,
-                            placeholderTextStyle = placeholderTextStyle.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                    )
-                }
-        )
+        Column {
+            labelText?.invoke()
+
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceExtraSmall))
+
+            BasicTextField(
+                    modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester)
+                            .onFocusChanged { focused = it.isFocused },
+                    state = textFieldState,
+                    textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+                    lineLimits = TextFieldLineLimits.MultiLine(
+                            minHeightInLines = 2,
+                            maxHeightInLines = 3
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    keyboardOptions = keyboardOptions,
+                    decorator = { innerTextField ->
+                        TextDecorator(
+                                isEmpty = textFieldState.text.isEmpty(),
+                                innerTextField = innerTextField,
+                                focused = focused,
+                                placeholderText = placeholderText,
+                                placeholderTextStyle = placeholderTextStyle.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                        )
+                    }
+            )
+        }
         trailingIcon?.invoke()
     }
 }
@@ -145,7 +158,10 @@ private fun SearchComponent_Preview() {
             AppInputField(
                     modifier = Modifier
                             .clip(MaterialTheme.shapes.extraLarge)
-                            .background(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.extraLarge),
+                            .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = MaterialTheme.shapes.extraLarge
+                            ),
                     textFieldState = TextFieldState(initialText = "Hello"),
                     height = 40.dp,
                     placeholderText = "",
