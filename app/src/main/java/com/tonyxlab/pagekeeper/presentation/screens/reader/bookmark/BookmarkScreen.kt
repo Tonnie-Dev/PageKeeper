@@ -11,22 +11,17 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppButton
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
-import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkDialog
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.handling.BookmarkActionEvent
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.handling.BookmarkUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.handling.BookmarkUiState
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun BookmarkScreen(
-    bookId: String,
-    navigator: Navigator,
-    modifier: Modifier = Modifier,
-    viewModel: BookmarkViewModel = koinViewModel()
+    viewModel: ReadViewModel,
+    navigateToReadScreen: () -> Unit
 ) {
-
     BaseContentLayout(
             viewModel = viewModel,
             topBar = {
@@ -34,20 +29,16 @@ fun BookmarkScreen(
                 AppTopBar(
                         titleText = stringResource(id = R.string.topbar_text_bookmarks),
                         backgroundColor = MaterialTheme.colorScheme.background,
-                        onNavButtonClick = {viewModel.onEvent(BookmarkUiEvent.NavigateBack)},
+                        onNavButtonClick = navigateToReadScreen
                 )
             },
-            actionEventHandler = { _,action ->
-                when (action) {
-                    BookmarkActionEvent.NavigateBackToRead -> navigator.popBackstack()
-                }
-            },
+
             floatingActionButton = {
                 AppButton(
                         modifier = Modifier.navigationBarsPadding(),
                         buttonText = stringResource(id = R.string.button_text_add_bookmark),
                         leadingIcon = painterResource(R.drawable.ic_bookmark_add),
-                        onClick = {viewModel.onEvent(BookmarkUiEvent.AddBookmark)}
+                        onClick = { viewModel.onEvent(ReaderUiEvent.AddBookmark) }
                 )
             }
     ) { state ->
@@ -61,28 +52,30 @@ fun BookmarkScreen(
 
 @Composable
 private fun BookmarkScreenContent(
-    uiState: BookmarkUiState,
-    onEvent: (BookmarkUiEvent) -> Unit
+    uiState: ReaderUiState,
+    onEvent: (ReaderUiEvent) -> Unit
 ) {
     val isDeviceWide = rememberIsDeviceWide()
-    uiState.bookMarks.ifEmpty {
 
+    uiState.bookmarkUiState.bookMarks.ifEmpty {
         EmptyBookmarkScreen(isDeviceWide = isDeviceWide)
     }
 
-    if (uiState.dialogInputState.showBookmarkDialog) {
+    val dialogInputState = uiState.bookmarkUiState.dialogInputState
+
+    if (dialogInputState.showBookmarkDialog) {
         BookmarkDialog(
                 modifier = Modifier,
-                textFieldState = uiState.dialogInputState.textFieldState,
-                selectedColor = uiState.dialogInputState.selectedColor,
+                textFieldState = dialogInputState.textFieldState,
+                selectedColor = dialogInputState.selectedColor,
                 onColorSelected = { color ->
-                    onEvent(BookmarkUiEvent.ColorSelected(color))
+                    onEvent(ReaderUiEvent.ColorSelected(color))
                 },
                 onDismissRequest = {
-                    onEvent(BookmarkUiEvent.DismissBookmarkDialog)
+                    onEvent(ReaderUiEvent.DismissBookmarkDialog)
                 },
                 onSave = {
-                    onEvent(BookmarkUiEvent.SaveBookmark)
+                    onEvent(ReaderUiEvent.SaveBookmark)
                 },
         )
     }

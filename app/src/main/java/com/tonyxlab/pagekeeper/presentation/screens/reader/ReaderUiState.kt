@@ -1,9 +1,12 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
 import com.tonyxlab.pagekeeper.domain.model.ReaderBook
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.ChapterUiSection
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 
@@ -23,9 +26,12 @@ data class ReaderUiState(
     val controlMode: ReadingControlMode = ReadingControlMode.Immersive,
 
     val chapterSections: List<ChapterUiSection> = emptyList(),
-    val currentBlockIndex: Int = 0,
-    val requestedBlockIndex: Int? = null
 
+    val currentBlockIndex: Int = 0,
+
+    val requestedBlockIndex: Int? = null,
+
+    val bookmarkUiState: BookmarkUiState = BookmarkUiState()
 ) : UiState {
 
     @Stable
@@ -33,6 +39,19 @@ data class ReaderUiState(
         val fontSize: Float = ReaderFontSize.DEFAULT,
         val previewFontSize: Float = ReaderFontSize.DEFAULT
     )
+
+    @Stable
+    data class BookmarkUiState(
+        val bookMarks: List<BookmarkUiItem> = emptyList(),
+        val dialogInputState: DialogInputState = DialogInputState()
+    ) : UiState {
+
+        data class DialogInputState(
+            val textFieldState: TextFieldState = TextFieldState(),
+            val showBookmarkDialog: Boolean = false,
+            val selectedColor: BookmarkColor = BookmarkColor.Blue
+        )
+    }
 }
 
 enum class ReadingOrientation {

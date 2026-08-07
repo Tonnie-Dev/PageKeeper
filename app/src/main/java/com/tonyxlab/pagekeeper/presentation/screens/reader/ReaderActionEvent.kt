@@ -14,5 +14,8 @@ sealed interface ReaderActionEvent : ActionEvent {
     data object NavigateToBookmarksView : ReaderActionEvent
 
     // Chapter ActionEvents
-    data object CloseChapters : ReaderActionEvent
+    data object ExitChapters : ReaderActionEvent
+
+    // Bookmark Action Events
+    object ExitBookmark : ReaderActionEvent
 }

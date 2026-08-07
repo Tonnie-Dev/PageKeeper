@@ -17,7 +17,7 @@ class ChapterHandler(
     }
 
     fun exitChapters() {
-        sendActionEvent(ReaderActionEvent.CloseChapters)
+        sendActionEvent(ReaderActionEvent.ExitChapters)
     }
 
     fun selectChapter(startBlockIndex: Int) {
@@ -30,6 +30,6 @@ class ChapterHandler(
             )
         }
 
-        sendActionEvent(ReaderActionEvent.CloseChapters)
+        sendActionEvent(ReaderActionEvent.ExitChapters)
     }
 }

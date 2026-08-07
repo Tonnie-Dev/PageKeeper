@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark
+package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model
 
 import androidx.compose.ui.graphics.Color
 import com.tonyxlab.pagekeeper.domain.model.BookmarkColor

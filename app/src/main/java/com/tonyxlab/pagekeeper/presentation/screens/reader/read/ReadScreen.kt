@@ -56,7 +56,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun ReadScreen(
     navigator: Navigator,
     viewModel: ReadViewModel,
-    navigateToChaptersScreen: () -> Unit
+    navigateToChaptersScreen: () -> Unit,
+    navigateToBookmarkScreen:() -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -154,7 +155,7 @@ fun ReadScreen(
 
                     ReaderActionEvent.ExitReader -> navigator.popToLibrary()
                     ReaderActionEvent.NavigateToChaptersView -> navigateToChaptersScreen()
-                    ReaderActionEvent.NavigateToBookmarksView -> navigator.navigateToBookmark("")
+                    ReaderActionEvent.NavigateToBookmarksView -> navigateToBookmarkScreen()
                     else -> Unit
                 }
             }

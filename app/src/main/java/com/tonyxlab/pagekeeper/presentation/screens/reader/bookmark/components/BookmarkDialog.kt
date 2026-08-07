@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -48,7 +46,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
 import com.tonyxlab.pagekeeper.presentation.core.components.AppInputField
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.toColor
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.toColor
 import com.tonyxlab.pagekeeper.presentation.theme.BgModalInput
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumRegular

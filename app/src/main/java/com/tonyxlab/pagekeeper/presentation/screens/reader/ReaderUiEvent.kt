@@ -1,7 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader
 
+import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiEvent
-
 
 sealed interface ReaderUiEvent : UiEvent {
 
@@ -30,11 +30,23 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data object ViewBookmarks : ReaderUiEvent
 
-
     data object ChaptersJumpConsumed : ReaderUiEvent
 
     // Chapters UiEvents
-    data object BackClicked: ReaderUiEvent
-    data class ChapterSelected(val startBlockIndex: Int): ReaderUiEvent
-    data class SectionClicked(val sectionIndex: Int): ReaderUiEvent
+    data object BackClicked : ReaderUiEvent
+
+    data class ChapterSelected(val startBlockIndex: Int) : ReaderUiEvent
+
+    data class SectionClicked(val sectionIndex: Int) : ReaderUiEvent
+
+    // Bookmark UiEvents
+    data object AddBookmark : ReaderUiEvent
+
+    data object SaveBookmark : ReaderUiEvent
+
+    data object DismissBookmarkDialog : ReaderUiEvent
+
+    data class ColorSelected(val color: BookmarkColor) : ReaderUiEvent
+
+    data object NavigateBack : ReaderUiEvent
 }

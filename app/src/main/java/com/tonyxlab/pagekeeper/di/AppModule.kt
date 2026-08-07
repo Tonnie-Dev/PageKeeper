@@ -3,14 +3,13 @@ package com.tonyxlab.pagekeeper.di
 import androidx.room.Room
 import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.data.local.database.PageKeeperDatabase
+import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.data.parser.Fb2PullParser
-import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.repository.BookRepositoryImpl
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.BookmarkViewModel
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
@@ -20,7 +19,7 @@ import org.koin.dsl.module
 val viewModelModule = module {
     viewModelOf(::LibraryViewModel)
     viewModelOf(::ReadViewModel)
-    viewModelOf(::BookmarkViewModel)
+
 }
 
 val databaseModule = module {

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.BookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.ChaptersScreen
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.ReadScreen
 import org.koin.compose.viewmodel.koinViewModel
@@ -31,7 +32,8 @@ fun ReaderFlow(
             ReadScreen(
                     navigator = navigator,
                     viewModel = viewModel,
-                    navigateToChaptersScreen = { currentScreen = ReaderScreen.Chapters }
+                    navigateToChaptersScreen = { currentScreen = ReaderScreen.Chapters },
+                    navigateToBookmarkScreen = {currentScreen = ReaderScreen.Bookmark}
             )
         }
 
@@ -41,9 +43,13 @@ fun ReaderFlow(
                     navigateToReadScreen = { currentScreen = ReaderScreen.Read }
             )
         }
+
+        ReaderScreen.Bookmark -> {
+            BookmarkScreen(viewModel = viewModel) {  currentScreen = ReaderScreen.Read}
+        }
     }
 }
 
 private enum class ReaderScreen {
-    Read, Chapters
+    Read, Chapters, Bookmark
 }

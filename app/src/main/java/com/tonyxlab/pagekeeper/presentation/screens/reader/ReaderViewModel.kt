@@ -6,6 +6,7 @@ import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.data.parser.mapper.toReaderBook
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.handling.BookmarkHandler
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.handling.ChapterHandler
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.mapper.toChapterSections
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.handling.ControlsHandler
@@ -51,6 +52,11 @@ class ReadViewModel(
             }
     )
 
+    private val bookmarkHandler = BookmarkHandler(
+            updateState = ::updateState,
+            sendActionEvent = ::sendActionEvent
+    )
+
     init {
         fontHandler.loadFontSize()
         loadBook(bookId)
@@ -82,6 +88,13 @@ class ReadViewModel(
             }
 
             ReaderUiEvent.ViewBookmarks -> viewBookmarks()
+
+            // Bookmark UiEvents
+            ReaderUiEvent.AddBookmark -> bookmarkHandler.onAddBookmark()
+            is ReaderUiEvent.ColorSelected -> bookmarkHandler.onSelectColor(event.color)
+            ReaderUiEvent.DismissBookmarkDialog -> bookmarkHandler.onDismissBookmarkDialog()
+            ReaderUiEvent.NavigateBack -> bookmarkHandler.onExitBookmark()
+            ReaderUiEvent.SaveBookmark -> bookmarkHandler.onSaveBookmark()
         }
     }
 
@@ -126,7 +139,7 @@ class ReadViewModel(
                                             book = state.book?.copy(
                                                     totalBlockCount = document.blocks.size
                                             ),
-                                            chapterSections =document.toChapterSections(),
+                                            chapterSections = document.toChapterSections(),
                                             currentBlockIndex = currentBlockIndex
                                     )
                                 }
