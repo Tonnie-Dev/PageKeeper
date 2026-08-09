@@ -7,7 +7,9 @@ import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.data.parser.Fb2PullParser
 import com.tonyxlab.pagekeeper.data.repository.BookRepositoryImpl
+import com.tonyxlab.pagekeeper.data.repository.BookmarkRepositoryImpl
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
+import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
 import com.tonyxlab.pagekeeper.utils.AppDefaults
@@ -33,11 +35,13 @@ val databaseModule = module {
     }
 
     single { get<PageKeeperDatabase>().bookDao }
+    single { get<PageKeeperDatabase>().bookmarkDao }
 
 }
 
 val repositoryModule = module {
     single<BookRepository> { BookRepositoryImpl(get()) }
+    single<BookmarkRepository> { BookmarkRepositoryImpl(get()) }
 }
 
 val importerModule = module {

@@ -1,19 +1,12 @@
 package com.tonyxlab.pagekeeper.domain.model
 
 data class Bookmark(
-
     val id: Long = 0L,
-
-    val bookHash: String,
-
+    val bookId: String,
     val blockIndex: Int,
-
-    val blockOffset: Int = 0,
-
-    val title: String,
-
+    val text: String,
+    val chapterTitle: String,
     val color: BookmarkColor,
-
     val createdAt: Long,
 )
 
