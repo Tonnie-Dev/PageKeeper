@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BookDao {
 
-    @Query("SELECT * FROM books ORDER BY dateAdded DESC")
+    @Query("SELECT * FROM books ORDER BY date_added DESC")
     fun observeBooks(): Flow<List<BookEntity>>
 
     @Query("SELECT * FROM books WHERE id = :id")
@@ -22,10 +22,10 @@ interface BookDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertBook(book: BookEntity)
 
-    @Query("UPDATE books SET isFavorite = :isFavorite WHERE id = :bookId")
+    @Query("UPDATE books SET is_favorite = :isFavorite WHERE id = :bookId")
     suspend fun updateFavorite(bookId: String, isFavorite: Boolean)
 
-    @Query("UPDATE books SET isFinished = :isFinished WHERE id = :bookId")
+    @Query("UPDATE books SET is_finished = :isFinished WHERE id = :bookId")
     suspend fun updateFinished(bookId: String, isFinished: Boolean)
 
     @Query("DELETE FROM books WHERE id = :id")
@@ -36,7 +36,7 @@ interface BookDao {
     SELECT * FROM books
     WHERE title LIKE '%' || :query || '%' COLLATE NOCASE
        OR author LIKE '%' || :query || '%' COLLATE NOCASE
-    ORDER BY dateAdded DESC
+    ORDER BY date_added DESC
     """
     )
     fun searchBooks(query: String): Flow<List<BookEntity>>
@@ -44,8 +44,8 @@ interface BookDao {
     @Query(
             """
         UPDATE books
-        SET lastReadBlockIndex = :lastReadBlockIndex,
-totalBlockCount = :totalBlockCount
+        SET last_read_block_index = :lastReadBlockIndex,
+total_block_count = :totalBlockCount
 WHERE id = :bookId
     """
     )
@@ -54,7 +54,7 @@ WHERE id = :bookId
     @Query(
             """
   UPDATE books
-  SET lastReadAt = :lastOpenedAt
+  SET last_read_at = :lastOpenedAt
   WHERE id =:bookId
    """
     )
@@ -63,9 +63,9 @@ WHERE id = :bookId
     @Query(
             """
 SELECT * FROM books
-WHERE lastReadAt   IS NOT NULL
-AND isFinished = 0
-ORDER BY lastReadAt DESC
+WHERE last_read_at   IS NOT NULL
+AND is_finished = 0
+ORDER BY last_read_at DESC
 LIMIT 1
  """
     )

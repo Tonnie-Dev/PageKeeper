@@ -15,6 +15,7 @@ data class ReaderUiState(
     val isLoading: Boolean = false,
 
     val book: Book? = null,
+
     val resumeBook: Book? = null,
 
     val document: ReaderBook? = null,
