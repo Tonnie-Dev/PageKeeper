@@ -11,10 +11,12 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppButton
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
+import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkDialog
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkItem
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 
 @Composable
@@ -32,7 +34,6 @@ fun BookmarkScreen(
                         onNavButtonClick = navigateToReadScreen
                 )
             },
-
             floatingActionButton = {
                 AppButton(
                         modifier = Modifier.navigationBarsPadding(),
@@ -62,6 +63,20 @@ private fun BookmarkScreenContent(
     }
 
     val dialogInputState = uiState.bookmarkUiState.dialogInputState
+
+
+    LazyListComponent(
+            modifier = Modifier,
+            items = uiState.bookmarkUiState.bookMarks,
+            key = { it.id },
+            content = { bookmark ->
+                BookmarkItem(
+                        bookmark = bookmark,
+                        onClick = { onEvent(ReaderUiEvent.SelectBookmark(bookmark)) },
+                        onMenuClick = { onEvent(ReaderUiEvent.ShowBookmarkMenu(bookmark)) }
+                )
+            }
+    )
 
     if (dialogInputState.showBookmarkDialog) {
         BookmarkDialog(

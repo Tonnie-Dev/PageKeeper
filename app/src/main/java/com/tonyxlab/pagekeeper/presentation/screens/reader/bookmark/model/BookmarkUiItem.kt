@@ -1,13 +1,14 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model
 
 import androidx.compose.ui.graphics.Color
+import com.tonyxlab.pagekeeper.domain.model.Bookmark
 import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
 
 data class BookmarkUiItem(
     val id: Long,
-    val blockIndex: Int,
-    val blockOffset: Int,
     val text: String,
+    val blockIndex: Int,
+    val textOffset:Int,
     val chapterTitle: String,
     val color: BookmarkColor,
     val createdAt: Long,
@@ -21,3 +22,14 @@ fun BookmarkColor.toColor(): Color =
         BookmarkColor.Orange -> Color(0xFFE53916)
         BookmarkColor.Purple -> Color(0xFFD000B8)
     }
+
+fun Bookmark.toBookmarkUiItem() =
+    BookmarkUiItem(
+            id = id,
+            text = text,
+            blockIndex = blockIndex,
+            textOffset = textOffset,
+            chapterTitle = chapterTitle,
+            color = color,
+            createdAt = createdAt
+    )

@@ -25,7 +25,7 @@ class ChapterHandler(
 
         updateState { state ->
             state.copy(
-                    currentBlockIndex = safeIndex,
+                    readingPosition = state.readingPosition.copy(currentBlockIndex = safeIndex),
                     requestedBlockIndex = safeIndex
             )
         }

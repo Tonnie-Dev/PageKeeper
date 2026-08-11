@@ -17,16 +17,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,14 +53,13 @@ import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
 import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun ReadScreen(
     navigator: Navigator,
     viewModel: ReadViewModel,
     navigateToChaptersScreen: () -> Unit,
-    navigateToBookmarkScreen:() -> Unit
+    navigateToBookmarkScreen: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -182,16 +184,48 @@ fun ReadScreenContent(
 
     val blocks = uiState.document?.blocks.orEmpty()
     val listState = rememberLazyListState()
+
+    val textLayouts = remember {
+        mutableStateMapOf<Int, TextLayoutResult>()
+    }
     /*
     * save position
     */
 
     LaunchedEffect(listState) {
 
-        snapshotFlow { listState.firstVisibleItemIndex }
-                .distinctUntilChanged()
-                .collect { blockIndex ->
-                    onEvent(ReaderUiEvent.ReadingPositionChanged(blockIndex))
+        snapshotFlow {
+            listState.layoutInfo.visibleItemsInfo.firstOrNull()
+        }
+                .collect { visibleItem ->
+
+                    visibleItem ?: return@collect
+
+                    val blockIndex = visibleItem.index
+
+                    val layoutResult =
+                        textLayouts[blockIndex]
+
+                    val textOffset =
+                        if (layoutResult != null) {
+
+                            val localY =
+                                (-visibleItem.offset).toFloat()
+
+                            layoutResult.getTextOffsetAtVerticalPosition(
+                                    y = localY
+                            )
+
+                        } else {
+                            0
+                        }
+
+                    onEvent(
+                            ReaderUiEvent.ReadingPositionChanged(
+                                    blockIndex = blockIndex,
+                                    textOffset = textOffset
+                            )
+                    )
                 }
     }
 
@@ -252,7 +286,7 @@ fun ReadScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTen * 2)
         ) {
-            items(items = blocks) { block ->
+            itemsIndexed(items = blocks) { blockIndex, block ->
                 when (block) {
                     is ReaderContentBlock.ChapterTitle -> {
                         ChapterTitleBlock(
@@ -264,7 +298,10 @@ fun ReadScreenContent(
                     is ReaderContentBlock.Paragraph -> {
                         ParagraphBlock(
                                 block = block,
-                                fontSizeSp = uiState.fontSizeState.previewFontSize
+                                fontSizeSp = uiState.fontSizeState.previewFontSize,
+                                onTextLayout = { layoutResult ->
+                                    textLayouts[blockIndex] = layoutResult
+                                }
                         )
                     }
 
@@ -286,3 +323,16 @@ private val MAX_WIDTH = 600.dp
 
 private fun <T> readerControlsTween() =
     tween<T>(durationMillis = READER_ANIMATION_DURATION)
+
+private fun TextLayoutResult.getTextOffsetAtVerticalPosition(
+    y: Float
+): Int {
+
+    if (layoutInput.text.text.isEmpty()) return 0
+
+    val line = getLineForVerticalPosition(
+            vertical = y.coerceAtLeast(0f)
+    )
+
+    return getLineStart(line)
+}

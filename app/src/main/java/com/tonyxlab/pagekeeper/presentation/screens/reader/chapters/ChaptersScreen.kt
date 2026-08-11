@@ -67,7 +67,7 @@ private fun ChaptersScreenContent(
 ) {
 
     val sections = uiState.chapterSections
-    val currentBlockIndex = uiState.currentBlockIndex
+    val currentBlockIndex = uiState.readingPosition.currentBlockIndex
 
     val currentChapter = remember(
             sections,

@@ -4,9 +4,12 @@ import androidx.lifecycle.viewModelScope
 import com.tonyxlab.pagekeeper.data.local.datastore.FontDataStore
 import com.tonyxlab.pagekeeper.data.parser.Fb2Parser
 import com.tonyxlab.pagekeeper.data.parser.mapper.toReaderBook
+import com.tonyxlab.pagekeeper.domain.model.Bookmark
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
+import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.handling.BookmarkHandler
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.toBookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.handling.ChapterHandler
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.mapper.toChapterSections
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.handling.ControlsHandler
@@ -22,6 +25,7 @@ typealias ReadBaseViewModel = BaseViewModel<ReaderUiState, ReaderUiEvent, Reader
 class ReadViewModel(
     private val fb2Parser: Fb2Parser,
     private val bookRepository: BookRepository,
+    private val bookmarkRepository: BookmarkRepository,
     fontDataStore: FontDataStore,
     bookId: String,
 ) : ReadBaseViewModel(initialState = ReaderUiState()) {
@@ -54,12 +58,19 @@ class ReadViewModel(
 
     private val bookmarkHandler = BookmarkHandler(
             updateState = ::updateState,
-            sendActionEvent = ::sendActionEvent
+            sendActionEvent = ::sendActionEvent,
+            currentState = { currentState },
+            bookmarkRepository = bookmarkRepository,
+            coroutineScope = viewModelScope,
+            onSaveError = {
+                sendActionEvent(ReaderActionEvent.ShowToast("Unable to save bookmark."))
+            }
     )
 
     init {
         fontHandler.loadFontSize()
         loadBook(bookId)
+        observeBookmarks(bookId)
     }
 
     override fun onEvent(event: ReaderUiEvent) {
@@ -75,7 +86,10 @@ class ReadViewModel(
             is ReaderUiEvent.PreviewFontSizeChange -> fontHandler.previewFontSize(event.fontSize)
             is ReaderUiEvent.FontSizeChangeFinished -> fontHandler.finishAndSaveFontSizeChange()
             is ReaderUiEvent.ReadingPositionChanged ->
-                onReadingPositionChanged(blockIndex = event.blockIndex)
+                onReadingPositionChanged(
+                        blockIndex = event.blockIndex,
+                        textOffset = event.textOffset
+                )
 
             ReaderUiEvent.ViewChapters -> chapterHandler.viewChapters()
             ReaderUiEvent.ChaptersJumpConsumed -> chapterHandler.onConsumeChapterJump()
@@ -95,6 +109,8 @@ class ReadViewModel(
             ReaderUiEvent.DismissBookmarkDialog -> bookmarkHandler.onDismissBookmarkDialog()
             ReaderUiEvent.NavigateBack -> bookmarkHandler.onExitBookmark()
             ReaderUiEvent.SaveBookmark -> bookmarkHandler.onSaveBookmark()
+            is ReaderUiEvent.SelectBookmark -> {}
+            is ReaderUiEvent.ShowBookmarkMenu -> {}
         }
     }
 
@@ -140,7 +156,7 @@ class ReadViewModel(
                                                     totalBlockCount = document.blocks.size
                                             ),
                                             chapterSections = document.toChapterSections(),
-                                            currentBlockIndex = currentBlockIndex
+                                            readingPosition = state.readingPosition.copy(currentBlockIndex = currentBlockIndex)
                                     )
                                 }
                             },
@@ -156,6 +172,25 @@ class ReadViewModel(
                         error.message ?: "Unable to read this book."
                 )
         )
+    }
+
+    private fun observeBookmarks(bookId: String) {
+
+        launchCatching {
+
+            bookmarkRepository.observeBookmarks(bookId = bookId)
+                    .collect { bookmarks ->
+
+                        updateState { state ->
+
+                            state.copy(
+                                    bookmarkUiState = state.bookmarkUiState.copy(
+                                            bookMarks = bookmarks.map(Bookmark::toBookmarkUiItem)
+                                    )
+                            )
+                        }
+                    }
+        }
     }
 
     private fun toggleFavorite() {
@@ -198,7 +233,10 @@ class ReadViewModel(
         }
     }
 
-    private fun onReadingPositionChanged(blockIndex: Int) {
+    private fun onReadingPositionChanged(
+        blockIndex: Int,
+        textOffset: Int
+    ) {
         val document = currentState.document ?: return
 
         val totalBlockCount = document.blocks.size
@@ -208,11 +246,16 @@ class ReadViewModel(
                     book = state.book?.copy(
                             lastReadBlockIndex = blockIndex,
                             totalBlockCount = totalBlockCount
+                    ),
+                    readingPosition = state.readingPosition.copy(
+                            currentBlockIndex = blockIndex,
+                            textOffset = textOffset
                     )
             )
         }
 
         progressSaveJob?.cancel()
+
         progressSaveJob = launch {
             delay(1000.milliseconds)
             saveReadingPosition(

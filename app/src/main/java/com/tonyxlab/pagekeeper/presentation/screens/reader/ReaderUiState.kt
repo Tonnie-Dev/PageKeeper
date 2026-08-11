@@ -28,11 +28,11 @@ data class ReaderUiState(
 
     val chapterSections: List<ChapterUiSection> = emptyList(),
 
-    val currentBlockIndex: Int = 0,
-
     val requestedBlockIndex: Int? = null,
 
-    val bookmarkUiState: BookmarkUiState = BookmarkUiState()
+    val bookmarkUiState: BookmarkUiState = BookmarkUiState(),
+
+    val readingPosition: ReadingPosition = ReadingPosition()
 ) : UiState {
 
     @Stable
@@ -50,9 +50,17 @@ data class ReaderUiState(
         data class DialogInputState(
             val textFieldState: TextFieldState = TextFieldState(),
             val showBookmarkDialog: Boolean = false,
-            val selectedColor: BookmarkColor = BookmarkColor.Blue
+            val selectedColor: BookmarkColor = BookmarkColor.Blue,
+            val blockIndex: Int? = null,
+            val chapterTitle: String = ""
         )
     }
+
+    @Stable
+    data class ReadingPosition(
+        val currentBlockIndex: Int = 0,
+        val textOffset: Int = 0
+    )
 }
 
 enum class ReadingOrientation {

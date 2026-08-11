@@ -24,10 +24,12 @@ data class BookmarkEntity(
     val id: Long = 0L,
     @ColumnInfo(name = "book_id")
     val bookId: String,
-    @ColumnInfo(name = "block_index")
-    val blockIndex: Int,
     @ColumnInfo(name = "text")
     val text: String,
+    @ColumnInfo(name = "block_index")
+    val blockIndex: Int,
+    @ColumnInfo(name = "text_offset")
+    val textOffset: Int,
     @ColumnInfo(name = "chapter_title")
     val chapterTitle: String,
     @ColumnInfo(name = "color")

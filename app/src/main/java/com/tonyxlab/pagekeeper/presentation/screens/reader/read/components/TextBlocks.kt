@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,7 +83,8 @@ fun ChapterTitleBlock(
 fun ParagraphBlock(
     block: ReaderContentBlock.Paragraph,
     fontSizeSp: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTextLayout: (TextLayoutResult) -> Unit = {}
 ) {
     Text(
             text = block.text,
@@ -91,7 +93,8 @@ fun ParagraphBlock(
                     fontSize = fontSizeSp.sp,
                     lineHeight = (fontSizeSp * 1.5f).sp,
                     color = TextModalPrimary
-            )
+            ),
+            onTextLayout = onTextLayout
     )
 }
 
