@@ -89,6 +89,8 @@
 
     <!--Menu Texts-->
     <string name="menu_text_male">Male</string>
+    <string name="menu_text_edit">Edit</string>
+    <string name="menu_text_delete">Delete</string>
 
     <!--Supporting Texts-->
     <string name="sup_text_def_username">Use between 3 and 20 characters for your username.</string>

@@ -43,7 +43,8 @@ data class ReaderUiState(
 
     @Stable
     data class BookmarkUiState(
-        val bookMarks: List<BookmarkUiItem> = emptyList(),
+        val bookmarkUiItems: List<BookmarkUiItem> = emptyList(),
+        val selectedBookmarkId: Long = 0L,
         val dialogInputState: DialogInputState = DialogInputState()
     ) : UiState {
 

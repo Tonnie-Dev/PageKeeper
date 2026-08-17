@@ -6,11 +6,13 @@ import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.util.findCurrentChapter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class BookmarkHandler(
     private val bookmarkRepository: BookmarkRepository,
@@ -137,6 +139,17 @@ class BookmarkHandler(
                             dialogInputState = state.bookmarkUiState.dialogInputState.copy(
                                     showBookmarkDialog = false
                             )
+                    )
+            )
+        }
+    }
+
+    fun onContextMenuClick(bookmarkUiItem: BookmarkUiItem) {
+        Timber.tag("BookmarkHandler").i("Context menu clicked for bookmark: ${bookmarkUiItem.id}")
+        updateState { state ->
+            state.copy(
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedBookmarkId = bookmarkUiItem.id
                     )
             )
         }

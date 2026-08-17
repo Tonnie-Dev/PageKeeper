@@ -3,7 +3,12 @@ package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.tonyxlab.pagekeeper.R
@@ -17,6 +22,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkDialog
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkItem
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 
 @Composable
@@ -57,23 +63,45 @@ private fun BookmarkScreenContent(
     onEvent: (ReaderUiEvent) -> Unit
 ) {
     val isDeviceWide = rememberIsDeviceWide()
+    val bookmarkState = uiState.bookmarkUiState
+    val selectedBookmarkId = bookmarkState.selectedBookmarkId
 
-    uiState.bookmarkUiState.bookMarks.ifEmpty {
+    uiState.bookmarkUiState.bookmarkUiItems.ifEmpty {
         EmptyBookmarkScreen(isDeviceWide = isDeviceWide)
     }
 
     val dialogInputState = uiState.bookmarkUiState.dialogInputState
 
+    var contextMenuBookmarkId by remember {
+        mutableStateOf<Long?>(null)
+    }
 
+    var contextMenuAnchor by remember {
+        mutableStateOf<ContextMenuAnchor?>(null)
+    }
     LazyListComponent(
             modifier = Modifier,
-            items = uiState.bookmarkUiState.bookMarks,
+            items = bookmarkState.bookmarkUiItems,
             key = { it.id },
             content = { bookmark ->
                 BookmarkItem(
-                        bookmark = bookmark,
-                        onClick = { onEvent(ReaderUiEvent.SelectBookmark(bookmark)) },
-                        onMenuClick = { onEvent(ReaderUiEvent.ShowBookmarkMenu(bookmark)) }
+                        bookmarkUiItem = bookmark,
+                        onClickBookmark = { onEvent(ReaderUiEvent.SelectBookmark(bookmark)) },
+                        selected = contextMenuBookmarkId == bookmark.id,
+                        contextMenuExpanded = contextMenuBookmarkId == bookmark.id,
+                        onBookmarkClicked = {},
+                        onContextMenuClick = { bookmark, position ->
+                            contextMenuBookmarkId = bookmark.id
+                            contextMenuAnchor = ContextMenuAnchor(
+                                    bookmark = bookmark,
+                                    position = position
+                            )
+                        },
+                        onDismissContextMenu = {
+                            contextMenuBookmarkId = null
+                        },
+                        onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
+                        onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmark(bookmark)) }
                 )
             }
     )
@@ -95,3 +123,8 @@ private fun BookmarkScreenContent(
         )
     }
 }
+
+data class ContextMenuAnchor(
+    val bookmark: BookmarkUiItem,
+    val position: Offset
+)

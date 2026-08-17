@@ -110,7 +110,9 @@ class ReadViewModel(
             ReaderUiEvent.NavigateBack -> bookmarkHandler.onExitBookmark()
             ReaderUiEvent.SaveBookmark -> bookmarkHandler.onSaveBookmark()
             is ReaderUiEvent.SelectBookmark -> {}
-            is ReaderUiEvent.ShowBookmarkMenu -> {}
+            is ReaderUiEvent.ShowBookmarkMenu -> bookmarkHandler.onContextMenuClick(event.bookmarkUiItem)
+            is ReaderUiEvent.EditBookmark -> {}
+            is ReaderUiEvent.DeleteBookmark -> {}
         }
     }
 
@@ -156,7 +158,9 @@ class ReadViewModel(
                                                     totalBlockCount = document.blocks.size
                                             ),
                                             chapterSections = document.toChapterSections(),
-                                            readingPosition = state.readingPosition.copy(currentBlockIndex = currentBlockIndex)
+                                            readingPosition = state.readingPosition.copy(
+                                                    currentBlockIndex = currentBlockIndex
+                                            )
                                     )
                                 }
                             },
@@ -185,7 +189,7 @@ class ReadViewModel(
 
                             state.copy(
                                     bookmarkUiState = state.bookmarkUiState.copy(
-                                            bookMarks = bookmarks.map(Bookmark::toBookmarkUiItem)
+                                            bookmarkUiItems = bookmarks.map(Bookmark::toBookmarkUiItem)
                                     )
                             )
                         }
