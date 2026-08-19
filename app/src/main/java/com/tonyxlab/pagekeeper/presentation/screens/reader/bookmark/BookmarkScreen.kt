@@ -72,13 +72,6 @@ private fun BookmarkScreenContent(
 
     val dialogInputState = uiState.bookmarkUiState.dialogInputState
 
-    var contextMenuBookmarkId by remember {
-        mutableStateOf<Long?>(null)
-    }
-
-    var contextMenuAnchor by remember {
-        mutableStateOf<ContextMenuAnchor?>(null)
-    }
     LazyListComponent(
             modifier = Modifier,
             items = bookmarkState.bookmarkUiItems,
@@ -87,19 +80,9 @@ private fun BookmarkScreenContent(
                 BookmarkItem(
                         bookmarkUiItem = bookmark,
                         onClickBookmark = { onEvent(ReaderUiEvent.SelectBookmark(bookmark)) },
-                        selected = contextMenuBookmarkId == bookmark.id,
-                        contextMenuExpanded = contextMenuBookmarkId == bookmark.id,
+                        selected =  bookmark.id == selectedBookmarkId,
                         onBookmarkClicked = {},
-                        onContextMenuClick = { bookmark, position ->
-                            contextMenuBookmarkId = bookmark.id
-                            contextMenuAnchor = ContextMenuAnchor(
-                                    bookmark = bookmark,
-                                    position = position
-                            )
-                        },
-                        onDismissContextMenu = {
-                            contextMenuBookmarkId = null
-                        },
+                        onContextMenuClick = { bookmark ->  ReaderUiEvent.ShowBookmarkMenu(bookmark)},
                         onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
                         onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmark(bookmark)) }
                 )
@@ -119,12 +102,8 @@ private fun BookmarkScreenContent(
                 },
                 onSave = {
                     onEvent(ReaderUiEvent.SaveBookmark)
-                },
+                }
         )
     }
 }
 
-data class ContextMenuAnchor(
-    val bookmark: BookmarkUiItem,
-    val position: Offset
-)

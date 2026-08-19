@@ -46,6 +46,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
 import com.tonyxlab.pagekeeper.presentation.theme.StateAlert
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ifThen
+import com.tonyxlab.pagekeeper.utils.toDpSize
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -57,27 +58,20 @@ fun BookmarkItem(
     modifier: Modifier = Modifier,
     onClickBookmark: () -> Unit,
     selected: Boolean,
-    contextMenuExpanded: Boolean,
+ //   contextMenuExpanded: Boolean,
     onBookmarkClicked: (BookmarkUiItem) -> Unit,
-    onContextMenuClick: (BookmarkUiItem, Offset) -> Unit,
-    onDismissContextMenu: () -> Unit,
+    onContextMenuClick: (BookmarkUiItem) -> Unit,
+   // onDismissContextMenu: () -> Unit,
     onEditClick: (BookmarkUiItem) -> Unit,
     onDeleteClick: (BookmarkUiItem) -> Unit
 ) {
 
+    var showContextMenu by remember { mutableStateOf(false) }
 
-    var menuPosition by remember {
-        mutableStateOf(Offset.Zero)
-    }
-
-    
     val formattedDate = remember(bookmarkUiItem.createdAt) {
         SimpleDateFormat("HH:mm MMM d, yyyy", Locale.getDefault())
                 .format(Date(bookmarkUiItem.createdAt))
     }
-
-    //var showContextMenu by remember { mutableStateOf(false) }
-
     Column(
             modifier = modifier
                     .background(Color.Transparent)
@@ -146,11 +140,7 @@ fun BookmarkItem(
 
                 IconButton(
                         modifier = Modifier
-                                .size(48.dp)
-                                .onGloballyPositioned{ coordinates ->
-                                    menuPosition = coordinates.positionInRoot()
-
-                                }
+                                .size(MENU_BUBBLE_SIZE.toDpSize())
                                 .ifThen(selected) {
                                     background(
                                             color = MaterialTheme.colorScheme.primary,
@@ -158,9 +148,11 @@ fun BookmarkItem(
                                     )
                                 },
                         onClick = {
-                            onContextMenuClick(bookmarkUiItem, menuPosition)
+                            showContextMenu = true
+                            onContextMenuClick(bookmarkUiItem)
                         }
                 ) {
+
                     Icon(
                             painter = painterResource(R.drawable.ic_context_menu),
                             contentDescription = stringResource(R.string.cds_text_menu),
@@ -171,10 +163,11 @@ fun BookmarkItem(
                             }
                     )
                 }
+
                 DropdownMenu(
                         modifier = Modifier.width(CONTEXT_MENU_WIDTH),
-                        expanded = contextMenuExpanded,
-                        onDismissRequest = onDismissContextMenu,
+                        expanded = showContextMenu,
+                        onDismissRequest = { showContextMenu = false },
                         shape = MaterialTheme.shapes.large,
                         containerColor = MaterialTheme.colorScheme.surface,
                         shadowElevation = SHADOW_ELEVATION
@@ -184,22 +177,22 @@ fun BookmarkItem(
                             icon = painterResource(R.drawable.ic_edit),
                             tintColor = MaterialTheme.colorScheme.onSurface,
                             onClick = {
-                             //  showContextMenu = false
+                             showContextMenu = false
                                 onEditClick(bookmarkUiItem) }
                     )
+
                     ContextMenuItem(
                             text = stringResource(id = R.string.menu_text_delete),
                             icon = painterResource(R.drawable.ic_delete),
                             tintColor = StateAlert,
                             onClick = {
-                            //    showContextMenu = false
+                            showContextMenu = false
                                 onDeleteClick(bookmarkUiItem)
                             }
                     )
                 }
             }
         }
-
         HorizontalDivider(color = Divider)
     }
 }
@@ -228,7 +221,6 @@ private fun ContextMenuItem(
             },
             onClick = onClick
     )
-
 }
 
 private val SHADOW_ELEVATION = 6.dp
@@ -238,7 +230,6 @@ private val MENU_BUBBLE_SIZE = IntSize(48, 48)
 @Preview(showBackground = true)
 @Composable
 private fun BookmarkItem_Preview() {
-
     PageKeeperTheme {
         Column(
                 modifier = Modifier
@@ -246,7 +237,6 @@ private fun BookmarkItem_Preview() {
                         .fillMaxSize()
                         .padding(MaterialTheme.spacing.spaceMedium)
         ) {
-
             val bookmark = BookmarkUiItem(
                     id = 879,
                     blockIndex = 5690,
@@ -260,15 +250,11 @@ private fun BookmarkItem_Preview() {
                     bookmarkUiItem = bookmark,
                     onClickBookmark = {},
                     selected = true,
-                    onContextMenuClick = {_,_ ->},
+                    onContextMenuClick = {},
                     onBookmarkClicked = {},
                     onEditClick = {},
-                    onDeleteClick = {},
-                    contextMenuExpanded = true,
-                    onDismissContextMenu = {}
-
+                    onDeleteClick = {}
             )
-
         }
     }
 }
