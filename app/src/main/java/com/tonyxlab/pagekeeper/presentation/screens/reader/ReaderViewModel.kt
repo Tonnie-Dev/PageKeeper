@@ -110,9 +110,10 @@ class ReadViewModel(
             ReaderUiEvent.NavigateBack -> bookmarkHandler.onExitBookmark()
             ReaderUiEvent.SaveBookmark -> bookmarkHandler.onSaveBookmark()
             is ReaderUiEvent.SelectBookmark -> {}
-            is ReaderUiEvent.ShowBookmarkMenu -> bookmarkHandler.onContextMenuClick(event.bookmarkUiItem)
-            is ReaderUiEvent.EditBookmark -> {}
-            is ReaderUiEvent.DeleteBookmark -> {}
+            is ReaderUiEvent.ShowPopupMenu -> bookmarkHandler.onShowPopupMenu(event.bookmarkUiItem)
+            is ReaderUiEvent.EditBookmark -> bookmarkHandler.onEditBookmark()
+            is ReaderUiEvent.DeleteBookmark -> bookmarkHandler.onDeleteBookmark()
+            ReaderUiEvent.DismissPopupMenu -> bookmarkHandler.onDismissPopupMenu()
         }
     }
 

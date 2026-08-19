@@ -12,7 +12,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class BookmarkHandler(
     private val bookmarkRepository: BookmarkRepository,
@@ -143,18 +142,50 @@ class BookmarkHandler(
             )
         }
     }
+    fun onShowPopupMenu(bookmarkUiItem: BookmarkUiItem) {
 
-    fun onContextMenuClick(bookmarkUiItem: BookmarkUiItem) {
-        Timber.tag("BookmarkHandler").i("Context menu clicked for bookmark: ${bookmarkUiItem.id}")
         updateState { state ->
             state.copy(
                     bookmarkUiState = state.bookmarkUiState.copy(
-                            selectedBookmarkId = bookmarkUiItem.id
+                            selectedBookmarkId = bookmarkUiItem.id,
+
                     )
             )
         }
     }
 
+
+    fun onDismissPopupMenu() {
+
+        updateState { state ->
+            state.copy(
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedBookmarkId = null
+                    )
+            )
+        }
+    }
+    fun onEditBookmark() {
+
+        updateState { state ->
+            state.copy(
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedBookmarkId = null
+                    )
+            )
+        }
+    }
+
+    fun onDeleteBookmark() {
+
+        updateState { state ->
+            state.copy(
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedBookmarkId = null
+                    )
+            )
+        }
+    }
     fun onExitBookmark() {
         sendActionEvent(ReaderActionEvent.ExitBookmark)
     }

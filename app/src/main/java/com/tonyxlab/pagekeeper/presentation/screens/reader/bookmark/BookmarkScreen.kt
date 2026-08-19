@@ -3,12 +3,7 @@ package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.tonyxlab.pagekeeper.R
@@ -22,7 +17,6 @@ import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkDialog
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkItem
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 
 @Composable
@@ -66,11 +60,10 @@ private fun BookmarkScreenContent(
     val bookmarkState = uiState.bookmarkUiState
     val selectedBookmarkId = bookmarkState.selectedBookmarkId
 
+    val dialogInputState = uiState.bookmarkUiState.dialogInputState
     uiState.bookmarkUiState.bookmarkUiItems.ifEmpty {
         EmptyBookmarkScreen(isDeviceWide = isDeviceWide)
     }
-
-    val dialogInputState = uiState.bookmarkUiState.dialogInputState
 
     LazyListComponent(
             modifier = Modifier,
@@ -80,11 +73,13 @@ private fun BookmarkScreenContent(
                 BookmarkItem(
                         bookmarkUiItem = bookmark,
                         onClickBookmark = { onEvent(ReaderUiEvent.SelectBookmark(bookmark)) },
-                        selected =  bookmark.id == selectedBookmarkId,
+                        selected = bookmark.id == selectedBookmarkId,
                         onBookmarkClicked = {},
-                        onContextMenuClick = { bookmark ->  ReaderUiEvent.ShowBookmarkMenu(bookmark)},
                         onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
-                        onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmark(bookmark)) }
+                        onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmark(bookmark)) },
+                        onOpenMenu = { onEvent(ReaderUiEvent.ShowPopupMenu(bookmark)) },
+                        onDismissMenu = { onEvent(ReaderUiEvent.DismissPopupMenu) },
+                        isMenuExpanded = selectedBookmarkId == bookmark.id
                 )
             }
     )

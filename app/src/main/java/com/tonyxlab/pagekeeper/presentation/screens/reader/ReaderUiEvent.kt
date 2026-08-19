@@ -54,7 +54,8 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data class SelectBookmark(val bookmark: BookmarkUiItem) : ReaderUiEvent
 
-    data class ShowBookmarkMenu(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
+    data class ShowPopupMenu(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
+    data object DismissPopupMenu : ReaderUiEvent
 
     data object NavigateBack : ReaderUiEvent
 

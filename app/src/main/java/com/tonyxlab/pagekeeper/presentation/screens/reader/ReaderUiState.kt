@@ -11,7 +11,6 @@ import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.model.Chapte
 import com.tonyxlab.pagekeeper.utils.AppDefaults
 
 data class ReaderUiState(
-
     val isLoading: Boolean = false,
 
     val book: Book? = null,
@@ -33,6 +32,7 @@ data class ReaderUiState(
     val bookmarkUiState: BookmarkUiState = BookmarkUiState(),
 
     val readingPosition: ReadingPosition = ReadingPosition()
+
 ) : UiState {
 
     @Stable
@@ -44,7 +44,7 @@ data class ReaderUiState(
     @Stable
     data class BookmarkUiState(
         val bookmarkUiItems: List<BookmarkUiItem> = emptyList(),
-        val selectedBookmarkId: Long = 0L,
+        val selectedBookmarkId: Long? = null,
         val dialogInputState: DialogInputState = DialogInputState()
     ) : UiState {
 

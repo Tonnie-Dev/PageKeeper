@@ -19,23 +19,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
@@ -47,10 +41,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.StateAlert
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.toDpSize
-import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.tonyxlab.pagekeeper.utils.toFormattedDate
 
 @Composable
 fun BookmarkItem(
@@ -58,20 +49,13 @@ fun BookmarkItem(
     modifier: Modifier = Modifier,
     onClickBookmark: () -> Unit,
     selected: Boolean,
- //   contextMenuExpanded: Boolean,
     onBookmarkClicked: (BookmarkUiItem) -> Unit,
-    onContextMenuClick: (BookmarkUiItem) -> Unit,
-   // onDismissContextMenu: () -> Unit,
     onEditClick: (BookmarkUiItem) -> Unit,
-    onDeleteClick: (BookmarkUiItem) -> Unit
+    onDeleteClick: (BookmarkUiItem) -> Unit,
+    isMenuExpanded: Boolean,
+    onOpenMenu: () -> Unit,
+    onDismissMenu: () -> Unit,
 ) {
-
-    var showContextMenu by remember { mutableStateOf(false) }
-
-    val formattedDate = remember(bookmarkUiItem.createdAt) {
-        SimpleDateFormat("HH:mm MMM d, yyyy", Locale.getDefault())
-                .format(Date(bookmarkUiItem.createdAt))
-    }
     Column(
             modifier = modifier
                     .background(Color.Transparent)
@@ -127,7 +111,7 @@ fun BookmarkItem(
                         Spacer(Modifier.width(MaterialTheme.spacing.spaceTwelve))
 
                         Text(
-                                text = formattedDate,
+                                text = bookmarkUiItem.createdAt.toFormattedDate(),
                                 style = MaterialTheme.typography.BodySmallRegular,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
@@ -148,8 +132,7 @@ fun BookmarkItem(
                                     )
                                 },
                         onClick = {
-                            showContextMenu = true
-                            onContextMenuClick(bookmarkUiItem)
+                            onOpenMenu()
                         }
                 ) {
 
@@ -166,19 +149,24 @@ fun BookmarkItem(
 
                 DropdownMenu(
                         modifier = Modifier.width(CONTEXT_MENU_WIDTH),
-                        expanded = showContextMenu,
-                        onDismissRequest = { showContextMenu = false },
+                        expanded = isMenuExpanded,
+                        onDismissRequest = onDismissMenu,
                         shape = MaterialTheme.shapes.large,
                         containerColor = MaterialTheme.colorScheme.surface,
-                        shadowElevation = SHADOW_ELEVATION
+                        shadowElevation = SHADOW_ELEVATION,
+                        properties = PopupProperties(
+                                focusable = false,
+                                dismissOnClickOutside = true
+                        )
                 ) {
                     ContextMenuItem(
                             text = stringResource(id = R.string.menu_text_edit),
                             icon = painterResource(R.drawable.ic_edit),
                             tintColor = MaterialTheme.colorScheme.onSurface,
                             onClick = {
-                             showContextMenu = false
-                                onEditClick(bookmarkUiItem) }
+
+                                onEditClick(bookmarkUiItem)
+                            }
                     )
 
                     ContextMenuItem(
@@ -186,7 +174,7 @@ fun BookmarkItem(
                             icon = painterResource(R.drawable.ic_delete),
                             tintColor = StateAlert,
                             onClick = {
-                            showContextMenu = false
+
                                 onDeleteClick(bookmarkUiItem)
                             }
                     )
@@ -250,7 +238,9 @@ private fun BookmarkItem_Preview() {
                     bookmarkUiItem = bookmark,
                     onClickBookmark = {},
                     selected = true,
-                    onContextMenuClick = {},
+                    isMenuExpanded = false,
+                    onOpenMenu = {},
+                    onDismissMenu = {},
                     onBookmarkClicked = {},
                     onEditClick = {},
                     onDeleteClick = {}
