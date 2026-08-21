@@ -109,7 +109,7 @@ private fun AppDialog_Preview() {
         ) {
             AppDialog(
                     dialogTitle = stringResource(id = R.string.dialog_text_delete_book, "Harry Potter"),
-                    dialogText = stringResource(id = R.string.dialog_text_remove_action),
+                    dialogText = stringResource(id = R.string.dialog_text_remove_book),
                     positiveButtonText = "Delete",
                     negativeButtonText = "Cancel",
                     isDeleteDialog = true,

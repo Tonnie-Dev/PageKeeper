@@ -20,8 +20,8 @@ class BookmarkRepositoryImpl(
     override suspend fun updateBookmark(bookmark: Bookmark) =
         bookmarkDao.update(bookmark.toEntity())
 
-    override suspend fun deleteBookmark(bookmark: Bookmark) =
-        bookmarkDao.delete(bookmark.toEntity())
+    override suspend fun deleteBookmarkById(bookmarkId: Long) =
+        bookmarkDao.deleteBookmarkById(bookmarkId)
 
     override fun observeBookmarks(bookId: String): Flow<List<Bookmark>> =
         bookmarkDao.observeBookmarks(bookId)

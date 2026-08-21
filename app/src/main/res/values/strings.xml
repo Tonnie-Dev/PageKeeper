@@ -78,8 +78,12 @@
     <!--Dialog Texts-->
     <string name="dialog_text_delete_book">Delete \"%s\"?</string>
     <string name="dialog_text_unsupported_format">Unsupported file format</string>
-    <string name="dialog_text_remove_action">This action will remove the book from your library.</string>
+    <string name="dialog_text_remove_book">This action will remove the book from your library.</string>
     <string name="dialog_text_add_bookmark">Add bookmark</string>
+    <string name="dialog_text_delete_bookmark">Delete this bookmark?</string>
+    <string name="dialog_text_remove_bookmark">This action will permanently remove the selected bookmark</string>
+    <string name="dialog_text_delete">Delete</string>
+    <string name="dialog_text_cancel">Cancel</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>

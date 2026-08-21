@@ -9,6 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppButton
+import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
@@ -76,7 +77,7 @@ private fun BookmarkScreenContent(
                         selected = bookmark.id == selectedBookmarkId,
                         onBookmarkClicked = {},
                         onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
-                        onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmark(bookmark)) },
+                        onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmarkClicked(bookmark)) },
                         onOpenMenu = { onEvent(ReaderUiEvent.ShowPopupMenu(bookmark)) },
                         onDismissMenu = { onEvent(ReaderUiEvent.DismissPopupMenu) },
                         isMenuExpanded = selectedBookmarkId == bookmark.id
@@ -84,7 +85,7 @@ private fun BookmarkScreenContent(
             }
     )
 
-    if (dialogInputState.showBookmarkDialog) {
+    if (dialogInputState.showEditBookmarkDialog) {
         BookmarkDialog(
                 modifier = Modifier,
                 textFieldState = dialogInputState.textFieldState,
@@ -100,5 +101,27 @@ private fun BookmarkScreenContent(
                 }
         )
     }
+
+
+    if (dialogInputState.showDeleteBookmarkDialog) {
+       BookmarkDialog (onEvent = onEvent)
+    }
 }
+
+@Composable
+private fun BookmarkDialog(
+    onEvent: (ReaderUiEvent) -> Unit
+) {
+    AppDialog(
+            dialogTitle = stringResource(id = R.string.dialog_text_delete_bookmark),
+            dialogText = stringResource(id = R.string.dialog_text_remove_bookmark),
+            positiveButtonText = stringResource(id = R.string.dialog_text_delete),
+            negativeButtonText = stringResource(id = R.string.dialog_text_cancel),
+            onDismissRequest = { onEvent(ReaderUiEvent.CancelDeleteBookmark) },
+            onConfirm = {
+                onEvent(ReaderUiEvent.ConfirmDeleteBookmark)
+            }
+    )
+}
+
 

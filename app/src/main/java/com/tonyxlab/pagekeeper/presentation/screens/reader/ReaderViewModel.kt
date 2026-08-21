@@ -64,6 +64,9 @@ class ReadViewModel(
             coroutineScope = viewModelScope,
             onSaveError = {
                 sendActionEvent(ReaderActionEvent.ShowToast("Unable to save bookmark."))
+            },
+            onDeleteError = {
+                sendActionEvent(ReaderActionEvent.ShowToast("Unable to delete bookmark."))
             }
     )
 
@@ -112,8 +115,10 @@ class ReadViewModel(
             is ReaderUiEvent.SelectBookmark -> {}
             is ReaderUiEvent.ShowPopupMenu -> bookmarkHandler.onShowPopupMenu(event.bookmarkUiItem)
             is ReaderUiEvent.EditBookmark -> bookmarkHandler.onEditBookmark(event.bookmarkUiItem)
-            is ReaderUiEvent.DeleteBookmark -> bookmarkHandler.onDeleteBookmark()
+            is ReaderUiEvent.DeleteBookmarkClicked -> bookmarkHandler.onClickDelete()
             ReaderUiEvent.DismissPopupMenu -> bookmarkHandler.onDismissPopupMenu()
+            ReaderUiEvent.ConfirmDeleteBookmark -> bookmarkHandler.onConfirmDelete()
+            ReaderUiEvent.CancelDeleteBookmark -> bookmarkHandler.onCancelDeleteDialog()
         }
     }
 

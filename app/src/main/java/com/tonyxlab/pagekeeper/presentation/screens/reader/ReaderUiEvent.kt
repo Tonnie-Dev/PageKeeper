@@ -61,5 +61,8 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data class EditBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
 
-    data class DeleteBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
+    data class DeleteBookmarkClicked(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
+
+    data object ConfirmDeleteBookmark : ReaderUiEvent
+    data object CancelDeleteBookmark : ReaderUiEvent
 }

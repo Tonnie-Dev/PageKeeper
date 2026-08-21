@@ -50,7 +50,8 @@ data class ReaderUiState(
 
         data class DialogInputState(
             val textFieldState: TextFieldState = TextFieldState(),
-            val showBookmarkDialog: Boolean = false,
+            val showEditBookmarkDialog: Boolean = false,
+            val showDeleteBookmarkDialog: Boolean = false,
             val selectedColor: BookmarkColor = BookmarkColor.Blue,
             val blockIndex: Int? = null,
             val chapterTitle: String = "",

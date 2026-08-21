@@ -9,7 +9,7 @@ interface BookmarkRepository {
 
     suspend fun updateBookmark(bookmark: Bookmark)
 
-    suspend fun deleteBookmark(bookmark: Bookmark)
+    suspend fun deleteBookmarkById(bookmarkId: Long)
 
     fun observeBookmarks(bookId: String): Flow<List<Bookmark>>
 

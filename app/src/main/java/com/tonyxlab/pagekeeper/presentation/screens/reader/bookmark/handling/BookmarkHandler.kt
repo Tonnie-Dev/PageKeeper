@@ -19,7 +19,8 @@ class BookmarkHandler(
     private val currentState: () -> ReaderUiState,
     private val updateState: ((ReaderUiState) -> ReaderUiState) -> Unit,
     private val sendActionEvent: (ReaderActionEvent) -> Unit,
-    private val onSaveError: () -> Unit
+    private val onSaveError: () -> Unit,
+    private val onDeleteError: () -> Unit
 ) {
 
     fun onAddBookmark() {
@@ -54,7 +55,7 @@ class BookmarkHandler(
                     bookmarkUiState = state.bookmarkUiState.copy(
 
                             dialogInputState = state.bookmarkUiState.dialogInputState.copy(
-                                    showBookmarkDialog = true,
+                                    showEditBookmarkDialog = true,
                                     blockIndex = blockIndex,
                                     chapterTitle = chapterTitle,
                                     editingBookmarkId = null
@@ -73,7 +74,7 @@ class BookmarkHandler(
                     bookmarkUiState = state.bookmarkUiState.copy(
                             selectedBookmarkId = null,
                             dialogInputState = state.bookmarkUiState.dialogInputState.copy(
-                                    showBookmarkDialog = true,
+                                    showEditBookmarkDialog = true,
                                     selectedColor = bookmarkUiItem.color,
                                     blockIndex = bookmarkUiItem.blockIndex,
                                     editingBookmarkId = bookmarkUiItem.id
@@ -98,7 +99,6 @@ class BookmarkHandler(
                 .trim()
 
         bookmarkText.ifEmpty { return }
-
 
         coroutineScope.launch(Dispatchers.IO) {
             try {
@@ -129,7 +129,7 @@ class BookmarkHandler(
                     )
                     bookmarkRepository.updateBookmark(updatedBookmark)
                 }
-                closeBookmarkDialog()
+                closeBookmarkEditDialog()
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Throwable) {
@@ -150,9 +150,45 @@ class BookmarkHandler(
         }
     }
 
-    fun onDismissBookmarkDialog() {
-        closeBookmarkDialog()
+    fun onClickDelete() {
+
+        updateState { state ->
+            state.copy(
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            dialogInputState = state.bookmarkUiState.dialogInputState.copy(
+                                    showDeleteBookmarkDialog = true
+                            )
+                    )
+            )
+        }
     }
+
+    fun onCancelDeleteDialog() {
+        closeBookmarkDeleteDialog()
+    }
+
+    fun onConfirmDelete() {
+
+        coroutineScope.launch(Dispatchers.IO) {
+
+            try {
+
+                val selectedBookmark =
+                    currentState().bookmarkUiState.selectedBookmarkId
+                        ?: return@launch
+                bookmarkRepository.deleteBookmarkById(bookmarkId = selectedBookmark)
+
+                closeBookmarkDeleteDialog()
+
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Throwable) {
+                onCancelDeleteDialog()
+            }
+        }
+
+    }
+
 
     fun onShowPopupMenu(bookmarkUiItem: BookmarkUiItem) {
 
@@ -177,17 +213,9 @@ class BookmarkHandler(
         }
     }
 
-    fun onDeleteBookmark() {
-
-        updateState { state ->
-            state.copy(
-                    bookmarkUiState = state.bookmarkUiState.copy(
-                            selectedBookmarkId = null
-                    )
-            )
-        }
+    fun onDismissBookmarkDialog() {
+        closeBookmarkEditDialog()
     }
-
     fun onExitBookmark() {
         sendActionEvent(ReaderActionEvent.ExitBookmark)
     }
@@ -200,22 +228,34 @@ class BookmarkHandler(
                     end = length,
                     text = text
             )
-
         }
-
     }
 
-    private fun closeBookmarkDialog() {
+    private fun closeBookmarkEditDialog() {
         updateState { state ->
             state.copy(
                     bookmarkUiState = state.bookmarkUiState.copy(
                             dialogInputState = state.bookmarkUiState.dialogInputState.copy(
-                                    showBookmarkDialog = false,
+                                    showEditBookmarkDialog = false,
                                     editingBookmarkId = null
                             )
                     )
             )
         }
+    }
+
+    private fun closeBookmarkDeleteDialog() {
+        updateState { state ->
+            state.copy(
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedBookmarkId = null,
+                            dialogInputState = state.bookmarkUiState.dialogInputState.copy(
+                                    showDeleteBookmarkDialog = false
+                            )
+                    )
+            )
+        }
+
     }
 
     private fun ReaderContentBlock.bookmarkText(): String =
