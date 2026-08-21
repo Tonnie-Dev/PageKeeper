@@ -47,7 +47,6 @@ import com.tonyxlab.pagekeeper.utils.toFormattedDate
 fun BookmarkItem(
     bookmarkUiItem: BookmarkUiItem,
     modifier: Modifier = Modifier,
-    onClickBookmark: () -> Unit,
     selected: Boolean,
     onBookmarkClicked: (BookmarkUiItem) -> Unit,
     onEditClick: (BookmarkUiItem) -> Unit,
@@ -60,7 +59,7 @@ fun BookmarkItem(
             modifier = modifier
                     .background(Color.Transparent)
                     .fillMaxWidth()
-                    .clickable(onClick = onClickBookmark),
+
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Row(
@@ -236,7 +235,6 @@ private fun BookmarkItem_Preview() {
             )
             BookmarkItem(
                     bookmarkUiItem = bookmark,
-                    onClickBookmark = {},
                     selected = true,
                     isMenuExpanded = false,
                     onOpenMenu = {},

@@ -17,7 +17,7 @@ data class ReaderUiState(
 
     val resumeBook: Book? = null,
 
-    val document: ReaderBook? = null,
+    val readerBook: ReaderBook? = null,
 
     val orientation: ReadingOrientation = ReadingOrientation.AUTO_ROTATE,
 
@@ -27,12 +27,15 @@ data class ReaderUiState(
 
     val chapterSections: List<ChapterUiSection> = emptyList(),
 
-    val requestedBlockIndex: Int? = null,
+    //val requestedBlockIndex: Int? = null,
 
     val bookmarkUiState: BookmarkUiState = BookmarkUiState(),
 
-    val readingPosition: ReadingPosition = ReadingPosition()
+    val readingPosition: ReadingPosition = ReadingPosition(),
 
+
+    val requestedJumpTarget: ReaderJumpTarget? = null
+   // val bookmarkTarget: BookmarkTarget? = null
 ) : UiState {
 
     @Stable
@@ -64,6 +67,13 @@ data class ReaderUiState(
         val currentBlockIndex: Int = 0,
         val textOffset: Int = 0
     )
+
+   /* @Stable
+    data class BookmarkTarget(
+        val bookmarkId: Long,
+        val blockIndex: Int,
+        val textOffset: Int
+    )*/
 }
 
 enum class ReadingOrientation {
@@ -87,4 +97,17 @@ object ReaderFontSize {
 
 val Float.coercedFontSize
     get() = coerceIn(ReaderFontSize.range)
+
+sealed interface ReaderJumpTarget {
+
+    data class ChapterJumpTarget(
+        val blockIndex: Int
+    ) : ReaderJumpTarget
+
+    data class BookmarkJumpTarget(
+        val bookmarkId: Long,
+        val blockIndex: Int,
+        val textOffset: Int
+    ) : ReaderJumpTarget
+}
 

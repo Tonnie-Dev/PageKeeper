@@ -95,7 +95,7 @@ class ReadViewModel(
                 )
 
             ReaderUiEvent.ViewChapters -> chapterHandler.viewChapters()
-            ReaderUiEvent.ChaptersJumpConsumed -> chapterHandler.onConsumeChapterJump()
+            ReaderUiEvent.ReaderJumpConsumed -> chapterHandler.onConsumeChapterJump()
 
             // Chapter UiEvents
             ReaderUiEvent.BackClicked -> chapterHandler.exitChapters()
@@ -112,7 +112,7 @@ class ReadViewModel(
             ReaderUiEvent.DismissBookmarkDialog -> bookmarkHandler.onDismissBookmarkDialog()
             ReaderUiEvent.NavigateBack -> bookmarkHandler.onExitBookmark()
             ReaderUiEvent.SaveBookmark -> bookmarkHandler.onSaveBookmark()
-            is ReaderUiEvent.SelectBookmark -> {}
+            is ReaderUiEvent.OnClickBookmark -> bookmarkHandler.onClickBookmark(event.bookmarkUiItem)
             is ReaderUiEvent.ShowPopupMenu -> bookmarkHandler.onShowPopupMenu(event.bookmarkUiItem)
             is ReaderUiEvent.EditBookmark -> bookmarkHandler.onEditBookmark(event.bookmarkUiItem)
             is ReaderUiEvent.DeleteBookmarkClicked -> bookmarkHandler.onClickDelete()
@@ -123,7 +123,7 @@ class ReadViewModel(
     }
 
     fun loadBook(bookId: String) {
-        if (currentState.book?.id == bookId && (currentState.document != null || currentState.isLoading)) {
+        if (currentState.book?.id == bookId && (currentState.readerBook != null || currentState.isLoading)) {
             return
         }
 
@@ -133,7 +133,7 @@ class ReadViewModel(
                     updateState {
                         it.copy(
                                 book = null,
-                                document = null,
+                                readerBook = null,
                                 isLoading = true
                         )
                     }
@@ -159,7 +159,7 @@ class ReadViewModel(
 
                                 updateState { state ->
                                     state.copy(
-                                            document = document,
+                                            readerBook = document,
                                             book = state.book?.copy(
                                                     totalBlockCount = document.blocks.size
                                             ),
@@ -176,7 +176,7 @@ class ReadViewModel(
     }
 
     private fun onBookLoadFailed(error: Throwable) {
-        updateState { it.copy(document = null) }
+        updateState { it.copy(readerBook = null) }
         sendActionEvent(
                 ReaderActionEvent.ShowToast(
                         error.message ?: "Unable to read this book."
@@ -247,7 +247,7 @@ class ReadViewModel(
         blockIndex: Int,
         textOffset: Int
     ) {
-        val document = currentState.document ?: return
+        val document = currentState.readerBook ?: return
 
         val totalBlockCount = document.blocks.size
 

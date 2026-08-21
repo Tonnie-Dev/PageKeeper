@@ -34,7 +34,7 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data object ViewBookmarks : ReaderUiEvent
 
-    data object ChaptersJumpConsumed : ReaderUiEvent
+    data object ReaderJumpConsumed : ReaderUiEvent
 
     // Chapters UiEvents
     data object BackClicked : ReaderUiEvent
@@ -52,7 +52,7 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data class ColorSelected(val color: BookmarkColor) : ReaderUiEvent
 
-    data class SelectBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
+    data class OnClickBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
 
     data class ShowPopupMenu(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
     data object DismissPopupMenu : ReaderUiEvent

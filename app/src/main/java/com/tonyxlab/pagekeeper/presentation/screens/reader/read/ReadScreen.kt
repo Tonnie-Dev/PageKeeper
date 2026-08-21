@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +30,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,7 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderJumpTarget
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadingControlMode
@@ -180,9 +183,10 @@ fun ReadScreenContent(
 ) {
 
     val isDeviceWide = rememberIsDeviceWide()
+    val density = LocalDensity.current
     val maxWidth = if (isDeviceWide) MAX_WIDTH else Dp.Unspecified
 
-    val blocks = uiState.document?.blocks.orEmpty()
+    val blocks = uiState.readerBook?.blocks.orEmpty()
     val listState = rememberLazyListState()
 
     val textLayouts = remember {
@@ -230,39 +234,92 @@ fun ReadScreenContent(
     }
 
     /*
-    * retrieve position
+    * retrieve last read position
     */
 
-    LaunchedEffect(uiState.document) {
+    LaunchedEffect(uiState.readerBook, uiState.requestedJumpTarget) {
 
-        val document = uiState.document ?: return@LaunchedEffect
+        val readerBook = uiState.readerBook ?: return@LaunchedEffect
+
+        if (uiState.requestedJumpTarget != null) {
+
+            return@LaunchedEffect
+        }
         val savedIndex = uiState.book?.lastReadBlockIndex ?: 0
 
-        if (document.blocks.isNotEmpty()) {
+        if (readerBook.blocks.isNotEmpty()) {
 
-            val safeIndex = savedIndex.coerceIn(0, document.blocks.lastIndex)
+            val safeIndex = savedIndex.coerceIn(0, readerBook.blocks.lastIndex)
             listState.scrollToItem(safeIndex)
         }
     }
 
     /*
-   * jump to position
+   * jump to chapter or bookmark position
    */
 
-    LaunchedEffect(uiState.requestedBlockIndex) {
+    LaunchedEffect(uiState.requestedJumpTarget,textLayouts.size) {
 
-        val targetIndex = uiState.requestedBlockIndex ?: return@LaunchedEffect
+        val target = uiState.requestedJumpTarget
+            ?: return@LaunchedEffect
 
-        val document = uiState.document ?: return@LaunchedEffect
+        val readerBook = uiState.readerBook
+            ?: return@LaunchedEffect
 
-        if (document.blocks.isEmpty()) return@LaunchedEffect
+        if (readerBook.blocks.isEmpty()) return@LaunchedEffect
 
-        val safeIndex =
-            targetIndex.coerceIn(0, document.blocks.lastIndex)
+        val blockIndex = when(target) {
+            is ReaderJumpTarget.ChapterJumpTarget -> target.blockIndex
+            is ReaderJumpTarget.BookmarkJumpTarget -> target.blockIndex
+        }.coerceIn(0, readerBook.blocks.lastIndex)
 
-        listState.scrollToItem(safeIndex)
 
-        onEvent(ReaderUiEvent.ChaptersJumpConsumed)
+
+
+
+        when(target) {
+            is ReaderJumpTarget.ChapterJumpTarget -> {
+                listState.scrollToItem(blockIndex)
+
+                onEvent(ReaderUiEvent.ReaderJumpConsumed)
+            }
+            is ReaderJumpTarget.BookmarkJumpTarget -> {
+                listState.scrollToItem(blockIndex)
+
+                val layoutResult =
+                    textLayouts[blockIndex]
+                        ?: return@LaunchedEffect
+
+                val safeTextOffset =
+                    target.textOffset.coerceIn(
+                            0,
+                            layoutResult.layoutInput.text.length
+                    )
+
+                val line =
+                    layoutResult.getLineForOffset(
+                            safeTextOffset
+                    )
+
+                val bookmarkedLineTop =
+                    layoutResult.getLineTop(line)
+
+
+
+                val desiredTop =
+                    with(density) {
+                        BOOKMARK_TOP_OFFSET.toPx()
+                    }
+
+                listState.scrollBy(
+                        bookmarkedLineTop - desiredTop
+                )
+
+                onEvent(
+                        ReaderUiEvent.ReaderJumpConsumed
+                )
+            }
+        }
     }
 
     Box(
@@ -320,6 +377,8 @@ fun ReadScreenContent(
 private const val READER_ANIMATION_DURATION = 350
 
 private val MAX_WIDTH = 600.dp
+
+private val BOOKMARK_TOP_OFFSET = 72.dp
 
 private fun <T> readerControlsTween() =
     tween<T>(durationMillis = READER_ANIMATION_DURATION)

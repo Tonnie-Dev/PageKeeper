@@ -13,7 +13,7 @@ class ChapterHandler(
     }
 
     fun onConsumeChapterJump() {
-        updateState { state -> state.copy(requestedBlockIndex = null) }
+        updateState { state -> state.copy(requestedJumpTarget = null) }
     }
 
     fun exitChapters() {
@@ -26,7 +26,7 @@ class ChapterHandler(
         updateState { state ->
             state.copy(
                     readingPosition = state.readingPosition.copy(currentBlockIndex = safeIndex),
-                    requestedBlockIndex = safeIndex
+                    requestedJumpTarget = null
             )
         }
 

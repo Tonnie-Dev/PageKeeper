@@ -14,6 +14,7 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkDialog
@@ -34,6 +35,15 @@ fun BookmarkScreen(
                         backgroundColor = MaterialTheme.colorScheme.background,
                         onNavButtonClick = navigateToReadScreen
                 )
+            },
+            actionEventHandler = {_,action ->
+
+                when(action) {
+                    ReaderActionEvent.ExitBookmark -> navigateToReadScreen()
+                   else -> Unit
+                }
+
+
             },
             floatingActionButton = {
                 AppButton(
@@ -73,9 +83,8 @@ private fun BookmarkScreenContent(
             content = { bookmark ->
                 BookmarkItem(
                         bookmarkUiItem = bookmark,
-                        onClickBookmark = { onEvent(ReaderUiEvent.SelectBookmark(bookmark)) },
+                        onBookmarkClicked = { onEvent(ReaderUiEvent.OnClickBookmark(bookmark)) },
                         selected = bookmark.id == selectedBookmarkId,
-                        onBookmarkClicked = {},
                         onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
                         onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmarkClicked(bookmark)) },
                         onOpenMenu = { onEvent(ReaderUiEvent.ShowPopupMenu(bookmark)) },

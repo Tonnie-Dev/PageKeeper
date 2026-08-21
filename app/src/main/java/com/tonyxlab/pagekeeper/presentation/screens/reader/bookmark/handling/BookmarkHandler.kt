@@ -5,6 +5,7 @@ import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
 import com.tonyxlab.pagekeeper.domain.model.ReaderContentBlock
 import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderJumpTarget
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.util.findCurrentChapter
@@ -30,7 +31,7 @@ class BookmarkHandler(
         val blockIndex = currentState.readingPosition.currentBlockIndex
 
         val block =
-            currentState.document?.blocks
+            currentState.readerBook?.blocks
                     ?.getOrNull(currentState.readingPosition.currentBlockIndex)
         val bookmarkText = when (block) {
 
@@ -38,7 +39,6 @@ class BookmarkHandler(
                 block.text
                         .drop(currentState.readingPosition.textOffset)
                         .take(BOOKMARK_PREVIEW_LENGTH)
-
             else -> ""
         }
 
@@ -63,6 +63,26 @@ class BookmarkHandler(
                     )
             )
         }
+    }
+
+    fun onClickBookmark(bookmarkUiItem: BookmarkUiItem) {
+
+        updateState { state ->
+            state.copy(
+                    requestedJumpTarget = ReaderJumpTarget.BookmarkJumpTarget(
+                            bookmarkId = bookmarkUiItem.id,
+                            blockIndex = bookmarkUiItem.blockIndex,
+                            textOffset = bookmarkUiItem.textOffset
+                    ),
+                    bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedBookmarkId = null
+                    )
+            )
+        }
+
+        sendActionEvent(ReaderActionEvent.ExitBookmark)
+
+
     }
 
     fun onEditBookmark(bookmarkUiItem: BookmarkUiItem) {
@@ -183,12 +203,10 @@ class BookmarkHandler(
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Throwable) {
-                onCancelDeleteDialog()
+                onDeleteError()
             }
         }
-
     }
-
 
     fun onShowPopupMenu(bookmarkUiItem: BookmarkUiItem) {
 
@@ -269,6 +287,6 @@ class BookmarkHandler(
 
     companion object {
 
-        const val BOOKMARK_PREVIEW_LENGTH = 100
+        const val BOOKMARK_PREVIEW_LENGTH = 150
     }
 }

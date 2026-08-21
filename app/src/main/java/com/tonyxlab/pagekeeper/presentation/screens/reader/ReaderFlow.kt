@@ -33,7 +33,7 @@ fun ReaderFlow(
                     navigator = navigator,
                     viewModel = viewModel,
                     navigateToChaptersScreen = { currentScreen = ReaderScreen.Chapters },
-                    navigateToBookmarkScreen = {currentScreen = ReaderScreen.Bookmark}
+                    navigateToBookmarkScreen = { currentScreen = ReaderScreen.Bookmark }
             )
         }
 
@@ -45,7 +45,10 @@ fun ReaderFlow(
         }
 
         ReaderScreen.Bookmark -> {
-            BookmarkScreen(viewModel = viewModel) {  currentScreen = ReaderScreen.Read}
+            BookmarkScreen(
+                    viewModel = viewModel,
+                    navigateToReadScreen = { currentScreen = ReaderScreen.Read }
+            )
         }
     }
 }
