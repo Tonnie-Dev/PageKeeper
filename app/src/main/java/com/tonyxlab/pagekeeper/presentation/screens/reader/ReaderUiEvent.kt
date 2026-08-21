@@ -52,14 +52,14 @@ sealed interface ReaderUiEvent : UiEvent {
 
     data class ColorSelected(val color: BookmarkColor) : ReaderUiEvent
 
-    data class SelectBookmark(val bookmark: BookmarkUiItem) : ReaderUiEvent
+    data class SelectBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
 
     data class ShowPopupMenu(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
     data object DismissPopupMenu : ReaderUiEvent
 
     data object NavigateBack : ReaderUiEvent
 
-    data class EditBookmark(val bookmark: BookmarkUiItem) : ReaderUiEvent
+    data class EditBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
 
-    data class DeleteBookmark(val bookmark: BookmarkUiItem) : ReaderUiEvent
+    data class DeleteBookmark(val bookmarkUiItem: BookmarkUiItem) : ReaderUiEvent
 }

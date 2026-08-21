@@ -53,7 +53,8 @@ data class ReaderUiState(
             val showBookmarkDialog: Boolean = false,
             val selectedColor: BookmarkColor = BookmarkColor.Blue,
             val blockIndex: Int? = null,
-            val chapterTitle: String = ""
+            val chapterTitle: String = "",
+            val editingBookmarkId: Long? = null
         )
     }
 

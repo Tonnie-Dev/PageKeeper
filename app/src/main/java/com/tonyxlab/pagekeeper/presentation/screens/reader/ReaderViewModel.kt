@@ -111,7 +111,7 @@ class ReadViewModel(
             ReaderUiEvent.SaveBookmark -> bookmarkHandler.onSaveBookmark()
             is ReaderUiEvent.SelectBookmark -> {}
             is ReaderUiEvent.ShowPopupMenu -> bookmarkHandler.onShowPopupMenu(event.bookmarkUiItem)
-            is ReaderUiEvent.EditBookmark -> bookmarkHandler.onEditBookmark()
+            is ReaderUiEvent.EditBookmark -> bookmarkHandler.onEditBookmark(event.bookmarkUiItem)
             is ReaderUiEvent.DeleteBookmark -> bookmarkHandler.onDeleteBookmark()
             ReaderUiEvent.DismissPopupMenu -> bookmarkHandler.onDismissPopupMenu()
         }

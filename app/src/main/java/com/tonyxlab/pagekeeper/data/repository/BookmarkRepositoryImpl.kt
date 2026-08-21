@@ -4,6 +4,7 @@ import com.tonyxlab.pagekeeper.data.local.database.dao.BookmarkDao
 import com.tonyxlab.pagekeeper.data.local.database.entity.BookmarkEntity
 import com.tonyxlab.pagekeeper.data.local.database.mapper.mapper.toEntity
 import com.tonyxlab.pagekeeper.data.local.database.mapper.mapper.toModel
+import com.tonyxlab.pagekeeper.domain.exception.ItemNotFoundException
 import com.tonyxlab.pagekeeper.domain.model.Bookmark
 import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,12 @@ class BookmarkRepositoryImpl(
                 .map { bookmarks ->
                     bookmarks.map(BookmarkEntity::toModel)
                 }
+
+    override suspend fun getBookmarkById(bookmarkId: Long): Bookmark {
+        return bookmarkDao
+                .getBookmarkById(bookmarkId)
+                ?.toModel() ?: throw ItemNotFoundException("Bookmark not found")
+    }
 
     override suspend fun deleteAllBookmarksForBook(bookId: String) =
         bookmarkDao.deleteAllForBook(bookId)
