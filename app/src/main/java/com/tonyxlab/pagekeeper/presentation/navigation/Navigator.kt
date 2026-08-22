@@ -18,6 +18,9 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
     fun navigateToRead(bookId: String) {
         push(ReadDestination(bookId))
     }
+    fun navigateToBookmarks() {
+        push(BookmarksDestination)
+    }
     fun popBackstack() {
         if (backStack.size > 1) {
             backStack.removeLastOrNull()

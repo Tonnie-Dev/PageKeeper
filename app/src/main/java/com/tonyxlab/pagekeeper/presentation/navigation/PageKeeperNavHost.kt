@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.BookmarksScreen
 import com.tonyxlab.pagekeeper.presentation.screens.library.LibraryScreen
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderFlow
 
@@ -24,6 +25,10 @@ fun PageKeeperNavHost() {
 
         entry<ReadDestination> { key ->
             ReaderFlow(bookId = key.bookId, navigator = navigator)
+        }
+
+        entry < BookmarksDestination> {
+            BookmarksScreen()
         }
     }
 
