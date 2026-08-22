@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,22 +20,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.BookmarkColor
+import com.tonyxlab.pagekeeper.presentation.core.components.AppDropdownMenu
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.toColor
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.Divider
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
-import com.tonyxlab.pagekeeper.presentation.theme.StateAlert
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.toDpSize
@@ -146,72 +141,21 @@ fun BookmarkItem(
                     )
                 }
 
-                DropdownMenu(
-                        modifier = Modifier.width(CONTEXT_MENU_WIDTH),
-                        expanded = isMenuExpanded,
-                        onDismissRequest = onDismissMenu,
-                        shape = MaterialTheme.shapes.large,
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        shadowElevation = SHADOW_ELEVATION,
-                        properties = PopupProperties(
-                                focusable = false,
-                                dismissOnClickOutside = true
-                        )
-                ) {
-                    ContextMenuItem(
-                            text = stringResource(id = R.string.menu_text_edit),
-                            icon = painterResource(R.drawable.ic_edit),
-                            tintColor = MaterialTheme.colorScheme.onSurface,
-                            onClick = {
-
-                                onEditClick(bookmarkUiItem)
-                            }
-                    )
-
-                    ContextMenuItem(
-                            text = stringResource(id = R.string.menu_text_delete),
-                            icon = painterResource(R.drawable.ic_delete),
-                            tintColor = StateAlert,
-                            onClick = {
-
-                                onDeleteClick(bookmarkUiItem)
-                            }
-                    )
-                }
+                AppDropdownMenu(
+                        item = bookmarkUiItem,
+                        isMenuExpanded = isMenuExpanded,
+                        modifier = Modifier,
+                        isSmallMenu = true,
+                        onDismissMenu = onDismissMenu,
+                        onEditClick = onEditClick,
+                        onDeleteClick = onDeleteClick
+                )
             }
         }
         HorizontalDivider(color = Divider)
     }
 }
 
-@Composable
-private fun ContextMenuItem(
-    text: String,
-    icon: Painter,
-    tintColor: Color,
-    onClick: () -> Unit
-) {
-    DropdownMenuItem(
-            text = {
-                Text(
-                        text = text,
-                        color = tintColor,
-                        style = MaterialTheme.typography.labelLarge
-                )
-            },
-            leadingIcon = {
-                Icon(
-                        painter = icon,
-                        contentDescription = null,
-                        tint = tintColor
-                )
-            },
-            onClick = onClick
-    )
-}
-
-private val SHADOW_ELEVATION = 6.dp
-private val CONTEXT_MENU_WIDTH = 124.dp
 private val MENU_BUBBLE_SIZE = IntSize(48, 48)
 
 @Preview(showBackground = true)

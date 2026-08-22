@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,9 +29,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
+import com.tonyxlab.pagekeeper.presentation.core.components.AppDropdownMenu
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.model.GlobalBookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.theme.BodyLargeRegular
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
@@ -40,19 +43,25 @@ import com.tonyxlab.pagekeeper.presentation.theme.TextPrimary
 import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.TitleSmallMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import com.tonyxlab.pagekeeper.utils.ifThen
+import com.tonyxlab.pagekeeper.utils.toDpSize
 
 @Composable
 fun BookmarkCard(
     item: GlobalBookmarkUiItem,
+    selected: Boolean,
+    isMenuExpanded: Boolean,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit,
-    onMenuClick: () -> Unit,
+    onEditClick: (GlobalBookmarkUiItem) -> Unit,
+    onDeleteClick: (GlobalBookmarkUiItem) -> Unit,
+    onOpenMenu: () -> Unit,
+    onDismissMenu: () -> Unit,
 ) {
-
     Surface(
             modifier = modifier
                     .fillMaxWidth()
-                    .clickable {onItemClick()},
+                    .clickable { onItemClick() },
             shape = MaterialTheme.shapes.small,
             color = Color.Transparent,
     ) {
@@ -73,8 +82,7 @@ fun BookmarkCard(
                                         shape = MaterialTheme.shapes.small
                                 )
                                 .size(
-                                        width = COVER_WIDTH,
-                                        height = COVER_HEIGHT
+                                        width = COVER_WIDTH, height = COVER_HEIGHT
                                 ),
                         model = cover,
                         contentDescription = item.title,
@@ -110,22 +118,50 @@ fun BookmarkCard(
                         )
                     }
 
-                    Icon(
-                            modifier = Modifier
-                                    .clickable{ onMenuClick()}
-                                    .padding(top = MaterialTheme.spacing.spaceMedium),
-                            painter = painterResource(id = R.drawable.ic_context_menu),
-                            contentDescription = stringResource(id = R.string.cds_text_menu),
-                            tint = IconsTint
-                    )
+                    Box(
+                            modifier = Modifier.padding(all = MaterialTheme.spacing.spaceSmall)
+                    ) {
 
+                        IconButton(
+                                modifier = Modifier
+                                        .size(MENU_BUBBLE_SIZE.toDpSize())
+                                        .ifThen(selected) {
+                                            background(
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    shape = MaterialTheme.shapes.large
+                                            )
+                                        }, onClick = {
+                            onOpenMenu()
+                        }) {
+
+                            Icon(
+                                    painter = painterResource(R.drawable.ic_context_menu),
+                                    contentDescription = stringResource(R.string.cds_text_menu),
+                                    tint = if (selected) {
+                                        MaterialTheme.colorScheme.onPrimary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
+                            )
+                        }
+
+                        AppDropdownMenu(
+                                item = item,
+                                isMenuExpanded = isMenuExpanded,
+                                modifier = Modifier,
+                                isSmallMenu = true,
+                                onDismissMenu = onDismissMenu,
+                                onEditClick = onEditClick,
+                                onDeleteClick = onDeleteClick
+                        )
+                    }
                 }
+
                 Spacer(modifier = Modifier.weight(1f))
 
                 Row(
                         modifier = Modifier.padding(bottom = MaterialTheme.spacing.spaceSmall),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(MaterialTheme.spacing.spaceExtraSmall),
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceExtraSmall),
                         verticalAlignment = Alignment.CenterVertically
                 ) {
 
@@ -158,10 +194,8 @@ private fun BookCoverPlaceholder(
                             shape = MaterialTheme.shapes.small
                     )
                     .size(
-                            width = COVER_WIDTH,
-                            height = COVER_HEIGHT
-                    ),
-            contentAlignment = Alignment.Center
+                            width = COVER_WIDTH, height = COVER_HEIGHT
+                    ), contentAlignment = Alignment.Center
     ) {
         Icon(
                 painter = painterResource(id = R.drawable.ic_book),
@@ -190,24 +224,40 @@ private fun BookmarkCard_Preview() {
             BookmarkCard(
                     item = bookmarkItem,
                     onItemClick = {},
-                    onMenuClick = {}
-            )
+                    selected = false,
+                    isMenuExpanded = false,
+                    modifier = Modifier,
+                    onEditClick = {},
+                    onDeleteClick = {},
+                    onOpenMenu = {},
+                    onDismissMenu = {})
 
             BookmarkCard(
                     item = bookmarkItem,
                     onItemClick = {},
-                    onMenuClick = {}
-            )
+                    selected = false,
+                    isMenuExpanded = false,
+                    modifier = Modifier,
+                    onEditClick = {},
+                    onDeleteClick = {},
+                    onOpenMenu = {},
+                    onDismissMenu = {})
 
             BookmarkCard(
                     item = bookmarkItem,
                     onItemClick = {},
-                    onMenuClick = {}
-            )
+                    selected = false,
+                    isMenuExpanded = false,
+                    modifier = Modifier,
+                    onEditClick = {},
+                    onDeleteClick = {},
+                    onOpenMenu = {},
+                    onDismissMenu = {})
         }
     }
 }
 
 private val COVER_WIDTH = 104.dp
 private val COVER_HEIGHT = 156.dp
+private val MENU_BUBBLE_SIZE = IntSize(48, 48)
 private val BOOK_COVER_ICON_SIZE = 56.dp
