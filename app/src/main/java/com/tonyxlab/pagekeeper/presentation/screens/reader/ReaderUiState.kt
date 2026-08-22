@@ -27,15 +27,12 @@ data class ReaderUiState(
 
     val chapterSections: List<ChapterUiSection> = emptyList(),
 
-    //val requestedBlockIndex: Int? = null,
-
     val bookmarkUiState: BookmarkUiState = BookmarkUiState(),
 
     val readingPosition: ReadingPosition = ReadingPosition(),
 
-
     val requestedJumpTarget: ReaderJumpTarget? = null
-   // val bookmarkTarget: BookmarkTarget? = null
+
 ) : UiState {
 
     @Stable
@@ -48,6 +45,7 @@ data class ReaderUiState(
     data class BookmarkUiState(
         val bookmarkUiItems: List<BookmarkUiItem> = emptyList(),
         val selectedBookmarkId: Long? = null,
+        val visibleBookmarkId: Long? = null,
         val dialogInputState: DialogInputState = DialogInputState()
     ) : UiState {
 
@@ -68,12 +66,12 @@ data class ReaderUiState(
         val textOffset: Int = 0
     )
 
-   /* @Stable
-    data class BookmarkTarget(
-        val bookmarkId: Long,
-        val blockIndex: Int,
-        val textOffset: Int
-    )*/
+    /* @Stable
+     data class BookmarkTarget(
+         val bookmarkId: Long,
+         val blockIndex: Int,
+         val textOffset: Int
+     )*/
 }
 
 enum class ReadingOrientation {

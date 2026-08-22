@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,7 @@ import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderJumpTarget
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadingControlMode
+import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.components.BookmarkIndicator
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.ChapterTitleBlock
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.FontSizeControlPanel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.components.ParagraphBlock
@@ -192,6 +195,66 @@ fun ReadScreenContent(
     val textLayouts = remember {
         mutableStateMapOf<Int, TextLayoutResult>()
     }
+
+    val bookmarks =
+        uiState.bookmarkUiState.bookmarkUiItems
+
+    /*
+    * Bookmark Indicator
+    */
+    val visibleBookmark by remember(
+            bookmarks,
+            textLayouts
+    ) {
+        derivedStateOf {
+
+            val layoutInfo =
+                listState.layoutInfo
+
+            bookmarks.firstOrNull { bookmark ->
+
+                val visibleItem =
+                    layoutInfo.visibleItemsInfo
+                            .firstOrNull {
+                                it.index == bookmark.blockIndex
+                            }
+                        ?: return@firstOrNull false
+
+                val textLayout =
+                    textLayouts[bookmark.blockIndex]
+                        ?: return@firstOrNull false
+
+                if (textLayout.layoutInput.text.isEmpty()) {
+                    return@firstOrNull false
+                }
+
+                val safeTextOffset =
+                    bookmark.textOffset.coerceIn(
+                            0,
+                            textLayout.layoutInput.text.length
+                    )
+
+                val line =
+                    textLayout.getLineForOffset(
+                            safeTextOffset
+                    )
+
+                val anchorTop =
+                    visibleItem.offset +
+                            textLayout.getLineTop(line)
+
+                val anchorBottom =
+                    visibleItem.offset +
+                            textLayout.getLineBottom(line)
+
+                anchorBottom >=
+                        layoutInfo.viewportStartOffset &&
+                        anchorTop <=
+                        layoutInfo.viewportEndOffset
+            }
+        }
+    }
+
     /*
     * save position
     */
@@ -258,7 +321,7 @@ fun ReadScreenContent(
    * jump to chapter or bookmark position
    */
 
-    LaunchedEffect(uiState.requestedJumpTarget,textLayouts.size) {
+    LaunchedEffect(uiState.requestedJumpTarget, textLayouts.size) {
 
         val target = uiState.requestedJumpTarget
             ?: return@LaunchedEffect
@@ -268,21 +331,18 @@ fun ReadScreenContent(
 
         if (readerBook.blocks.isEmpty()) return@LaunchedEffect
 
-        val blockIndex = when(target) {
+        val blockIndex = when (target) {
             is ReaderJumpTarget.ChapterJumpTarget -> target.blockIndex
             is ReaderJumpTarget.BookmarkJumpTarget -> target.blockIndex
         }.coerceIn(0, readerBook.blocks.lastIndex)
 
-
-
-
-
-        when(target) {
+        when (target) {
             is ReaderJumpTarget.ChapterJumpTarget -> {
                 listState.scrollToItem(blockIndex)
 
                 onEvent(ReaderUiEvent.ReaderJumpConsumed)
             }
+
             is ReaderJumpTarget.BookmarkJumpTarget -> {
                 listState.scrollToItem(blockIndex)
 
@@ -303,8 +363,6 @@ fun ReadScreenContent(
 
                 val bookmarkedLineTop =
                     layoutResult.getLineTop(line)
-
-
 
                 val desiredTop =
                     with(density) {
@@ -369,6 +427,24 @@ fun ReadScreenContent(
                         )
                     }
                 }
+            }
+        }
+
+        AnimatedVisibility(
+                visible = visibleBookmark != null,
+                modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .statusBarsPadding()
+                        .padding(
+                                top = MaterialTheme.spacing.spaceSmall,
+                                end = MaterialTheme.spacing.spaceMedium
+                        ),
+                enter = fadeIn(),
+                exit = fadeOut()
+        ) {
+
+            visibleBookmark?.let { bookmark ->
+                BookmarkIndicator(bookmark = bookmark)
             }
         }
     }

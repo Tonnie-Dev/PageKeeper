@@ -54,6 +54,7 @@
     <string name="cds_text_cancel">Cancel</string>
     <string name="cds_text_expand_more">Expand More</string>
     <string name="cds_text_expand_less">Expand Less</string>
+    <string name="cds_bookmarked_position">Bookmarked Position</string>
 
     <!--Button Texts-->
     <string name="button_text_start">Start</string>
