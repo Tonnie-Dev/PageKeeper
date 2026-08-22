@@ -1,7 +1,8 @@
 package com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling
 
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
+import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.model.GlobalBookmarkUiItem
 
 data class BookmarksUiState(
-    val isLoading: Boolean = false,
+    val globalBookmarkUiItems: List<GlobalBookmarkUiItem> = emptyList()
 ) : UiState

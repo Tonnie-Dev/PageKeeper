@@ -41,6 +41,7 @@ import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.TitleLargeBold
 import com.tonyxlab.pagekeeper.presentation.theme.TitleMediumMedium
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
+import com.tonyxlab.pagekeeper.utils.ifThen
 
 @Composable
 fun EmptyBooksScreen(
@@ -141,11 +142,11 @@ fun EmptyFavoritesScreen(
                     modifier = Modifier
                             .size(MaterialTheme.spacing.spaceTwelve * 10)
                             .then(
-                                if (isDeviceWide) {
-                                    Modifier.background(BgMain, CircleShape)
-                                } else {
-                                    Modifier.background(BgActive, CircleShape)
-                                }
+                                    if (isDeviceWide) {
+                                        Modifier.background(BgMain, CircleShape)
+                                    } else {
+                                        Modifier.background(BgActive, CircleShape)
+                                    }
                             ),
                     contentAlignment = Alignment.Center
             ) {
@@ -241,14 +242,26 @@ fun EmptyFinishedScreen(
     }
 }
 
-
-
 @Composable
 fun EmptyBookmarkScreen(
     isDeviceWide: Boolean,
     modifier: Modifier = Modifier,
+    isGlobalScreen: Boolean = false,
     backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
+
+    val circleModifier = Modifier
+            .size(MaterialTheme.spacing.spaceTwelve * 10)
+            .then(
+                    if (isDeviceWide) {
+                        Modifier.background(BgMain, CircleShape)
+                    } else {
+                        Modifier.background(BgActive, CircleShape)
+                    }
+            )
+
+
+
     Column(
             modifier = modifier
                     .fillMaxSize()
@@ -263,15 +276,9 @@ fun EmptyBookmarkScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                    modifier = Modifier
-                            .size(MaterialTheme.spacing.spaceTwelve * 10)
-                            .then(
-                                    if (isDeviceWide) {
-                                        Modifier.background(BgMain, CircleShape)
-                                    } else {
-                                        Modifier.background(BgActive, CircleShape)
-                                    }
-                            ),
+                    modifier = Modifier.ifThen(isGlobalScreen) {
+                        circleModifier
+                    },
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -295,7 +302,7 @@ fun EmptyBookmarkScreen(
 
             Text(
                     modifier = Modifier.padding(horizontal = MaterialTheme.spacing.spaceLarge),
-                    text = stringResource(id = R.string.caption_text_finished_empty_desc),
+                    text = stringResource(id = R.string.caption_text_bookmarks_empty_desc),
                     style = MaterialTheme.typography.BodySmallRegular,
                     color = TextSecondary,
                     textAlign = TextAlign.Center
@@ -329,7 +336,6 @@ private fun EmptyFinishedScreenPreview() {
         EmptyFinishedScreen(isDeviceWide = false)
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

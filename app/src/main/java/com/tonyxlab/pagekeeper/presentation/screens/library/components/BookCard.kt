@@ -283,7 +283,7 @@ private fun BookCoverPlaceholder(
                 painter = painterResource(id = R.drawable.ic_book),
                 contentDescription = null,
                 tint = Color(0xFF7A7771),
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(BOOK_COVER_ICON_SIZE)
         )
     }
 }
@@ -348,3 +348,6 @@ private fun Boolean.coverWidth() =
 
 private fun Boolean.coverHeight() =
     if (this) 240.dp else 156.dp
+
+
+private val BOOK_COVER_ICON_SIZE = 56.dp
