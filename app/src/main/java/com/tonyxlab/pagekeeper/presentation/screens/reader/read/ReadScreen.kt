@@ -258,34 +258,48 @@ fun ReadScreenContent(
     /*
     * save position
     */
-
     LaunchedEffect(listState) {
 
         snapshotFlow {
-            listState.layoutInfo.visibleItemsInfo.firstOrNull()
+            listState.layoutInfo.visibleItemsInfo
+                    .map { item ->
+                        item.index to item.offset
+                    }
         }
-                .collect { visibleItem ->
+                .collect { visibleItems ->
 
-                    visibleItem ?: return@collect
+                    val readingPosition =
+                        visibleItems.firstNotNullOfOrNull { (blockIndex, itemOffset) ->
 
-                    val blockIndex = visibleItem.index
-
-                    val layoutResult =
-                        textLayouts[blockIndex]
-
-                    val textOffset =
-                        if (layoutResult != null) {
+                            val layoutResult =
+                                textLayouts[blockIndex]
+                                    ?: return@firstNotNullOfOrNull null
 
                             val localY =
-                                (-visibleItem.offset).toFloat()
+                                (-itemOffset).toFloat()
 
-                            layoutResult.getTextOffsetAtVerticalPosition(
-                                    y = localY
-                            )
+                            /*
+                             * The viewport has already moved beyond
+                             * this block's actual text.
+                             *
+                             * Skip it and inspect the next visible block.
+                             */
+                            if (localY >= layoutResult.size.height) {
+                                return@firstNotNullOfOrNull null
+                            }
 
-                        } else {
-                            0
+                            val textOffset =
+                                layoutResult.getTextOffsetAtVerticalPosition(
+                                        y = localY.coerceAtLeast(0f)
+                                )
+
+                            blockIndex to textOffset
                         }
+
+                    readingPosition ?: return@collect
+
+                    val (blockIndex, textOffset) =
+                        readingPosition
 
                     onEvent(
                             ReaderUiEvent.ReadingPositionChanged(
