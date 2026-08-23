@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.model.BookmarkUiItem
 import com.tonyxlab.pagekeeper.presentation.theme.StateAlert
 
 @Composable
@@ -26,8 +25,8 @@ fun<T> AppDropdownMenu(
     modifier: Modifier = Modifier,
     isSmallMenu: Boolean = false,
     onDismissMenu: () -> Unit,
-    onEditClick: (T) -> Unit,
-    onDeleteClick: (T) -> Unit
+    onFirstAction: () -> Unit,
+    onSecondAction: () -> Unit
 ) {
     DropdownMenu(
             modifier = modifier.width(if (isSmallMenu) SMALL_CONTEXT_MENU_WIDTH else Dp.Unspecified),
@@ -45,19 +44,14 @@ fun<T> AppDropdownMenu(
                 text = stringResource(id = R.string.menu_text_edit),
                 icon = painterResource(R.drawable.ic_edit),
                 tintColor = MaterialTheme.colorScheme.onSurface,
-                onClick = {
-                    onEditClick(item)
-                }
+                onClick = onFirstAction
         )
 
         ContextMenuItem(
                 text = stringResource(id = R.string.menu_text_delete),
                 icon = painterResource(R.drawable.ic_delete),
                 tintColor = StateAlert,
-                onClick = {
-
-                    onDeleteClick(item)
-                }
+                onClick = onSecondAction
         )
     }
 }

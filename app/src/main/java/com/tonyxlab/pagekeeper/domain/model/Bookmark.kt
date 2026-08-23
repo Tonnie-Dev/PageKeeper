@@ -18,3 +18,11 @@ enum class BookmarkColor {
     Orange,
     Purple
 }
+
+data class BookWithBookmarkCount(
+    val bookId: String,
+    val title: String,
+    val author: String,
+    val coverPath: String?,
+    val bookmarkCount: Int,
+)

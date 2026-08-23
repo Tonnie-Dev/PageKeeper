@@ -44,8 +44,8 @@ fun BookmarkItem(
     modifier: Modifier = Modifier,
     selected: Boolean,
     onBookmarkClicked: (BookmarkUiItem) -> Unit,
-    onEditClick: (BookmarkUiItem) -> Unit,
-    onDeleteClick: (BookmarkUiItem) -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     isMenuExpanded: Boolean,
     onOpenMenu: () -> Unit,
     onDismissMenu: () -> Unit,
@@ -147,8 +147,8 @@ fun BookmarkItem(
                         modifier = Modifier,
                         isSmallMenu = true,
                         onDismissMenu = onDismissMenu,
-                        onEditClick = onEditClick,
-                        onDeleteClick = onDeleteClick
+                        onFirstAction = onEditClick,
+                        onSecondAction = onDeleteClick
                 )
             }
         }

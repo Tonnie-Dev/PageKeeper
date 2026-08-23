@@ -2,8 +2,8 @@ package com.tonyxlab.pagekeeper.data.repository
 
 import com.tonyxlab.pagekeeper.data.local.database.dao.BookDao
 import com.tonyxlab.pagekeeper.data.local.database.entity.BookEntity
-import com.tonyxlab.pagekeeper.data.local.database.mapper.mapper.toEntity
-import com.tonyxlab.pagekeeper.data.local.database.mapper.mapper.toModel
+import com.tonyxlab.pagekeeper.data.local.database.mapper.toEntity
+import com.tonyxlab.pagekeeper.data.local.database.mapper.toModel
 import com.tonyxlab.pagekeeper.domain.exception.ItemNotFoundException
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository

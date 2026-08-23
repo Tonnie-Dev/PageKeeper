@@ -1,6 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.bookmarks.model
 
 import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.domain.model.BookWithBookmarkCount
 
 data class GlobalBookmarkUiItem(
     val bookId: String,
@@ -21,3 +22,12 @@ fun Book.toGlobalBookmarkUiItem(
             bookmarkCount = bookmarkCount,
     )
 }
+
+fun BookWithBookmarkCount.toGlobalBookmarkUiItem() =
+    GlobalBookmarkUiItem(
+            bookId = bookId,
+            title = title,
+            author = author,
+            coverPath = coverPath,
+            bookmarkCount = bookmarkCount,
+    )

@@ -53,9 +53,9 @@ fun BookmarkCard(
     isMenuExpanded: Boolean,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit,
-    onEditClick: (GlobalBookmarkUiItem) -> Unit,
-    onDeleteClick: (GlobalBookmarkUiItem) -> Unit,
-    onOpenMenu: () -> Unit,
+    onViewBookmarks: () -> Unit,
+    onDeleteBookmarks: () -> Unit,
+    onOpenContextMenu: () -> Unit,
     onDismissMenu: () -> Unit,
 ) {
     Surface(
@@ -69,7 +69,8 @@ fun BookmarkCard(
                 modifier = Modifier
                         .fillMaxWidth()
                         .height(IntrinsicSize.Min)
-                        .padding(MaterialTheme.spacing.spaceTwelve),
+                        .padding(horizontal = MaterialTheme.spacing.spaceTwelve)
+                        .padding(vertical = MaterialTheme.spacing.spaceSmall),
                 verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -131,7 +132,7 @@ fun BookmarkCard(
                                                     shape = MaterialTheme.shapes.large
                                             )
                                         }, onClick = {
-                            onOpenMenu()
+                            onOpenContextMenu()
                         }) {
 
                             Icon(
@@ -140,7 +141,7 @@ fun BookmarkCard(
                                     tint = if (selected) {
                                         MaterialTheme.colorScheme.onPrimary
                                     } else {
-                                        MaterialTheme.colorScheme.onSurface
+                                        IconsTint
                                     }
                             )
                         }
@@ -151,8 +152,8 @@ fun BookmarkCard(
                                 modifier = Modifier,
                                 isSmallMenu = true,
                                 onDismissMenu = onDismissMenu,
-                                onEditClick = onEditClick,
-                                onDeleteClick = onDeleteClick
+                                onFirstAction = onViewBookmarks,
+                                onSecondAction = onDeleteBookmarks
                         )
                     }
                 }
@@ -206,6 +207,11 @@ private fun BookCoverPlaceholder(
     }
 }
 
+private val COVER_WIDTH = 104.dp
+private val COVER_HEIGHT = 156.dp
+private val MENU_BUBBLE_SIZE = IntSize(48, 48)
+private val BOOK_COVER_ICON_SIZE = 56.dp
+
 @Preview(showBackground = true, backgroundColor = 0xFFFDFCF8)
 @Composable
 private fun BookmarkCard_Preview() {
@@ -227,9 +233,9 @@ private fun BookmarkCard_Preview() {
                     selected = false,
                     isMenuExpanded = false,
                     modifier = Modifier,
-                    onEditClick = {},
-                    onDeleteClick = {},
-                    onOpenMenu = {},
+                    onViewBookmarks = {},
+                    onDeleteBookmarks = {},
+                    onOpenContextMenu = {},
                     onDismissMenu = {})
 
             BookmarkCard(
@@ -238,9 +244,9 @@ private fun BookmarkCard_Preview() {
                     selected = false,
                     isMenuExpanded = false,
                     modifier = Modifier,
-                    onEditClick = {},
-                    onDeleteClick = {},
-                    onOpenMenu = {},
+                    onViewBookmarks = {},
+                    onDeleteBookmarks = {},
+                    onOpenContextMenu = {},
                     onDismissMenu = {})
 
             BookmarkCard(
@@ -249,15 +255,11 @@ private fun BookmarkCard_Preview() {
                     selected = false,
                     isMenuExpanded = false,
                     modifier = Modifier,
-                    onEditClick = {},
-                    onDeleteClick = {},
-                    onOpenMenu = {},
+                    onViewBookmarks = {},
+                    onDeleteBookmarks = {},
+                    onOpenContextMenu = {},
                     onDismissMenu = {})
         }
     }
 }
 
-private val COVER_WIDTH = 104.dp
-private val COVER_HEIGHT = 156.dp
-private val MENU_BUBBLE_SIZE = IntSize(48, 48)
-private val BOOK_COVER_ICON_SIZE = 56.dp

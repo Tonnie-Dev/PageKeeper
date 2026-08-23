@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.data.local.database.mapper.mapper
+package com.tonyxlab.pagekeeper.data.local.database.mapper
 
 import com.tonyxlab.pagekeeper.data.local.database.entity.BookEntity
 import com.tonyxlab.pagekeeper.data.local.database.entity.BookmarkEntity
