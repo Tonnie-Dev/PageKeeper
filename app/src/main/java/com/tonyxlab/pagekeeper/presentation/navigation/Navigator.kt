@@ -18,7 +18,17 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
     fun navigateToRead(bookId: String) {
         push(ReadDestination(bookId))
     }
-    fun navigateToBookmarks() {
+
+    fun navigateToBookBookmarks(bookId: String) {
+        push(
+                ReadDestination(
+                        bookId = bookId,
+                        startScreen = ReaderStartScreen.Bookmarks
+                )
+        )
+    }
+
+    fun navigateToGlobalBookmarks() {
         push(BookmarksDestination)
     }
     fun popBackstack() {

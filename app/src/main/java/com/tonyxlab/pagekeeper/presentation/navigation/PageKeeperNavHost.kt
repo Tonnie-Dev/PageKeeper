@@ -24,11 +24,15 @@ fun PageKeeperNavHost() {
         }
 
         entry<ReadDestination> { key ->
-            ReaderFlow(bookId = key.bookId, navigator = navigator)
+            ReaderFlow(
+                    bookId = key.bookId,
+                    navigator = navigator,
+                    startScreen = key.startScreen
+            )
         }
 
         entry < BookmarksDestination> {
-            BookmarksScreen()
+            BookmarksScreen(navigator = navigator)
         }
     }
 

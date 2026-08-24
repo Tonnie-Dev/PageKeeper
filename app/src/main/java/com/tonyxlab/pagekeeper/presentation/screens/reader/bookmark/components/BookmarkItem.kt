@@ -142,7 +142,8 @@ fun BookmarkItem(
                 }
 
                 AppDropdownMenu(
-                        item = bookmarkUiItem,
+                        actionOneText = stringResource(id = R.string.menu_text_edit),
+                        actionTwoText = stringResource(id = R.string.menu_text_delete),
                         isMenuExpanded = isMenuExpanded,
                         modifier = Modifier,
                         isSmallMenu = true,

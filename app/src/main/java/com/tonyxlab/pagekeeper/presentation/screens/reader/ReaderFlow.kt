@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
+import com.tonyxlab.pagekeeper.presentation.navigation.ReaderStartScreen
 import com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark.BookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.ChaptersScreen
 import com.tonyxlab.pagekeeper.presentation.screens.reader.read.ReadScreen
@@ -15,7 +16,8 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun ReaderFlow(
     bookId: String,
-    navigator: Navigator
+    navigator: Navigator,
+    startScreen: ReaderStartScreen = ReaderStartScreen.Read
 ) {
     val viewModel: ReadViewModel = koinViewModel(
             key = "reader-$bookId",
@@ -23,7 +25,14 @@ fun ReaderFlow(
     )
 
     var currentScreen by rememberSaveable {
-        mutableStateOf(ReaderScreen.Read)
+
+        mutableStateOf(
+                when (startScreen) {
+                    ReaderStartScreen.Read -> ReaderScreen.Read
+                    ReaderStartScreen.Bookmarks -> ReaderScreen.Bookmarks
+                }
+        )
+
     }
 
     when (currentScreen) {
@@ -33,7 +42,7 @@ fun ReaderFlow(
                     navigator = navigator,
                     viewModel = viewModel,
                     navigateToChaptersScreen = { currentScreen = ReaderScreen.Chapters },
-                    navigateToBookmarkScreen = { currentScreen = ReaderScreen.Bookmark }
+                    navigateToBookmarkScreen = { currentScreen = ReaderScreen.Bookmarks }
             )
         }
 
@@ -44,15 +53,21 @@ fun ReaderFlow(
             )
         }
 
-        ReaderScreen.Bookmark -> {
+        ReaderScreen.Bookmarks -> {
             BookmarkScreen(
                     viewModel = viewModel,
-                    navigateToReadScreen = { currentScreen = ReaderScreen.Read }
+                    navigateToReadScreen = {
+
+                        when(startScreen) {
+                            ReaderStartScreen.Read -> currentScreen = ReaderScreen.Read
+                            ReaderStartScreen.Bookmarks -> {navigator.popBackstack()}
+                        }
+                    }
             )
         }
     }
 }
 
 private enum class ReaderScreen {
-    Read, Chapters, Bookmark
+    Read, Chapters, Bookmarks
 }

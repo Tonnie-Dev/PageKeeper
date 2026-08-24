@@ -10,9 +10,9 @@ sealed interface BookmarksUiEvent : UiEvent {
 
     data object DismissContextMenu : BookmarksUiEvent
 
-    data class ViewAllBookmarks(val bookId: String) : BookmarksUiEvent
+    data class ViewBookmarks(val bookId: String) : BookmarksUiEvent
 
-    data class DeleteAllBookmarks(val bookId: String) : BookmarksUiEvent
+    data class DeleteBookmarks(val bookId: String) : BookmarksUiEvent
 
     data object CancelDeleteDialog : BookmarksUiEvent
 

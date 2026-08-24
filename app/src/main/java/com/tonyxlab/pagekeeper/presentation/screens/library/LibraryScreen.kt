@@ -283,7 +283,7 @@ private fun MergedLibraryLayout(
                                 .show()
                     }
 
-                    LibraryActionEvent.NavigateToBookmarks -> navigator.navigateToBookmarks()
+                    LibraryActionEvent.NavigateToBookmarks -> navigator.navigateToGlobalBookmarks()
                 }
             }
     ) { state ->

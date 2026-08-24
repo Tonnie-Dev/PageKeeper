@@ -5,12 +5,12 @@ import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.model.GlobalBookma
 
 data class BookmarksUiState(
     val globalBookmarkUiItems: List<GlobalBookmarkUiItem> = emptyList(),
-    val selectedMenuItemId: Long? = null,
+    val selectedMenuItemId: String? = null,
     val deleteDialogState: DeleteDialogState = DeleteDialogState(),
 ) : UiState {
 
     data class DeleteDialogState(
-        val showDialog: Boolean = false,
+        val showDeleteDialog: Boolean = false,
         val bookId: String? = null,
     )
 }
