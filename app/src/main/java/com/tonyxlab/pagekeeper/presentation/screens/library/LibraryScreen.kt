@@ -8,7 +8,9 @@ import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -62,9 +65,9 @@ import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationRail
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryTopBar
-import com.tonyxlab.pagekeeper.presentation.screens.library.components.SearchComponent
+import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SelectionTopBar
-import com.tonyxlab.pagekeeper.presentation.screens.library.components.WideDummySearchBar
+import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
@@ -106,7 +109,7 @@ fun LibraryScreen(
                         viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
                     },
                     exitSearch = {
-                        viewModel.onEvent(LibraryUiEvent.SearchBackClicked)
+                        viewModel.onEvent(LibraryUiEvent.ExitSearch)
                     }
             )
 
@@ -337,13 +340,16 @@ private fun WideLibraryLayout(
                         modifier = Modifier
                                 .clip(shape = MaterialTheme.shapes.extraLarge)
                                 .fillMaxWidth(),
-                        uiState = uiState,
-                        onEvent = onEvent,
-                        expanded = uiState.searchState.isSearchMode,
+                       searchTextFieldState = uiState.searchState.searchTextFieldState,
+                        searchResultItems = uiState.searchState.searchResults,
+                        expanded = uiState.searchState.searchTextFieldState.text.isNotBlank(),
                         showBackButton = false,
-                        showSearchIconWhenEmpty = uiState.searchState.isSearchMode.not(),
-                        inputHeight = 40.dp,
-                        isDeviceWide = true
+                        showSearchIconWhenEmpty = false,
+                        isDeviceWide = true,
+                        onSearch = { onEvent(LibraryUiEvent.SearchClicked)},
+                        onOpenBook = {onEvent(LibraryUiEvent.OpenBook(bookId = it))},
+                        onClearSearchText = { onEvent(LibraryUiEvent.ClearSearchClicked) },
+                        onExitSearch = {onEvent(LibraryUiEvent.ExitSearch)},
                 )
             }
 
@@ -486,6 +492,7 @@ private fun CompactLibraryLayout(
             modifier = modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
+                    .padding(top = MaterialTheme.spacing.spaceMedium)
     ) {
         when {
             uiState.isLoading || uiState.isImporting -> {
@@ -496,10 +503,19 @@ private fun CompactLibraryLayout(
             }
 
             uiState.searchState.isSearchMode -> {
+
                 SearchComponent(
                         modifier = Modifier,
-                        uiState = uiState,
-                        onEvent = onEvent
+                        searchTextFieldState = uiState.searchState.searchTextFieldState,
+                        searchResultItems = uiState.searchState.searchResults,
+                        expanded = uiState.searchState.searchTextFieldState.text.isNotBlank(),
+                        showBackButton = true,
+                        showSearchIconWhenEmpty = true,
+                        isDeviceWide = false,
+                        onSearch = { onEvent(LibraryUiEvent.SearchClicked)},
+                        onOpenBook = {onEvent(LibraryUiEvent.OpenBook(bookId = it))},
+                        onClearSearchText = { onEvent(LibraryUiEvent.ClearSearchClicked) },
+                        onExitSearch = {onEvent(LibraryUiEvent.ExitSearch)},
                 )
             }
 

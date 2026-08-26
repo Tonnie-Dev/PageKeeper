@@ -57,7 +57,7 @@ class LibraryViewModel(
             is LibraryUiEvent.DrawerDestinationClicked -> onDrawerDestinationClicked(event.destination)
             is LibraryUiEvent.ShareBook -> onShareBook(event.bookId)
             LibraryUiEvent.ClearSearchClicked -> searchHandler.clearSearchText()
-            LibraryUiEvent.SearchBackClicked -> searchHandler.exitSearchMode()
+            LibraryUiEvent.ExitSearch -> searchHandler.exitSearchMode()
             LibraryUiEvent.SearchClicked -> searchHandler.enterSearchMode()
             LibraryUiEvent.AddSelectedToFavoritesClicked -> onAddSelectedToFavorites()
             is LibraryUiEvent.BookLongClicked -> selectionHandler.enterSelectionMode(event.bookId)

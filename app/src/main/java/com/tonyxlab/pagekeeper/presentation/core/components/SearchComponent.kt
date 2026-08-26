@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.library.components
+package com.tonyxlab.pagekeeper.presentation.core.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,11 +38,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.domain.model.Book
-import com.tonyxlab.pagekeeper.domain.model.BookMock
-import com.tonyxlab.pagekeeper.presentation.core.components.AppInputField
-import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.BodyLargeRegular
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
@@ -56,16 +51,24 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchComponent(
-    uiState: LibraryUiState,
-    onEvent: (LibraryUiEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    expanded: Boolean = uiState.searchState.searchTextFieldState.text.isNotBlank(),
-    showBackButton: Boolean = true,
-    showSearchIconWhenEmpty: Boolean = false,
-    isDeviceWide: Boolean = false,
-    inputHeight: Dp = MaterialTheme.spacing.spaceTwelve * 6,
+        /*
+            uiStte: LibraryUiState,
+            onEvnt: (LibraryUiEvent) -> Unit,
+        */
+        searchTextFieldState: TextFieldState,
+        searchResultItems: List<Book>,
+        expanded: Boolean,
+        modifier: Modifier = Modifier,
+        showBackButton: Boolean = true,
+        showSearchIconWhenEmpty: Boolean = false,
+        isDeviceWide: Boolean = false,
+        inputHeight: Dp = MaterialTheme.spacing.spaceTwelve * 6,
+        onSearch: () -> Unit,
+        onOpenBook: (String) -> Unit,
+        onClearSearchText: () -> Unit,
+        onExitSearch: () -> Unit,
 ) {
-    val searchTextFieldState = uiState.searchState.searchTextFieldState
+    //val searchTextFieldState = uiState.searchState.searchTextFieldState
     val textFieldHasText = searchTextFieldState.text.isNotBlank()
 
     SearchBar(
@@ -83,9 +86,7 @@ fun SearchComponent(
                                 {
                                     Image(
                                             modifier = Modifier.clickable(
-                                                    onClick = {
-                                                        onEvent(LibraryUiEvent.SearchBackClicked)
-                                                    }
+                                                    onClick = onExitSearch
                                             ),
                                             painter = painterResource(R.drawable.ic_back),
                                             contentDescription = stringResource(id = R.string.cds_text_back),
@@ -96,9 +97,7 @@ fun SearchComponent(
                                 if (textFieldHasText) {
                                     Image(
                                             modifier = Modifier.clickable(onClick = {
-                                                onEvent(
-                                                        LibraryUiEvent.ClearSearchClicked
-                                                )
+                                                onClearSearchText()
                                             }),
                                             painter = painterResource(R.drawable.ic_cancel),
                                             contentDescription = stringResource(id = R.string.cds_text_back),
@@ -108,7 +107,8 @@ fun SearchComponent(
                                         Image(
                                                 modifier = Modifier.clickable(
                                                         onClick = {
-                                                            onEvent(LibraryUiEvent.SearchClicked)
+                                                            // onEvent(LibraryUiEvent.SearchClicked)
+                                                            onSearch()
                                                         }
                                                 ),
                                                 painter = painterResource(R.drawable.ic_search),
@@ -135,8 +135,8 @@ fun SearchComponent(
             ),
     ) {
 
-        val items = uiState.searchState.searchResults
-        if (textFieldHasText && items.isEmpty()) {
+        // val items = uiState.searchState.searchResults
+        if (textFieldHasText && searchResultItems.isEmpty()) {
 
             Box(
                     modifier = Modifier
@@ -154,14 +154,15 @@ fun SearchComponent(
             }
         }
         LazyListComponent(
-                items = items,
-                key = { item -> item.id },
+                items = searchResultItems,
+                key = { it.id },
                 isDeviceWide = isDeviceWide
         ) { book ->
+
             SearchResultItem(
                     book = book,
                     modifier = Modifier,
-                    onItemClick = { onEvent(LibraryUiEvent.OpenBook(book.id)) }
+                    onItemClick = { onOpenBook(book.id) }
             )
         }
     }
@@ -290,17 +291,14 @@ private fun SearchComponent_Preview() {
                         .padding(),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceMedium)
         ) {
-
             SearchComponent(
-                    uiState = LibraryUiState(
-
-                            searchState = LibraryUiState.SearchState(
-                                    searchTextFieldState = TextFieldState(initialText = "Tonnie"),
-                                    isSearchMode = false,
-                                    searchResults = BookMock.books
-                            )
-                    ),
-                    onEvent = {}
+                    searchTextFieldState = TextFieldState(),
+                    searchResultItems = emptyList(),
+                    expanded = true,
+                    onSearch = {},
+                    onOpenBook = {},
+                    onExitSearch = {},
+                    onClearSearchText = {},
             )
         }
     }
