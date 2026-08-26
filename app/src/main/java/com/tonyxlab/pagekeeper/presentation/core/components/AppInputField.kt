@@ -49,6 +49,7 @@ fun AppInputField(
     textFieldState: TextFieldState,
     placeholderText: String,
     modifier: Modifier = Modifier,
+    hasLabel: Boolean = false,
     textStyle: TextStyle = MaterialTheme.typography.BodyLargeRegular,
     placeholderTextStyle: TextStyle = MaterialTheme.typography.BodyLargeRegular,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
@@ -81,39 +82,79 @@ fun AppInputField(
     ) {
         leadingIcon?.invoke()
 
-        Column {
-            labelText?.invoke()
+        if (hasLabel) {
+            Column {
+                labelText?.invoke()
 
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceExtraSmall))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.spaceExtraSmall))
 
-            BasicTextField(
+                InputField(
+                        modifier = Modifier
+                                .weight(1f)
+                                .focusRequester(focusRequester)
+                                .onFocusChanged { focused = it.isFocused },
+                        textFieldState = textFieldState,
+                        textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+                        lineLimits = TextFieldLineLimits.MultiLine(
+                                minHeightInLines = 2,
+                                maxHeightInLines = 3
+                        ),
+                        placeholderText = placeholderText,
+                        placeholderTextStyle = placeholderTextStyle,
+                        focused = focused,
+                        keyboardOptions = keyboardOptions
+                )
+            }
+        } else {
+
+            InputField(
                     modifier = Modifier
                             .weight(1f)
                             .focusRequester(focusRequester)
                             .onFocusChanged { focused = it.isFocused },
-                    state = textFieldState,
+                    textFieldState = textFieldState,
                     textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
-                    lineLimits = TextFieldLineLimits.MultiLine(
-                            minHeightInLines = 2,
-                            maxHeightInLines = 3
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    keyboardOptions = keyboardOptions,
-                    decorator = { innerTextField ->
-                        TextDecorator(
-                                isEmpty = textFieldState.text.isEmpty(),
-                                innerTextField = innerTextField,
-                                focused = focused,
-                                placeholderText = placeholderText,
-                                placeholderTextStyle = placeholderTextStyle.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                        )
-                    }
+                    placeholderText = placeholderText,
+                    placeholderTextStyle = placeholderTextStyle,
+                    focused = focused,
+                    keyboardOptions = keyboardOptions
             )
         }
         trailingIcon?.invoke()
     }
+}
+
+@Composable
+private fun InputField(
+    textFieldState: TextFieldState,
+    placeholderText: String,
+    focused: Boolean,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle,
+    placeholderTextStyle: TextStyle,
+    keyboardOptions: KeyboardOptions,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default
+) {
+
+    BasicTextField(
+            modifier = modifier,
+            state = textFieldState,
+            textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+            lineLimits = lineLimits,
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            keyboardOptions = keyboardOptions,
+            decorator = { innerTextField ->
+                TextDecorator(
+                        isEmpty = textFieldState.text.isEmpty(),
+                        innerTextField = innerTextField,
+                        focused = focused,
+                        placeholderText = placeholderText,
+                        placeholderTextStyle = placeholderTextStyle.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                )
+            }
+    )
 }
 
 @Composable

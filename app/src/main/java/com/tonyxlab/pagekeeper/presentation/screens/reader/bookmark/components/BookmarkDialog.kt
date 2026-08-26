@@ -109,6 +109,7 @@ fun BookmarkDialog(
                         textFieldState = textFieldState,
                         placeholderText = stringResource(id = R.string.label_text_title),
                         height = inputFieldHeight,
+                        hasLabel = true,
                         textStyle = MaterialTheme.typography.BodyMediumRegular.copy(
                                 color = MaterialTheme.colorScheme.onSurface
                         ),

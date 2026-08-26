@@ -1,13 +1,12 @@
 package com.tonyxlab.pagekeeper.presentation.core.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheetDefaults.properties
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,6 +23,8 @@ import com.tonyxlab.pagekeeper.utils.ifThen
 fun AppDropdownMenu(
     actionOneText: String,
     actionTwoText: String,
+    @DrawableRes
+    nonDeleteIconRes: Int,
     isMenuExpanded: Boolean,
     modifier: Modifier = Modifier,
     isSmallMenu: Boolean = false,
@@ -51,7 +52,7 @@ fun AppDropdownMenu(
     ) {
         ContextMenuItem(
                 text = actionOneText,
-                icon = painterResource(R.drawable.ic_edit),
+                icon = painterResource(id =nonDeleteIconRes),
                 tintColor = MaterialTheme.colorScheme.onSurface,
                 isSmallMenu = isSmallMenu,
                 onClick = onFirstAction
