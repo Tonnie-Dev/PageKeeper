@@ -6,10 +6,10 @@ import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.domain.ImportBookResult
 import com.tonyxlab.pagekeeper.domain.repository.BookRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
+import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialog
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.SearchHandler
@@ -255,11 +255,12 @@ class LibraryViewModel(
         }
     }
 
-    private fun onDrawerDestinationClicked(destination: LibraryDrawerDestination) {
+    private fun onDrawerDestinationClicked(destination: AppNavigationDestination) {
 
-        if (destination == LibraryDrawerDestination.Bookmarks){
+        if (destination == AppNavigationDestination.Bookmarks){
 
             sendActionEvent(LibraryActionEvent.NavigateToBookmarks)
+            return
         }
         updateState { it.copy(selectedDrawerDestination = destination) }
     }

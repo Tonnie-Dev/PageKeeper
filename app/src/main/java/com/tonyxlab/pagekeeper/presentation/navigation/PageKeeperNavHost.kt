@@ -14,24 +14,26 @@ import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderFlow
 @Composable
 fun PageKeeperNavHost() {
 
-    val backStack = rememberNavBackStack(LibraryDestination)
+    val backStack = rememberNavBackStack(LibraryDestination())
     val navigator = remember(backStack) { Navigator(backStack) }
 
     val entryProvider = entryProvider {
+        entry<LibraryDestination> { backStackEntry ->
 
-        entry<LibraryDestination> {
-            LibraryScreen(navigator = navigator)
-        }
-
-        entry<ReadDestination> { key ->
-            ReaderFlow(
-                    bookId = key.bookId,
+            LibraryScreen(
                     navigator = navigator,
-                    startScreen = key.startScreen
+                    initialDestination = backStackEntry.destination
             )
         }
 
-        entry < BookmarksDestination> {
+        entry<ReadDestination> { backStackEntry ->
+            ReaderFlow(
+                    bookId = backStackEntry.bookId,
+                    navigator = navigator,
+                    startScreen = backStackEntry.startScreen
+            )
+        }
+        entry<BookmarksDestination> {
             BookmarksScreen(navigator = navigator)
         }
     }

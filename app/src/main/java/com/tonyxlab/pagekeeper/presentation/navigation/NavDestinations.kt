@@ -4,7 +4,9 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object LibraryDestination : NavKey
+data class LibraryDestination(
+        val destination: AppNavigationDestination = AppNavigationDestination.Library
+) : NavKey
 
 @Serializable
 data class ReadDestination(

@@ -85,6 +85,8 @@
     <string name="dialog_text_remove_bookmark">This action will permanently remove the selected bookmark</string>
     <string name="dialog_text_delete">Delete</string>
     <string name="dialog_text_cancel">Cancel</string>
+    <string name="dialog_text_delete_all_bookmarks">Delete all bookmarks</string>
+    <string name="dialog_text_delete_all_desc">All bookmarks for this book will be permanently removed</string>
 
     <!--Snackbar Texts-->
     <string name="snack_text_item_added_to_cart">Item Added to Cart</string>

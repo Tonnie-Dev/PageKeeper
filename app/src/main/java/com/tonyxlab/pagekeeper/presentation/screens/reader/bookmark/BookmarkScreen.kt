@@ -13,6 +13,7 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
+import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
@@ -117,6 +118,9 @@ private fun BookmarkScreenContent(
     }
 }
 
+
+
+
 @Composable
 private fun BookmarkDialog(
     onEvent: (ReaderUiEvent) -> Unit
@@ -126,6 +130,7 @@ private fun BookmarkDialog(
             dialogText = stringResource(id = R.string.dialog_text_remove_bookmark),
             positiveButtonText = stringResource(id = R.string.dialog_text_delete),
             negativeButtonText = stringResource(id = R.string.dialog_text_cancel),
+            isDeleteDialog = true,
             onDismissRequest = { onEvent(ReaderUiEvent.CancelDeleteBookmark) },
             onConfirm = {
                 onEvent(ReaderUiEvent.ConfirmDeleteBookmark)

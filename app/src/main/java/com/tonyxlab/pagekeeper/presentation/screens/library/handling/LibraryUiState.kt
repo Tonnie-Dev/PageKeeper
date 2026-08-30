@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Stable
 import com.tonyxlab.pagekeeper.domain.model.Book
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiState
+import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 
 data class LibraryUiState(
     val books: List<Book> = emptyList(),
@@ -11,7 +12,7 @@ data class LibraryUiState(
     val isLoading: Boolean = true,
     val isImporting: Boolean = false,
     val dialog: LibraryDialog? = null,
-    val selectedDrawerDestination: LibraryDrawerDestination = LibraryDrawerDestination.Library,
+    val selectedDrawerDestination: AppNavigationDestination = AppNavigationDestination.Library,
     val searchState: SearchState = SearchState(),
     val selectionState: SelectionState = SelectionState()
 ) : UiState {
@@ -47,12 +48,5 @@ enum class LibraryDialogType {
     DeleteBook,
     DeleteSelectedBooks,
     UnsupportedFile,
-}
-
-enum class LibraryDrawerDestination {
-    Library,
-    Favorites,
-    Finished,
-    Bookmarks
 }
 

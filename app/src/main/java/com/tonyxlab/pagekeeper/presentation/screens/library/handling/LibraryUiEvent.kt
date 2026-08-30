@@ -2,13 +2,14 @@ package com.tonyxlab.pagekeeper.presentation.screens.library.handling
 
 import android.net.Uri
 import com.tonyxlab.pagekeeper.presentation.core.handling.UiEvent
+import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 
 sealed interface LibraryUiEvent: UiEvent{
 
     data object ImportBookClicked : LibraryUiEvent
 
     data class DrawerDestinationClicked(
-        val destination: LibraryDrawerDestination
+        val destination: AppNavigationDestination
     ) : LibraryUiEvent
 
     data class OpenBook(val bookId: String) : LibraryUiEvent
@@ -29,7 +30,7 @@ sealed interface LibraryUiEvent: UiEvent{
 
     data object SearchClicked : LibraryUiEvent
 
-    data object SearchBackClicked : LibraryUiEvent
+    data object ExitSearch : LibraryUiEvent
 
     data object ClearSearchClicked : LibraryUiEvent
 

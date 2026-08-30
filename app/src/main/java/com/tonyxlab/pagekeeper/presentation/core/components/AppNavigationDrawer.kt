@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.library.components
+package com.tonyxlab.pagekeeper.presentation.core.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
+import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.theme.BgActive
 import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
@@ -42,11 +42,11 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.presentation.theme.IconsTint as IconTint
 
 @Composable
-fun LibraryNavigationDrawer(
-    selectedDestination: LibraryDrawerDestination,
+fun AppNavigationDrawer(
+    selectedDestination: AppNavigationDestination,
     onCloseClick: () -> Unit,
     onImportBookClick: () -> Unit,
-    onDestinationClick: (LibraryDrawerDestination) -> Unit,
+    onDestinationClick: (AppNavigationDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -108,28 +108,28 @@ fun LibraryNavigationDrawer(
 
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_library),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Library) R.drawable.books_filled else R.drawable.books_outlined,
-                    selected = selectedDestination == LibraryDrawerDestination.Library,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Library) }
+                    iconRes = if (selectedDestination == AppNavigationDestination.Library) R.drawable.books_filled else R.drawable.books_outlined,
+                    selected = selectedDestination == AppNavigationDestination.Library,
+                    onClick = { onDestinationClick(AppNavigationDestination.Library) }
             )
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_favorites),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Favorites) R.drawable.ic_star_filled else R.drawable.ic_star_outlined,
-                    selected = selectedDestination == LibraryDrawerDestination.Favorites,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Favorites) }
+                    iconRes = if (selectedDestination == AppNavigationDestination.Favorites) R.drawable.ic_star_filled else R.drawable.ic_star_outlined,
+                    selected = selectedDestination == AppNavigationDestination.Favorites,
+                    onClick = { onDestinationClick(AppNavigationDestination.Favorites) }
             )
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_finished),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Finished) R.drawable.ic_mark_finished else R.drawable.ic_finished_outlined,
-                    selected = selectedDestination == LibraryDrawerDestination.Finished,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Finished) }
+                    iconRes = if (selectedDestination == AppNavigationDestination.Finished) R.drawable.ic_mark_finished else R.drawable.ic_finished_outlined,
+                    selected = selectedDestination == AppNavigationDestination.Finished,
+                    onClick = { onDestinationClick(AppNavigationDestination.Finished) }
             )
 
             DrawerItem(
                     label = stringResource(id = R.string.nav_drawer_bookmarks),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Bookmarks) R.drawable.ic_bookmark_big else R.drawable.ic_bookmark,
-                    selected = selectedDestination == LibraryDrawerDestination.Bookmarks,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Bookmarks) }
+                    iconRes = if (selectedDestination == AppNavigationDestination.Bookmarks) R.drawable.ic_bookmark_big else R.drawable.ic_bookmark,
+                    selected = selectedDestination == AppNavigationDestination.Bookmarks,
+                    onClick = { onDestinationClick(AppNavigationDestination.Bookmarks) }
             )
         }
     }
@@ -180,7 +180,7 @@ private val DrawerShape = RoundedCornerShape(
 
 @Preview(showBackground = true)
 @Composable
-private fun LibraryNavigationDrawerPreview() {
+private fun AppNavigationDrawerPreview() {
     PageKeeperTheme {
 
         Column(
@@ -188,8 +188,8 @@ private fun LibraryNavigationDrawerPreview() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            LibraryNavigationDrawer(
-                    selectedDestination = LibraryDrawerDestination.Library,
+            AppNavigationDrawer(
+                    selectedDestination = AppNavigationDestination.Library,
                     onCloseClick = {},
                     onImportBookClick = {},
                     onDestinationClick = {}

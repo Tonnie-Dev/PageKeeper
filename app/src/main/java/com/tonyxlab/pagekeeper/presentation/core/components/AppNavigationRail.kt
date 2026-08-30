@@ -1,4 +1,4 @@
-package com.tonyxlab.pagekeeper.presentation.screens.library.components
+package com.tonyxlab.pagekeeper.presentation.core.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
+import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.theme.BgActive
 import com.tonyxlab.pagekeeper.presentation.theme.BgMain
 import com.tonyxlab.pagekeeper.presentation.theme.BodyMediumMedium
@@ -44,13 +44,13 @@ import com.tonyxlab.pagekeeper.presentation.theme.TextSecondary
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @Composable
-fun LibraryNavigationRail(
-    selectedDestination: LibraryDrawerDestination,
+fun AppNavigationRail(
+    selectedDestination: AppNavigationDestination,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onImportBookClick: () -> Unit,
     exitSearch: () -> Unit,
-    onDestinationClick: (LibraryDrawerDestination) -> Unit,
+    onDestinationClick: (AppNavigationDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val railWidth by animateDpAsState(
@@ -107,49 +107,49 @@ fun LibraryNavigationRail(
         ) {
             RailDestinationItem(
                     label = stringResource(id = R.string.nav_drawer_library),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Library) {
+                    iconRes = if (selectedDestination == AppNavigationDestination.Library) {
                         R.drawable.books_filled
                     } else {
                         R.drawable.books_outlined
                     },
-                    selected = selectedDestination == LibraryDrawerDestination.Library,
+                    selected = selectedDestination == AppNavigationDestination.Library,
                     expanded = expanded,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Library) }
+                    onClick = { onDestinationClick(AppNavigationDestination.Library) }
             )
             RailDestinationItem(
                     label = stringResource(id = R.string.nav_drawer_favorites),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Favorites) {
+                    iconRes = if (selectedDestination == AppNavigationDestination.Favorites) {
                         R.drawable.ic_star_filled
                     } else {
                         R.drawable.ic_star_outlined
                     },
-                    selected = selectedDestination == LibraryDrawerDestination.Favorites,
+                    selected = selectedDestination == AppNavigationDestination.Favorites,
                     expanded = expanded,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Favorites) }
+                    onClick = { onDestinationClick(AppNavigationDestination.Favorites) }
             )
             RailDestinationItem(
                     label = stringResource(id = R.string.nav_drawer_finished),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Finished) {
+                    iconRes = if (selectedDestination == AppNavigationDestination.Finished) {
                         R.drawable.ic_finished_filled
                     } else {
                         R.drawable.ic_finished_outlined
                     },
-                    selected = selectedDestination == LibraryDrawerDestination.Finished,
+                    selected = selectedDestination == AppNavigationDestination.Finished,
                     expanded = expanded,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Finished) }
+                    onClick = { onDestinationClick(AppNavigationDestination.Finished) }
             )
 
 
             RailDestinationItem(
                     label = stringResource(id = R.string.nav_drawer_bookmarks),
-                    iconRes = if (selectedDestination == LibraryDrawerDestination.Bookmarks) {
+                    iconRes = if (selectedDestination == AppNavigationDestination.Bookmarks) {
                         R.drawable.ic_bookmark_filled
                     } else {
                         R.drawable.ic_bookmark
                     },
-                    selected = selectedDestination == LibraryDrawerDestination.Bookmarks,
+                    selected = selectedDestination == AppNavigationDestination.Bookmarks,
                     expanded = expanded,
-                    onClick = { onDestinationClick(LibraryDrawerDestination.Bookmarks) }
+                    onClick = { onDestinationClick(AppNavigationDestination.Bookmarks) }
             )
         }
     }
@@ -304,10 +304,10 @@ private val ExpandedRailWidth = 200.dp
 
 @Preview(showBackground = true)
 @Composable
-private fun LibraryNavigationRailPreview() {
+private fun AppNavigationRailPreview() {
     PageKeeperTheme {
-        LibraryNavigationRail(
-                selectedDestination = LibraryDrawerDestination.Library,
+        AppNavigationRail(
+                selectedDestination = AppNavigationDestination.Library,
                 expanded = true,
                 onExpandedChange = {},
                 exitSearch = {},

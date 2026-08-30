@@ -8,9 +8,7 @@ import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -38,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,21 +54,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
+import com.tonyxlab.pagekeeper.presentation.core.components.AppNavigationDrawer
+import com.tonyxlab.pagekeeper.presentation.core.components.AppNavigationRail
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
+import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
+import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
+import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
-import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationDrawer
-import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryNavigationRail
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.LibraryTopBar
-import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.SelectionTopBar
-import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDialogType
-import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryDrawerDestination
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.library.handling.LibraryUiState
 import com.tonyxlab.pagekeeper.presentation.theme.Primary
@@ -83,6 +81,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LibraryScreen(
     navigator: Navigator,
+    initialDestination: AppNavigationDestination = AppNavigationDestination.Library,
     viewModel: LibraryViewModel = koinViewModel(),
 ) {
 
@@ -96,9 +95,16 @@ fun LibraryScreen(
 
     val isDeviceWide = rememberIsDeviceWide()
 
+    LaunchedEffect(initialDestination) {
+
+        if (initialDestination != AppNavigationDestination.Bookmarks) {
+            viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination = initialDestination))
+        }
+    }
+
     if (isDeviceWide) {
         Row(modifier = Modifier.fillMaxSize()) {
-            LibraryNavigationRail(
+            AppNavigationRail(
                     selectedDestination = uiState.selectedDrawerDestination,
                     expanded = isNavigationRailExpanded,
                     onExpandedChange = { isNavigationRailExpanded = it },
@@ -119,14 +125,14 @@ fun LibraryScreen(
                             .fillMaxSize()
             ) {
                 MergedLibraryLayout(
-                        showNavigationIcon = false,
-                        showTopBar = false,
                         modifier = Modifier.padding(
                                 top = MaterialTheme.spacing.spaceLarge,
                                 start = MaterialTheme.spacing.spaceMedium,
                                 end = MaterialTheme.spacing.spaceMedium,
                                 bottom = MaterialTheme.spacing.spaceMedium
                         ),
+                        showNavigationIcon = false,
+                        showTopBar = false,
                         navigator = navigator,
                         onNavButtonClick = {},
                         viewModel = viewModel,
@@ -139,7 +145,7 @@ fun LibraryScreen(
                 gesturesEnabled = inSearchMode.not() && selectionState.isSelectionMode.not(),
                 scrimColor = Color.Black.copy(alpha = 0.38f),
                 drawerContent = {
-                    LibraryNavigationDrawer(
+                    AppNavigationDrawer(
                             selectedDestination = uiState.selectedDrawerDestination,
                             onCloseClick = {
                                 coroutineScope.launch { drawerState.close() }
@@ -230,10 +236,10 @@ private fun MergedLibraryLayout(
                         LibraryTopBar(
                                 titleText = stringResource(
                                         id = when (uiState.selectedDrawerDestination) {
-                                            LibraryDrawerDestination.Library -> R.string.topbar_text_library
-                                            LibraryDrawerDestination.Favorites -> R.string.topbar_text_favorites
-                                            LibraryDrawerDestination.Finished -> R.string.topbar_text_finished
-                                            LibraryDrawerDestination.Bookmarks -> R.string.topbar_text_bookmarks
+                                            AppNavigationDestination.Library -> R.string.topbar_text_library
+                                            AppNavigationDestination.Favorites -> R.string.topbar_text_favorites
+                                            AppNavigationDestination.Finished -> R.string.topbar_text_finished
+                                            AppNavigationDestination.Bookmarks -> R.string.topbar_text_bookmarks
                                         }
                                 ),
                                 showNavIcon = showNavigationIcon,
@@ -269,6 +275,7 @@ private fun MergedLibraryLayout(
                     LibraryActionEvent.OpenFilePicker -> {
                         filePicker.launch("*/*")
                     }
+
                     is LibraryActionEvent.OpenBook -> {
                         isNavigatingAway = true
                         navigator.navigateToRead(actionEvent.bookId)
@@ -340,16 +347,16 @@ private fun WideLibraryLayout(
                         modifier = Modifier
                                 .clip(shape = MaterialTheme.shapes.extraLarge)
                                 .fillMaxWidth(),
-                       searchTextFieldState = uiState.searchState.searchTextFieldState,
+                        searchTextFieldState = uiState.searchState.searchTextFieldState,
                         searchResultItems = uiState.searchState.searchResults,
                         expanded = uiState.searchState.searchTextFieldState.text.isNotBlank(),
                         showBackButton = false,
                         showSearchIconWhenEmpty = false,
                         isDeviceWide = true,
-                        onSearch = { onEvent(LibraryUiEvent.SearchClicked)},
-                        onOpenBook = {onEvent(LibraryUiEvent.OpenBook(bookId = it))},
+                        onSearch = { onEvent(LibraryUiEvent.SearchClicked) },
+                        onOpenBook = { onEvent(LibraryUiEvent.OpenBook(bookId = it)) },
                         onClearSearchText = { onEvent(LibraryUiEvent.ClearSearchClicked) },
-                        onExitSearch = {onEvent(LibraryUiEvent.ExitSearch)},
+                        onExitSearch = { onEvent(LibraryUiEvent.ExitSearch) },
                 )
             }
 
@@ -388,7 +395,7 @@ private fun WideLibraryLayout(
 
                 visibleBooks.isEmpty() && uiState.searchState.isSearchMode.not() -> {
                     when (uiState.selectedDrawerDestination) {
-                        LibraryDrawerDestination.Favorites -> {
+                        AppNavigationDestination.Favorites -> {
                             EmptyFavoritesScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     backgroundColor = TabletBlockBg,
@@ -396,7 +403,7 @@ private fun WideLibraryLayout(
                             )
                         }
 
-                        LibraryDrawerDestination.Finished -> {
+                        AppNavigationDestination.Finished -> {
                             EmptyFinishedScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     backgroundColor = TabletBlockBg,
@@ -404,7 +411,7 @@ private fun WideLibraryLayout(
                             )
                         }
 
-                        LibraryDrawerDestination.Library -> {
+                        AppNavigationDestination.Library -> {
                             EmptyBooksScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     backgroundColor = TabletBlockBg,
@@ -414,7 +421,7 @@ private fun WideLibraryLayout(
                             )
                         }
 
-                        LibraryDrawerDestination.Bookmarks -> {
+                        AppNavigationDestination.Bookmarks -> {
                             EmptyBookmarkScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     backgroundColor = TabletBlockBg,
@@ -512,31 +519,31 @@ private fun CompactLibraryLayout(
                         showBackButton = true,
                         showSearchIconWhenEmpty = true,
                         isDeviceWide = false,
-                        onSearch = { onEvent(LibraryUiEvent.SearchClicked)},
-                        onOpenBook = {onEvent(LibraryUiEvent.OpenBook(bookId = it))},
+                        onSearch = { onEvent(LibraryUiEvent.SearchClicked) },
+                        onOpenBook = { onEvent(LibraryUiEvent.OpenBook(bookId = it)) },
                         onClearSearchText = { onEvent(LibraryUiEvent.ClearSearchClicked) },
-                        onExitSearch = {onEvent(LibraryUiEvent.ExitSearch)},
+                        onExitSearch = { onEvent(LibraryUiEvent.ExitSearch) },
                 )
             }
 
             visibleBooks.isEmpty() -> {
                 when (uiState.selectedDrawerDestination) {
 
-                    LibraryDrawerDestination.Favorites -> {
+                    AppNavigationDestination.Favorites -> {
                         EmptyFavoritesScreen(isDeviceWide = false)
                     }
 
-                    LibraryDrawerDestination.Finished -> {
+                    AppNavigationDestination.Finished -> {
                         EmptyFinishedScreen(isDeviceWide = false)
                     }
 
-                    LibraryDrawerDestination.Library -> {
+                    AppNavigationDestination.Library -> {
                         EmptyBooksScreen(
                                 onImportBookClick = { onEvent(LibraryUiEvent.ImportBookClicked) }
                         )
                     }
 
-                    LibraryDrawerDestination.Bookmarks -> {
+                    AppNavigationDestination.Bookmarks -> {
                         EmptyBookmarkScreen(isDeviceWide = false)
                     }
                 }
@@ -597,8 +604,8 @@ private fun LibraryDialog(
 
 private fun LibraryUiState.visibleBooks() = when (selectedDrawerDestination) {
 
-    LibraryDrawerDestination.Favorites -> books.filter { it.isFavorite }
-    LibraryDrawerDestination.Finished -> books.filter { it.isFinished }
+    AppNavigationDestination.Favorites -> books.filter { it.isFavorite }
+    AppNavigationDestination.Finished -> books.filter { it.isFinished }
     else -> books
 }
 

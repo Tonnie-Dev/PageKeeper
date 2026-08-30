@@ -4,7 +4,9 @@ import com.tonyxlab.pagekeeper.presentation.core.handling.UiEvent
 
 sealed interface BookmarksUiEvent : UiEvent {
 
-    data class BookClicked(val bookId: String) : BookmarksUiEvent
+    data class OpenBook(val bookId: String) : BookmarksUiEvent
+
+    data object ImportBook : BookmarksUiEvent
 
     data class ContextMenuClicked(val bookId: String) : BookmarksUiEvent
 
@@ -17,4 +19,10 @@ sealed interface BookmarksUiEvent : UiEvent {
     data object CancelDeleteDialog : BookmarksUiEvent
 
     data object ConfirmDelete : BookmarksUiEvent
+
+    data object SearchClicked : BookmarksUiEvent
+
+    data object ExitSearch : BookmarksUiEvent
+
+    data object ClearSearchClicked : BookmarksUiEvent
 }

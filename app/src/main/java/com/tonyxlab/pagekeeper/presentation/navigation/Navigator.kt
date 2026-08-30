@@ -9,6 +9,9 @@ class Navigator(private val backStack: NavBackStack<NavKey>) {
         backStack.add(destination)
     }
 
+    fun navigateToLibrary(destination: AppNavigationDestination = AppNavigationDestination.Library) {
+        push(LibraryDestination(destination = destination))
+    }
     fun popToLibrary() {
         while (backStack.size > 1) {
             popBackstack()

@@ -144,6 +144,7 @@ fun BookmarkItem(
                 AppDropdownMenu(
                         actionOneText = stringResource(id = R.string.menu_text_edit),
                         actionTwoText = stringResource(id = R.string.menu_text_delete),
+                        nonDeleteIconRes = R.drawable.ic_edit,
                         isMenuExpanded = isMenuExpanded,
                         modifier = Modifier,
                         isSmallMenu = true,
