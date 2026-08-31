@@ -1,13 +1,6 @@
 package com.tonyxlab.pagekeeper.presentation.screens.library
 
-import android.content.Context
-import android.content.Intent
-import android.database.Cursor
-import android.net.Uri
-import android.provider.OpenableColumns
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -62,6 +54,8 @@ import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
+import com.tonyxlab.pagekeeper.presentation.core.utils.rememberFilePicker
+import com.tonyxlab.pagekeeper.presentation.core.utils.shareBook
 import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.library.components.BookCard
@@ -108,15 +102,11 @@ fun LibraryScreen(
                     selectedDestination = uiState.selectedDrawerDestination,
                     expanded = isNavigationRailExpanded,
                     onExpandedChange = { isNavigationRailExpanded = it },
-                    onImportBookClick = {
-                        viewModel.onEvent(LibraryUiEvent.ImportBookClicked)
-                    },
+                    onImportBookClick = { viewModel.onEvent(LibraryUiEvent.ImportBookClicked) },
                     onDestinationClick = { destination ->
                         viewModel.onEvent(LibraryUiEvent.DrawerDestinationClicked(destination))
                     },
-                    exitSearch = {
-                        viewModel.onEvent(LibraryUiEvent.ExitSearch)
-                    }
+                    exitSearch = { viewModel.onEvent(LibraryUiEvent.ExitSearch) }
             )
 
             Box(
@@ -190,7 +180,6 @@ private fun MergedLibraryLayout(
 
     val isDeviceWide = rememberIsDeviceWide()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     val inSearchMode = uiState.searchState.isSearchMode
     val selectionState = uiState.selectionState
@@ -199,18 +188,11 @@ private fun MergedLibraryLayout(
         mutableStateOf(false)
     }
 
-    val filePicker = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        viewModel.onEvent(
-                LibraryUiEvent.FileSelected(
-                        uri = uri,
-                        fileName = context.getDisplayName(uri)
-                )
-        )
-    }
+    val filePicker = rememberFilePicker { uri, fileName ->
 
+        viewModel.onEvent(LibraryUiEvent.FileSelected(uri, fileName))
+
+    }
     BaseContentLayout(
             modifier = modifier,
             viewModel = viewModel,
@@ -607,40 +589,6 @@ private fun LibraryUiState.visibleBooks() = when (selectedDrawerDestination) {
     AppNavigationDestination.Favorites -> books.filter { it.isFavorite }
     AppNavigationDestination.Finished -> books.filter { it.isFinished }
     else -> books
-}
-
-private fun Context.getDisplayName(uri: Uri): String {
-    val cursor: Cursor? = contentResolver.query(
-            uri,
-            null,
-            null,
-            null,
-            null
-    )
-    cursor?.use {
-        val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (nameIndex >= 0 && it.moveToFirst()) {
-            return it.getString(nameIndex)
-                    .orEmpty()
-        }
-    }
-    return uri.lastPathSegment.orEmpty()
-}
-
-private fun Context.shareBook(bookId: String, uiState: LibraryUiState) {
-    val book = uiState.books.firstOrNull { it.id == bookId }
-    if (book == null) {
-        Toast.makeText(this, "Unable to share book.", Toast.LENGTH_SHORT)
-                .show()
-        return
-    }
-
-    val intent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, book.title)
-        putExtra(Intent.EXTRA_TEXT, "${book.title} by ${book.author}")
-    }
-    startActivity(Intent.createChooser(intent, null))
 }
 
 

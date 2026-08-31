@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -33,18 +35,22 @@ import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
 import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
+import com.tonyxlab.pagekeeper.presentation.core.utils.rememberFilePicker
 import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.components.BookmarkCard
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.components.BookmarksTopBar
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksUiEvent
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksUiState
+import com.tonyxlab.pagekeeper.presentation.theme.Primary
 import com.tonyxlab.pagekeeper.presentation.theme.TabletBlockBg
 import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+import timber.log.Timber
 
 @Composable
 fun BookmarksScreen(
@@ -141,7 +147,6 @@ fun BookmarksScreen(
                         coroutineScope.launch { drawerState.open() }
                     }
             )
-
         }
     }
 }
@@ -160,6 +165,9 @@ private fun MergedLibraryLayout(
 
     val inSearchMode = uiState.searchState.isSearchMode
 
+    val filePicker = rememberFilePicker { uri, fileName ->
+        viewModel.onEvent(BookmarksUiEvent.FileSelected(uri, fileName))
+    }
 
     BaseContentLayout(
             modifier = modifier,
@@ -185,6 +193,10 @@ private fun MergedLibraryLayout(
                     is BookmarksActionEvent.ShowToast -> {
                         Toast.makeText(actionContext, actionEvent.message, Toast.LENGTH_SHORT)
                                 .show()
+                    }
+
+                    BookmarksActionEvent.OpenFilePicker -> {
+                        filePicker.launch("*/*")
                     }
                 }
             }
@@ -214,6 +226,16 @@ private fun WideBookmarksLayout(
 ) {
     val isDeviceWide = rememberIsDeviceWide()
     val isSearchActive = uiState.searchState.isSearchMode
+
+    val deleteAllBookmarksTitle =
+        stringResource(R.string.dialog_text_delete_all_bookmarks)
+    val deleteAllBookmarksMessage =
+        stringResource(R.string.dialog_text_delete_all_desc)
+
+    val positiveButtonText =
+        stringResource(id = R.string.dialog_text_delete)
+    val negativeButtonText =
+        stringResource(id = R.string.dialog_text_cancel)
 
     Column(
             modifier = modifier
@@ -255,25 +277,45 @@ private fun WideBookmarksLayout(
             EmptyBookmarkScreen(isGlobalScreen = true, isDeviceWide = false)
         }
 
-        LazyListComponent(
-                items = uiState.globalBookmarkUiItems,
-                key = { it.bookId },
-                isDeviceWide = isDeviceWide
-        ) { item ->
-            BookmarkCard(
-                    item = item,
-                    selected = uiState.selectedMenuItemId == item.bookId,
-                    isMenuExpanded = uiState.selectedMenuItemId == item.bookId,
-                    onItemClick = { onEvent(BookmarksUiEvent.OpenBook(item.bookId)) },
-                    onViewBookmarks = { onEvent(BookmarksUiEvent.ViewBookmarks(item.bookId)) },
-                    onDeleteBookmarks = { onEvent(BookmarksUiEvent.DeleteBookmarks(item.bookId)) },
-                    onOpenContextMenu = { onEvent(BookmarksUiEvent.ContextMenuClicked(item.bookId)) },
-                    onDismissMenu = { onEvent(BookmarksUiEvent.DismissContextMenu) }
-            )
-        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyListComponent(
+                    items = uiState.globalBookmarkUiItems,
+                    key = { it.bookId },
+                    isDeviceWide = isDeviceWide
+            ) { item ->
+                BookmarkCard(
+                        item = item,
+                        selected = uiState.selectedMenuItemId == item.bookId,
+                        isMenuExpanded = uiState.selectedMenuItemId == item.bookId,
+                        onItemClick = { onEvent(BookmarksUiEvent.OpenBook(item.bookId)) },
+                        onViewBookmarks = { onEvent(BookmarksUiEvent.ViewBookmarks(item.bookId)) },
+                        onDeleteBookmarks = {
+                            onEvent(
+                                    BookmarksUiEvent.DeleteBookmarks(
+                                            bookId = item.bookId,
+                                            dialogTitle = deleteAllBookmarksTitle,
+                                            dialogMessage = deleteAllBookmarksMessage,
+                                            positiveButtonText = positiveButtonText,
+                                            negativeButtonText = negativeButtonText
+                                    )
+                            )
+                        },
+                        onOpenContextMenu = { onEvent(BookmarksUiEvent.ContextMenuClicked(item.bookId)) },
+                        onDismissMenu = { onEvent(BookmarksUiEvent.DismissContextMenu) }
+                )
+            }
 
-        if (uiState.deleteDialogState.showDeleteDialog) {
-            BookmarksDialog(onEvent = onEvent)
+            if (uiState.isImporting) {
+                CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Primary
+                )
+            }
+
+            BookmarksDialog(
+                    uiState = uiState,
+                    onEvent = onEvent
+            )
         }
     }
 }
@@ -284,6 +326,17 @@ private fun CompactBookmarksLayout(
     uiState: BookmarksUiState,
     onEvent: (BookmarksUiEvent) -> Unit
 ) {
+    val deleteAllBookmarksTitle =
+        stringResource(R.string.dialog_text_delete_all_bookmarks)
+
+    val deleteAllBookmarksMessage =
+        stringResource(R.string.dialog_text_delete_all_desc)
+
+    val positiveButtonText =
+        stringResource(id = R.string.dialog_text_delete)
+
+    val negativeButtonText =
+        stringResource(id = R.string.dialog_text_cancel)
 
     Box(modifier = modifier.fillMaxWidth()) {
 
@@ -301,32 +354,64 @@ private fun CompactBookmarksLayout(
                     isMenuExpanded = uiState.selectedMenuItemId == item.bookId,
                     onItemClick = { onEvent(BookmarksUiEvent.OpenBook(item.bookId)) },
                     onViewBookmarks = { onEvent(BookmarksUiEvent.ViewBookmarks(item.bookId)) },
-                    onDeleteBookmarks = { onEvent(BookmarksUiEvent.DeleteBookmarks(item.bookId)) },
+                    onDeleteBookmarks = {
+                        onEvent(
+                                BookmarksUiEvent.DeleteBookmarks(
+                                        bookId = item.bookId,
+                                        dialogTitle = deleteAllBookmarksTitle,
+                                        dialogMessage = deleteAllBookmarksMessage,
+                                        positiveButtonText = positiveButtonText,
+                                        negativeButtonText = negativeButtonText
+                                )
+                        )
+                    },
                     onOpenContextMenu = { onEvent(BookmarksUiEvent.ContextMenuClicked(item.bookId)) },
                     onDismissMenu = { onEvent(BookmarksUiEvent.DismissContextMenu) }
             )
         }
 
-        if (uiState.deleteDialogState.showDeleteDialog) {
-            BookmarksDialog(onEvent = onEvent)
+        BookmarksDialog(
+                uiState = uiState,
+                onEvent = onEvent
+        )
+
+        if (uiState.isImporting) {
+            CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = Primary
+            )
         }
     }
 }
 
 @Composable
 private fun BookmarksDialog(
+    uiState: BookmarksUiState,
     onEvent: (BookmarksUiEvent) -> Unit
 ) {
-    AppDialog(
-            dialogTitle = stringResource(id = R.string.dialog_text_delete_all_bookmarks),
-            dialogText = stringResource(id = R.string.dialog_text_delete_all_desc),
-            positiveButtonText = stringResource(id = R.string.dialog_text_delete),
-            negativeButtonText = stringResource(id = R.string.dialog_text_cancel),
-            isDeleteDialog = true,
-            onDismissRequest = { onEvent(BookmarksUiEvent.CancelDeleteDialog) },
-            onConfirm = {
-                onEvent(BookmarksUiEvent.ConfirmDelete)
-            }
-    )
+    uiState.bookmarkDialogState?.let { dialogState ->
+        AppDialog(
+                dialogTitle = dialogState.title,
+                dialogText = dialogState.message,
+                positiveButtonText = dialogState.positiveButtonText,
+                negativeButtonText = dialogState.negativeButtonText,
+                isDeleteDialog = dialogState.type == BookmarksDialogType.DeleteBookmarks,
+                onDismissRequest = { onEvent(BookmarksUiEvent.CancelDeleteDialog) },
+                onConfirm = {
+                    when (dialogState.type) {
+                        BookmarksDialogType.DeleteBookmarks -> {
+                            onEvent(BookmarksUiEvent.ConfirmDelete)
+                            Timber.tag("BookmarksDialog").i("Confirming delete bookmarks")
+                        }
+
+                        BookmarksDialogType.UnsupportedFile -> {
+                            onEvent(BookmarksUiEvent.CancelDeleteDialog)
+                        }
+                    }
+                }
+        )
+    }
 }
+
+
 

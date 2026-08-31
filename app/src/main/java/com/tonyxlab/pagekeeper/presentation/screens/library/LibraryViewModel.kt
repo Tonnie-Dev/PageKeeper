@@ -48,8 +48,8 @@ class LibraryViewModel(
         when (event) {
             is LibraryUiEvent.OpenBook -> openBook(event.bookId)
             is LibraryUiEvent.FinishBook -> onFinishBook(event.bookId)
-            is LibraryUiEvent.ConfirmDeleteDialog -> onConfirmDeleteDialog(event.bookId)
-            is LibraryUiEvent.DeleteBook -> onDeleteBook(event.bookId)
+            is LibraryUiEvent.ConfirmDeleteDialog -> onClickDelete(event.bookId)
+            is LibraryUiEvent.DeleteBook -> onConfirmDeleteDialog(event.bookId)
             LibraryUiEvent.DismissDialog -> dismissDialog()
             is LibraryUiEvent.MarkFavorite -> onMarkFavorite(event.bookId)
             is LibraryUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
@@ -121,7 +121,7 @@ class LibraryViewModel(
         }
     }
 
-    private fun onConfirmDeleteDialog(bookId: String) {
+    private fun onClickDelete(bookId: String) {
         val book = currentState.books.firstOrNull { it.id == bookId } ?: return
         updateState {
             it.copy(
@@ -137,7 +137,7 @@ class LibraryViewModel(
         }
     }
 
-    private fun onDeleteBook(bookId: String) {
+    private fun onConfirmDeleteDialog(bookId: String) {
 
         currentState.books.firstOrNull { it.id == bookId } ?: return
         launchCatching(
@@ -161,13 +161,13 @@ class LibraryViewModel(
         }
     }
 
-    private fun onFileSelected(uri: Uri, fileName: String) {
-        if (!fileName.endsWith(FB2_EXTENSION, ignoreCase = true)) {
-            showUnsupportedFileDialog()
-            return
-        }
+    private fun onImport() {
+        sendActionEvent(LibraryActionEvent.OpenFilePicker)
+    }
 
-        launchCatching(
+
+    private fun onFileSelected(uri: Uri, fileName: String) {
+           launchCatching(
                 onStart = { updateState { it.copy(isImporting = true) } },
                 onError = { showToast("Unable to import book.") },
                 onCompletion = { updateState { it.copy(isImporting = false) } }
@@ -181,11 +181,6 @@ class LibraryViewModel(
             }
         }
     }
-
-    private fun onImport() {
-        sendActionEvent(LibraryActionEvent.OpenFilePicker)
-    }
-
     private fun onShareBook(bookId: String) {
         sendActionEvent(LibraryActionEvent.ShareBook(bookId))
     }
@@ -238,7 +233,6 @@ class LibraryViewModel(
 
     private fun onConfirmMultiSelectionDeleteDialog() {
 
-        Timber.tag("LibVM").i("onConfirmMultiSelectionDeleteDialog clicked")
         val selectedBookIds = selectionHandler.getSelectedBookIds()
         if (selectedBookIds.isEmpty()) return
 
@@ -280,9 +274,5 @@ class LibraryViewModel(
 
     private fun showToast(message: String) {
         sendActionEvent(LibraryActionEvent.ShowToast(message))
-    }
-
-    private companion object {
-        const val FB2_EXTENSION = ".fb2"
     }
 }
