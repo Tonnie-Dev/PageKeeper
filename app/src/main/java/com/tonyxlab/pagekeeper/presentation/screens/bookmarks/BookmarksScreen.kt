@@ -34,6 +34,7 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppNavigationRail
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
 import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
+import com.tonyxlab.pagekeeper.presentation.core.components.SearchResultItem
 import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.core.utils.rememberFilePicker
 import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
@@ -261,11 +262,20 @@ private fun WideBookmarksLayout(
                         showBackButton = false,
                         showSearchIconWhenEmpty = false,
                         isDeviceWide = true,
+                        key = { it.bookId },
                         onSearch = { onEvent(BookmarksUiEvent.SearchClicked) },
-                        onOpenBook = { onEvent(BookmarksUiEvent.OpenBook(bookId = it)) },
                         onClearSearchText = { onEvent(BookmarksUiEvent.ClearSearchClicked) },
                         onExitSearch = { onEvent(BookmarksUiEvent.ExitSearch) },
-                )
+                ) { bookmarkUiItem ->
+
+                    SearchResultItem(
+                            modifier = Modifier,
+                            bookTitle = bookmarkUiItem.title,
+                            bookAuthor = bookmarkUiItem.author,
+                            coverPath = bookmarkUiItem.coverPath,
+                            onItemClick = { onEvent(BookmarksUiEvent.OpenBook(bookId = bookmarkUiItem.bookId)) }
+                    )
+                }
             }
 
             else -> {
@@ -340,34 +350,65 @@ private fun CompactBookmarksLayout(
 
     Box(modifier = modifier.fillMaxWidth()) {
 
-        uiState.globalBookmarkUiItems.ifEmpty {
-            EmptyBookmarkScreen(isGlobalScreen = true, isDeviceWide = false)
-        }
+        when {
 
-        LazyListComponent(
-                items = uiState.globalBookmarkUiItems,
-                key = { it.bookId }
-        ) { item ->
-            BookmarkCard(
-                    item = item,
-                    selected = uiState.selectedMenuItemId == item.bookId,
-                    isMenuExpanded = uiState.selectedMenuItemId == item.bookId,
-                    onItemClick = { onEvent(BookmarksUiEvent.OpenBook(item.bookId)) },
-                    onViewBookmarks = { onEvent(BookmarksUiEvent.ViewBookmarks(item.bookId)) },
-                    onDeleteBookmarks = {
-                        onEvent(
-                                BookmarksUiEvent.DeleteBookmarks(
-                                        bookId = item.bookId,
-                                        dialogTitle = deleteAllBookmarksTitle,
-                                        dialogMessage = deleteAllBookmarksMessage,
-                                        positiveButtonText = positiveButtonText,
-                                        negativeButtonText = negativeButtonText
+            uiState.globalBookmarkUiItems.isEmpty() -> {
+                EmptyBookmarkScreen(isGlobalScreen = true, isDeviceWide = false)
+            }
+
+            uiState.searchState.isSearchMode -> {
+                SearchComponent(
+                        modifier = Modifier,
+                        searchTextFieldState = uiState.searchState.searchTextFieldState,
+                        searchResultItems = uiState.searchState.searchResults,
+                        expanded = uiState.searchState.searchTextFieldState.text.isNotBlank(),
+                        showBackButton = true,
+                        showSearchIconWhenEmpty = true,
+                        isDeviceWide = false,
+                        key = { it.bookId },
+                        onSearch = { onEvent(BookmarksUiEvent.SearchClicked) },
+                        onClearSearchText = { onEvent(BookmarksUiEvent.ClearSearchClicked) },
+                        onExitSearch = { onEvent(BookmarksUiEvent.ExitSearch) },
+                ) { book ->
+
+                    SearchResultItem(
+                            modifier = Modifier,
+                            bookTitle = book.title,
+                            bookAuthor = book.author,
+                            coverPath = book.coverPath,
+                            onItemClick = { onEvent(BookmarksUiEvent.OpenBook(bookId = book.bookId)) }
+                    )
+
+                }
+            }
+
+            else -> {
+                LazyListComponent(
+                        items = uiState.globalBookmarkUiItems,
+                        key = { it.bookId }
+                ) { item ->
+                    BookmarkCard(
+                            item = item,
+                            selected = uiState.selectedMenuItemId == item.bookId,
+                            isMenuExpanded = uiState.selectedMenuItemId == item.bookId,
+                            onItemClick = { onEvent(BookmarksUiEvent.OpenBook(item.bookId)) },
+                            onViewBookmarks = { onEvent(BookmarksUiEvent.ViewBookmarks(item.bookId)) },
+                            onDeleteBookmarks = {
+                                onEvent(
+                                        BookmarksUiEvent.DeleteBookmarks(
+                                                bookId = item.bookId,
+                                                dialogTitle = deleteAllBookmarksTitle,
+                                                dialogMessage = deleteAllBookmarksMessage,
+                                                positiveButtonText = positiveButtonText,
+                                                negativeButtonText = negativeButtonText
+                                        )
                                 )
-                        )
-                    },
-                    onOpenContextMenu = { onEvent(BookmarksUiEvent.ContextMenuClicked(item.bookId)) },
-                    onDismissMenu = { onEvent(BookmarksUiEvent.DismissContextMenu) }
-            )
+                            },
+                            onOpenContextMenu = { onEvent(BookmarksUiEvent.ContextMenuClicked(item.bookId)) },
+                            onDismissMenu = { onEvent(BookmarksUiEvent.DismissContextMenu) }
+                    )
+                }
+            }
         }
 
         BookmarksDialog(
@@ -401,7 +442,8 @@ private fun BookmarksDialog(
                     when (dialogState.type) {
                         BookmarksDialogType.DeleteBookmarks -> {
                             onEvent(BookmarksUiEvent.ConfirmDelete)
-                            Timber.tag("BookmarksDialog").i("Confirming delete bookmarks")
+                            Timber.tag("BookmarksDialog")
+                                    .i("Confirming delete bookmarks")
                         }
 
                         BookmarksDialogType.UnsupportedFile -> {

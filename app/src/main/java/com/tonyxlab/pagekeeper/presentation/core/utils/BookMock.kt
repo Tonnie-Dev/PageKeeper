@@ -1,4 +1,6 @@
-package com.tonyxlab.pagekeeper.domain.model
+package com.tonyxlab.pagekeeper.presentation.core.utils
+
+import com.tonyxlab.pagekeeper.domain.model.Book
 
 object BookMock {
     val books = listOf(

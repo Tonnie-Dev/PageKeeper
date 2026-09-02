@@ -53,6 +53,7 @@ import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBooksScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFavoritesScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyFinishedScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
+import com.tonyxlab.pagekeeper.presentation.core.components.SearchResultItem
 import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
 import com.tonyxlab.pagekeeper.presentation.core.utils.rememberFilePicker
 import com.tonyxlab.pagekeeper.presentation.core.utils.shareBook
@@ -335,11 +336,19 @@ private fun WideLibraryLayout(
                         showBackButton = false,
                         showSearchIconWhenEmpty = false,
                         isDeviceWide = true,
+                        key = { book -> book.id },
                         onSearch = { onEvent(LibraryUiEvent.SearchClicked) },
-                        onOpenBook = { onEvent(LibraryUiEvent.OpenBook(bookId = it)) },
                         onClearSearchText = { onEvent(LibraryUiEvent.ClearSearchClicked) },
                         onExitSearch = { onEvent(LibraryUiEvent.ExitSearch) },
-                )
+                ) { book ->
+                    SearchResultItem(
+                            modifier = Modifier,
+                            bookTitle = book.title,
+                            bookAuthor = book.author,
+                            coverPath = book.coverPath,
+                            onItemClick = { onEvent(LibraryUiEvent.OpenBook(bookId = book.id)) }
+                    )
+                }
             }
 
             uiState.selectionState.isSelectionMode -> {
@@ -501,11 +510,21 @@ private fun CompactLibraryLayout(
                         showBackButton = true,
                         showSearchIconWhenEmpty = true,
                         isDeviceWide = false,
+                        key = { it.id },
                         onSearch = { onEvent(LibraryUiEvent.SearchClicked) },
-                        onOpenBook = { onEvent(LibraryUiEvent.OpenBook(bookId = it)) },
                         onClearSearchText = { onEvent(LibraryUiEvent.ClearSearchClicked) },
                         onExitSearch = { onEvent(LibraryUiEvent.ExitSearch) },
-                )
+                ) { book ->
+
+                    SearchResultItem(
+                            modifier = Modifier,
+                            bookTitle = book.title,
+                            bookAuthor = book.author,
+                            coverPath = book.coverPath,
+                            onItemClick = { onEvent(LibraryUiEvent.OpenBook(bookId = book.id)) }
+                    )
+
+                }
             }
 
             visibleBooks.isEmpty() -> {

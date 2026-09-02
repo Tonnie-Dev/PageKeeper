@@ -1,6 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.bookmarks
 
 import android.net.Uri
+import androidx.compose.runtime.snapshotFlow
 import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.domain.ImportBookResult
 import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
@@ -12,6 +13,8 @@ import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.Bookmarks
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksUiState
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.model.toGlobalBookmarkUiItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlin.coroutines.cancellation.CancellationException
 
 typealias BookmarksBaseViewModel = BaseViewModel<BookmarksUiState, BookmarksUiEvent, BookmarksActionEvent>
@@ -23,6 +26,7 @@ class BookmarksViewModel(
 
     init {
         observeBooksWithBookmarks()
+        searchBookmarks()
     }
 
     override fun onEvent(event: BookmarksUiEvent) {
@@ -41,26 +45,31 @@ class BookmarksViewModel(
 
             BookmarksUiEvent.DismissContextMenu -> closeContextMenu()
             is BookmarksUiEvent.ViewBookmarks -> onViewBookmarks(event.bookId)
-            BookmarksUiEvent.ClearSearchClicked -> {}
-            BookmarksUiEvent.ExitSearch -> {}
-            BookmarksUiEvent.SearchClicked -> {}
+            BookmarksUiEvent.ClearSearchClicked -> clearSearchText()
+            BookmarksUiEvent.ExitSearch -> exitSearchMode()
+            BookmarksUiEvent.SearchClicked -> enterSearchMode()
             BookmarksUiEvent.ImportBook -> onImport()
             is BookmarksUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
         }
     }
 
     private fun observeBooksWithBookmarks() {
-
         launch {
             repository
                     .observeBooksWithBookmarks()
                     .collect { books ->
+
+                        val items = books.map {
+                            it.toGlobalBookmarkUiItem()
+                        }
+
                         updateState { state ->
                             state.copy(
-                                    globalBookmarkUiItems =
-                                        books.map { it.toGlobalBookmarkUiItem() }
+                                    globalBookmarkUiItems = items
                             )
                         }
+
+                        // filterBookmarks()
                     }
         }
     }
@@ -98,6 +107,71 @@ class BookmarksViewModel(
         }
     }
 
+    private fun enterSearchMode() {
+        updateState {
+            it.copy(
+                    searchState = it.searchState.copy(
+                            isSearchMode = true
+                    )
+            )
+        }
+    }
+
+    private fun searchBookmarks() {
+        launch {
+            snapshotFlow {
+                currentState.searchState.searchTextFieldState.text
+            }
+                    .map {
+                        it.toString()
+                                .trim()
+                    }
+                    .distinctUntilChanged()
+                    .collect {
+                        filterBookmarks(it)
+                    }
+        }
+    }
+
+    private fun filterBookmarks(text: String) {
+
+        val searchResults =
+            if (text.isBlank()) {
+                emptyList()
+            } else {
+                currentState.globalBookmarkUiItems.filter { bookmark ->
+                    bookmark.title.contains(text, ignoreCase = true) ||
+                            bookmark.author.contains(text, ignoreCase = true)
+                }
+            }
+
+        updateState { state ->
+            state.copy(
+                    searchState = state.searchState.copy(
+                            searchResults = searchResults
+                    )
+            )
+        }
+    }
+
+    private fun clearSearchText() {
+        currentState.searchState.searchTextFieldState.edit {
+            replace(0, length, "")
+        }
+    }
+
+    private fun exitSearchMode() {
+        clearSearchText()
+        updateState {
+            it.copy(
+                    searchState = it.searchState.copy(
+                            isSearchMode = false,
+                            searchResults = emptyList()
+                    )
+            )
+        }
+    }
+
     private fun onViewBookmarks(bookId: String) {
         sendActionEvent(BookmarksActionEvent.NavigateToBookmarkPage(bookId))
         closeContextMenu()
@@ -109,7 +183,6 @@ class BookmarksViewModel(
         dialogMessage: String,
         positiveButtonText: String,
         negativeButtonText: String
-
     ) {
         updateState { state ->
             state.copy(
@@ -129,6 +202,7 @@ class BookmarksViewModel(
     private fun onConfirmDeleteBookmarks() {
 
         val bookId = currentState.bookmarkDialogState?.bookId ?: return
+
         launch(context = Dispatchers.IO) {
             try {
                 repository.deleteAllBookmarksForBook(bookId = bookId)
@@ -166,6 +240,5 @@ class BookmarksViewModel(
     private fun showToast(message: String) {
         sendActionEvent(BookmarksActionEvent.ShowToast(message))
     }
-
 }
 

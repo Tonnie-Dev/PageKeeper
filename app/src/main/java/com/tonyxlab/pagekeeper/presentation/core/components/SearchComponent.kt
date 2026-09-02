@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.tonyxlab.pagekeeper.R
-import com.tonyxlab.pagekeeper.domain.model.Book
+import com.tonyxlab.pagekeeper.presentation.core.utils.BookMock
 import com.tonyxlab.pagekeeper.presentation.theme.BodyLargeRegular
 import com.tonyxlab.pagekeeper.presentation.theme.BodySmallRegular
 import com.tonyxlab.pagekeeper.presentation.theme.PageKeeperTheme
@@ -50,25 +50,22 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchComponent(
-        /*
-            uiStte: LibraryUiState,
-            onEvnt: (LibraryUiEvent) -> Unit,
-        */
-        searchTextFieldState: TextFieldState,
-        searchResultItems: List<Book>,
-        expanded: Boolean,
-        modifier: Modifier = Modifier,
-        showBackButton: Boolean = true,
-        showSearchIconWhenEmpty: Boolean = false,
-        isDeviceWide: Boolean = false,
-        inputHeight: Dp = MaterialTheme.spacing.spaceTwelve * 6,
-        onSearch: () -> Unit,
-        onOpenBook: (String) -> Unit,
-        onClearSearchText: () -> Unit,
-        onExitSearch: () -> Unit,
+fun <T> SearchComponent(
+    searchTextFieldState: TextFieldState,
+    searchResultItems: List<T>,
+    expanded: Boolean,
+    modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
+    showSearchIconWhenEmpty: Boolean = false,
+    isDeviceWide: Boolean = false,
+    inputHeight: Dp = MaterialTheme.spacing.spaceTwelve * 6,
+    onSearch: () -> Unit,
+    onClearSearchText: () -> Unit,
+    key: (T) -> Any,
+    onExitSearch: () -> Unit,
+    itemContent: @Composable (T) -> Unit,
 ) {
-    //val searchTextFieldState = uiState.searchState.searchTextFieldState
+
     val textFieldHasText = searchTextFieldState.text.isNotBlank()
 
     SearchBar(
@@ -135,9 +132,7 @@ fun SearchComponent(
             ),
     ) {
 
-        // val items = uiState.searchState.searchResults
         if (textFieldHasText && searchResultItems.isEmpty()) {
-
             Box(
                     modifier = Modifier
                             .fillMaxWidth()
@@ -155,22 +150,19 @@ fun SearchComponent(
         }
         LazyListComponent(
                 items = searchResultItems,
-                key = { it.id },
+                key = key,
                 isDeviceWide = isDeviceWide
-        ) { book ->
-
-            SearchResultItem(
-                    book = book,
-                    modifier = Modifier,
-                    onItemClick = { onOpenBook(book.id) }
-            )
+        ) { item ->
+            itemContent(item)
         }
     }
 }
 
 @Composable
-private fun SearchResultItem(
-    book: Book,
+fun SearchResultItem(
+    bookTitle: String,
+    bookAuthor: String,
+    coverPath: String?,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit
 ) {
@@ -184,11 +176,10 @@ private fun SearchResultItem(
                             vertical = MaterialTheme.spacing.spaceSmall
                     )
     ) {
-
-        book.coverPath?.let { cover ->
+        coverPath?.let { cover ->
             AsyncImage(
                     model = cover,
-                    contentDescription = book.title,
+                    contentDescription = bookTitle,
                     modifier = Modifier
                             .background(color = MaterialTheme.colorScheme.surfaceVariant)
                             .size(width = 40.dp, height = 60.dp),
@@ -204,7 +195,7 @@ private fun SearchResultItem(
                         .fillMaxHeight()
         ) {
             Text(
-                    text = book.title,
+                    text = bookTitle,
                     style = MaterialTheme.typography.TitleSmallMedium,
                     color = TextPrimary,
                     maxLines = 1,
@@ -212,7 +203,7 @@ private fun SearchResultItem(
             )
 
             Text(
-                    text = book.author,
+                    text = bookAuthor,
                     style = MaterialTheme.typography.BodySmallRegular,
                     color = TextSecondary,
                     modifier = Modifier.padding(top = MaterialTheme.spacing.spaceExtraSmall)
@@ -282,8 +273,9 @@ fun WideDummySearchBar(onClick: () -> Unit) {
 @Composable
 private fun SearchComponent_Preview() {
 
-    PageKeeperTheme {
+    val books = BookMock.books
 
+    PageKeeperTheme {
         Column(
                 modifier = Modifier
                         .background(MaterialTheme.colorScheme.background)
@@ -293,12 +285,13 @@ private fun SearchComponent_Preview() {
         ) {
             SearchComponent(
                     searchTextFieldState = TextFieldState(),
-                    searchResultItems = emptyList(),
+                    searchResultItems = books,
                     expanded = true,
                     onSearch = {},
-                    onOpenBook = {},
+                    key = {},
                     onExitSearch = {},
                     onClearSearchText = {},
+                    itemContent = {}
             )
         }
     }
