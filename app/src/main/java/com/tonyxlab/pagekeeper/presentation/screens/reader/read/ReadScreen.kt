@@ -59,6 +59,7 @@ import com.tonyxlab.pagekeeper.utils.SetStatusBarIconsColor
 import com.tonyxlab.pagekeeper.utils.ifThen
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import com.tonyxlab.pagekeeper.utils.rememberIsMobileDevice
+import timber.log.Timber
 
 @Composable
 fun ReadScreen(
@@ -336,7 +337,7 @@ fun ReadScreenContent(
    */
 
     LaunchedEffect(uiState.requestedJumpTarget, textLayouts.size) {
-
+       
         val target = uiState.requestedJumpTarget
             ?: return@LaunchedEffect
 

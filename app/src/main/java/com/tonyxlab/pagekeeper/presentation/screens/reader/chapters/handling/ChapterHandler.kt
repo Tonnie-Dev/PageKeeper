@@ -1,6 +1,7 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader.chapters.handling
 
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderJumpTarget
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiState
 
 class ChapterHandler(
@@ -25,11 +26,11 @@ class ChapterHandler(
 
         updateState { state ->
             state.copy(
-                    readingPosition = state.readingPosition.copy(currentBlockIndex = safeIndex),
-                    requestedJumpTarget = null
+                    requestedJumpTarget = ReaderJumpTarget.ChapterJumpTarget(
+                            blockIndex = safeIndex
+                    )
             )
         }
-
         sendActionEvent(ReaderActionEvent.ExitChapters)
     }
 }
