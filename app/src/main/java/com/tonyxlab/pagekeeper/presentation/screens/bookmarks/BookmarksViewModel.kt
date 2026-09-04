@@ -2,11 +2,14 @@ package com.tonyxlab.pagekeeper.presentation.screens.bookmarks
 
 import android.net.Uri
 import androidx.compose.runtime.snapshotFlow
+import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.data.importer.BookImporter
 import com.tonyxlab.pagekeeper.domain.ImportBookResult
 import com.tonyxlab.pagekeeper.domain.repository.BookmarkRepository
 import com.tonyxlab.pagekeeper.presentation.core.BaseViewModel
+import com.tonyxlab.pagekeeper.presentation.core.components.SnackbarType
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksActionEvent
+import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksActionEvent.ShowSnackbar
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksDialogState
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksDialogType
 import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksUiEvent
@@ -50,6 +53,7 @@ class BookmarksViewModel(
             BookmarksUiEvent.SearchClicked -> enterSearchMode()
             BookmarksUiEvent.ImportBook -> onImport()
             is BookmarksUiEvent.FileSelected -> onFileSelected(event.uri, event.fileName)
+            BookmarksUiEvent.ViewLibrary -> viewLibrary()
         }
     }
 
@@ -62,14 +66,11 @@ class BookmarksViewModel(
                         val items = books.map {
                             it.toGlobalBookmarkUiItem()
                         }
-
                         updateState { state ->
                             state.copy(
                                     globalBookmarkUiItems = items
                             )
                         }
-
-                        // filterBookmarks()
                     }
         }
     }
@@ -94,15 +95,15 @@ class BookmarksViewModel(
 
         launchCatching(
                 onStart = { updateState { it.copy(isImporting = true) } },
-                onError = { showToast("Unable to import book.") },
+                onError = { showSnackbar(SnackbarType.Error) },
                 onCompletion = { updateState { it.copy(isImporting = false) } }
         ) {
             when (val result = bookImporter.importBook(uri)) {
-                ImportBookResult.Success -> showToast("Book imported.")
-                ImportBookResult.Duplicate -> showToast("This book is already in your library.")
+                ImportBookResult.Success -> showSnackbar(SnackbarType.Success)
+                ImportBookResult.Duplicate -> showSnackbar(SnackbarType.Duplicate)
                 ImportBookResult.UnsupportedFormat -> showUnsupportedFileDialog()
                 ImportBookResult.Loading -> updateState { it.copy(isImporting = true) }
-                is ImportBookResult.Error -> showToast(result.message)
+                is ImportBookResult.Error -> showSnackbar(SnackbarType.Error)
             }
         }
     }
@@ -211,7 +212,7 @@ class BookmarksViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Throwable) {
-                sendActionEvent(BookmarksActionEvent.ShowToast("Failed to delete bookmarks"))
+                showSnackbar(SnackbarType.Error)
             }
         }
     }
@@ -237,8 +238,38 @@ class BookmarksViewModel(
         }
     }
 
-    private fun showToast(message: String) {
-        sendActionEvent(BookmarksActionEvent.ShowToast(message))
+    private fun showSnackbar(snackbarType: SnackbarType) {
+        when (snackbarType) {
+            SnackbarType.Success -> sendActionEvent(
+                    ShowSnackbar(
+                            messageRes = R.string.snack_text_book_imported,
+                            actionLabelRes = R.string.snack_text_view_library,
+                            event = BookmarksUiEvent.ViewLibrary
+                    )
+            )
+
+            SnackbarType.Duplicate -> sendActionEvent(
+                    ShowSnackbar(
+                            messageRes = R.string.snack_text_book_already_in_library,
+                            actionLabelRes = R.string.blank_text,
+                    )
+            )
+
+            SnackbarType.Error -> sendActionEvent(
+                    ShowSnackbar(
+                            messageRes = R.string.snack_text_unable_to_import_book,
+                            actionLabelRes = R.string.blank_text,
+                            isError = true
+                    )
+            )
+        }
+    }
+
+    private fun viewLibrary() {
+        sendActionEvent(BookmarksActionEvent.NavigateToLibrary)
     }
 }
+
+
+
 

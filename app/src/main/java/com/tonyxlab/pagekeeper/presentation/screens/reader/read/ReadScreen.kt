@@ -337,7 +337,7 @@ fun ReadScreenContent(
    */
 
     LaunchedEffect(uiState.requestedJumpTarget, textLayouts.size) {
-       
+
         val target = uiState.requestedJumpTarget
             ?: return@LaunchedEffect
 

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp.plugin)
     alias(libs.plugins.kotlin.serializer.plugin)
@@ -43,6 +42,12 @@ android {
         compose = true
         buildConfig = true
 
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 dependencies {

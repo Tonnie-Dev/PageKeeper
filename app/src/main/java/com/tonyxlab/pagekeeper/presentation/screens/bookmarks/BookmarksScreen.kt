@@ -1,6 +1,5 @@
 package com.tonyxlab.pagekeeper.presentation.screens.bookmarks
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,10 +12,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -31,11 +32,14 @@ import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppNavigationDrawer
 import com.tonyxlab.pagekeeper.presentation.core.components.AppNavigationRail
+import com.tonyxlab.pagekeeper.presentation.core.components.AppSnackbarHost
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
 import com.tonyxlab.pagekeeper.presentation.core.components.SearchComponent
 import com.tonyxlab.pagekeeper.presentation.core.components.SearchResultItem
+import com.tonyxlab.pagekeeper.presentation.core.components.ShowAppSnackbar
 import com.tonyxlab.pagekeeper.presentation.core.components.WideDummySearchBar
+import com.tonyxlab.pagekeeper.presentation.core.components.rememberSnackbarController
 import com.tonyxlab.pagekeeper.presentation.core.utils.rememberFilePicker
 import com.tonyxlab.pagekeeper.presentation.navigation.AppNavigationDestination
 import com.tonyxlab.pagekeeper.presentation.navigation.Navigator
@@ -51,7 +55,6 @@ import com.tonyxlab.pagekeeper.presentation.theme.spacing
 import com.tonyxlab.pagekeeper.utils.rememberIsDeviceWide
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
-import timber.log.Timber
 
 @Composable
 fun BookmarksScreen(
@@ -170,6 +173,24 @@ private fun MergedLibraryLayout(
         viewModel.onEvent(BookmarksUiEvent.FileSelected(uri, fileName))
     }
 
+    val snackbarController =
+        rememberSnackbarController<BookmarksUiEvent>()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    ShowAppSnackbar(
+            triggerId = snackbarController.triggerId,
+            snackbarHostState = snackbarHostState,
+            message = snackbarController.message,
+            actionLabel = snackbarController.actionLabel,
+            onActionClick = {
+                snackbarController.actionEvent?.let {
+                    viewModel.onEvent(it)
+                }
+            }
+    )
+
+
     BaseContentLayout(
             modifier = modifier,
             viewModel = viewModel,
@@ -182,22 +203,36 @@ private fun MergedLibraryLayout(
                     )
                 }
             },
+            snackbarHost = {
+                AppSnackbarHost(
+                        modifier = Modifier,
+                        isError = snackbarController.isError,
+                        snackbarHostState = snackbarHostState
+                )
+            },
 
             actionEventHandler = { actionContext, actionEvent ->
                 when (actionEvent) {
 
                     is BookmarksActionEvent.NavigateToBookmarkPage -> {
-
                         navigator.navigateToBookBookmarks(actionEvent.bookId)
                     }
 
-                    is BookmarksActionEvent.ShowToast -> {
-                        Toast.makeText(actionContext, actionEvent.message, Toast.LENGTH_SHORT)
-                                .show()
+                    is BookmarksActionEvent.ShowSnackbar -> {
+                        snackbarController.showSnackbar(
+                                message = actionContext.getString(actionEvent.messageRes),
+                                actionLabel = actionContext.getString(actionEvent.actionLabelRes),
+                                isError = actionEvent.isError,
+                                actionEvent = actionEvent.event
+                        )
                     }
 
                     BookmarksActionEvent.OpenFilePicker -> {
                         filePicker.launch("*/*")
+                    }
+
+                    BookmarksActionEvent.NavigateToLibrary -> {
+                        navigator.navigateToLibrary()
                     }
                 }
             }
@@ -249,7 +284,6 @@ private fun WideBookmarksLayout(
                     .padding(top = MaterialTheme.spacing.spaceTwelve),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spaceTwelve)
     ) {
-
         when {
             isSearchActive -> {
                 SearchComponent(
@@ -282,7 +316,6 @@ private fun WideBookmarksLayout(
                 WideDummySearchBar { onEvent(BookmarksUiEvent.SearchClicked) }
             }
         }
-
         uiState.globalBookmarkUiItems.ifEmpty {
             EmptyBookmarkScreen(isGlobalScreen = true, isDeviceWide = false)
         }
@@ -321,7 +354,6 @@ private fun WideBookmarksLayout(
                         color = Primary
                 )
             }
-
             BookmarksDialog(
                     uiState = uiState,
                     onEvent = onEvent
@@ -378,7 +410,6 @@ private fun CompactBookmarksLayout(
                             coverPath = book.coverPath,
                             onItemClick = { onEvent(BookmarksUiEvent.OpenBook(bookId = book.bookId)) }
                     )
-
                 }
             }
 
@@ -442,8 +473,7 @@ private fun BookmarksDialog(
                     when (dialogState.type) {
                         BookmarksDialogType.DeleteBookmarks -> {
                             onEvent(BookmarksUiEvent.ConfirmDelete)
-                            Timber.tag("BookmarksDialog")
-                                    .i("Confirming delete bookmarks")
+
                         }
 
                         BookmarksDialogType.UnsupportedFile -> {

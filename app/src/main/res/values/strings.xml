@@ -89,7 +89,10 @@
     <string name="dialog_text_delete_all_desc">All bookmarks for this book will be permanently removed</string>
 
     <!--Snackbar Texts-->
-    <string name="snack_text_item_added_to_cart">Item Added to Cart</string>
+    <string name="snack_text_book_imported">Book imported</string>
+    <string name="snack_text_unable_to_import_book">Unable to import book</string>
+    <string name="snack_text_book_already_in_library">This book is already in your library</string>
+    <string name="snack_text_view_library">View Library</string>
 
     <!--Toast Texts-->
     <string name="toast_text_copied">Copied to Clipboard</string>
