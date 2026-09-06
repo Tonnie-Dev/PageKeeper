@@ -57,11 +57,7 @@ fun ReaderFlow(
             BookmarkScreen(
                     viewModel = viewModel,
                     navigateToReadScreen = {
-
-                        when(startScreen) {
-                            ReaderStartScreen.Read -> currentScreen = ReaderScreen.Read
-                            ReaderStartScreen.Bookmarks -> {navigator.popBackstack()}
-                        }
+                        currentScreen = ReaderScreen.Read
                     }
             )
         }

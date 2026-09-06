@@ -1,11 +1,17 @@
 package com.tonyxlab.pagekeeper.presentation.screens.reader.bookmark
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tonyxlab.pagekeeper.R
 import com.tonyxlab.pagekeeper.presentation.core.BaseContentLayout
 import com.tonyxlab.pagekeeper.presentation.core.components.AppButton
@@ -13,7 +19,6 @@ import com.tonyxlab.pagekeeper.presentation.core.components.AppDialog
 import com.tonyxlab.pagekeeper.presentation.core.components.AppTopBar
 import com.tonyxlab.pagekeeper.presentation.core.components.EmptyBookmarkScreen
 import com.tonyxlab.pagekeeper.presentation.core.components.LazyListComponent
-import com.tonyxlab.pagekeeper.presentation.screens.bookmarks.handling.BookmarksUiState
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReadViewModel
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderActionEvent
 import com.tonyxlab.pagekeeper.presentation.screens.reader.ReaderUiEvent
@@ -37,13 +42,12 @@ fun BookmarkScreen(
                         onNavButtonClick = navigateToReadScreen
                 )
             },
-            actionEventHandler = {_,action ->
+            actionEventHandler = { _, action ->
 
-                when(action) {
+                when (action) {
                     ReaderActionEvent.ExitBookmark -> navigateToReadScreen()
-                   else -> Unit
+                    else -> Unit
                 }
-
 
             },
             floatingActionButton = {
@@ -73,56 +77,59 @@ private fun BookmarkScreenContent(
     val selectedBookmarkId = bookmarkState.selectedBookmarkId
 
     val dialogInputState = uiState.bookmarkUiState.dialogInputState
+
+    val maxWidth = if (isDeviceWide) MAX_WIDTH else Dp.Unspecified
+
     uiState.bookmarkUiState.bookmarkUiItems.ifEmpty {
         EmptyBookmarkScreen(isDeviceWide = isDeviceWide)
     }
 
-    LazyListComponent(
-            modifier = Modifier,
-            items = bookmarkState.bookmarkUiItems,
-            key = { it.id },
-            content = { bookmark ->
-                BookmarkItem(
-                        bookmarkUiItem = bookmark,
-                        onBookmarkClicked = { onEvent(ReaderUiEvent.OnClickBookmark(bookmark)) },
-                        selected = bookmark.id == selectedBookmarkId,
-                        onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
-                        onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmarkClicked(bookmark)) },
-                        onOpenMenu = { onEvent(ReaderUiEvent.ShowPopupMenu(bookmark)) },
-                        onDismissMenu = { onEvent(ReaderUiEvent.DismissPopupMenu) },
-                        isMenuExpanded = selectedBookmarkId == bookmark.id
-                )
-            }
-    )
-
-    if (dialogInputState.showEditBookmarkDialog) {
-        BookmarkDialog(
-                modifier = Modifier,
-                textFieldState = dialogInputState.textFieldState,
-                selectedColor = dialogInputState.selectedColor,
-                onColorSelected = { color ->
-                    onEvent(ReaderUiEvent.ColorSelected(color))
-                },
-                onDismissRequest = {
-                    onEvent(ReaderUiEvent.DismissBookmarkDialog)
-                },
-                onSave = {
-                    onEvent(ReaderUiEvent.SaveBookmark)
+    Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
+    ) {
+        LazyListComponent(
+                modifier = Modifier.widthIn(max = maxWidth),
+                items = bookmarkState.bookmarkUiItems,
+                key = { it.id },
+                content = { bookmark ->
+                    BookmarkItem(
+                            bookmarkUiItem = bookmark,
+                            selected =uiState.bookmarkUiState.selectedMenuItemId == bookmark.id,
+                            isMenuExpanded = uiState.bookmarkUiState.selectedMenuItemId == bookmark.id,
+                            onBookmarkClicked = { onEvent(ReaderUiEvent.OnClickBookmark(bookmark)) },
+                            onEditClick = { onEvent(ReaderUiEvent.EditBookmark(bookmark)) },
+                            onDeleteClick = { onEvent(ReaderUiEvent.DeleteBookmarkClicked(bookmark)) },
+                            onOpenMenu = { onEvent(ReaderUiEvent.ShowPopupMenu(bookmark)) },
+                            onDismissMenu = { onEvent(ReaderUiEvent.DismissPopupMenu) }
+                    )
                 }
         )
-    }
 
-
-    if (dialogInputState.showDeleteBookmarkDialog) {
-       BookmarkDialog (onEvent = onEvent)
+        if (dialogInputState.showEditBookmarkDialog) {
+            BookmarkDialog(
+                    modifier = Modifier,
+                    textFieldState = dialogInputState.textFieldState,
+                    selectedColor = dialogInputState.selectedColor,
+                    onColorSelected = { color ->
+                        onEvent(ReaderUiEvent.ColorSelected(color))
+                    },
+                    onDismissRequest = {
+                        onEvent(ReaderUiEvent.DismissBookmarkDialog)
+                    },
+                    onSave = {
+                        onEvent(ReaderUiEvent.SaveBookmark)
+                    }
+            )
+        }
+        if (dialogInputState.showDeleteBookmarkDialog) {
+            DeleteDialog(onEvent = onEvent)
+        }
     }
 }
 
-
-
-
 @Composable
-private fun BookmarkDialog(
+private fun DeleteDialog(
     onEvent: (ReaderUiEvent) -> Unit
 ) {
     AppDialog(
@@ -137,5 +144,7 @@ private fun BookmarkDialog(
             }
     )
 }
+
+private val MAX_WIDTH = 600.dp
 
 

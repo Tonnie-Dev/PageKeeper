@@ -83,7 +83,6 @@ fun BookmarkDialog(
     ) {
         Surface(
                 modifier = modifier
-                        .fillMaxWidth()
                         .padding(horizontal = MaterialTheme.spacing.spaceTwelve * 2)
                         .widthIn(max = dialogMaxWidth),
                 shape = MaterialTheme.shapes.extraLarge,

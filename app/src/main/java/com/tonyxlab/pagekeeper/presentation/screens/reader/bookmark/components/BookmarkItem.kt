@@ -41,12 +41,12 @@ import com.tonyxlab.pagekeeper.utils.toFormattedDate
 @Composable
 fun BookmarkItem(
     bookmarkUiItem: BookmarkUiItem,
-    modifier: Modifier = Modifier,
     selected: Boolean,
+    isMenuExpanded: Boolean,
+    modifier: Modifier = Modifier,
     onBookmarkClicked: (BookmarkUiItem) -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isMenuExpanded: Boolean,
     onOpenMenu: () -> Unit,
     onDismissMenu: () -> Unit,
 ) {

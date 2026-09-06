@@ -39,6 +39,7 @@ class BookmarkHandler(
                 block.text
                         .drop(currentState.readingPosition.textOffset)
                         .take(BOOKMARK_PREVIEW_LENGTH)
+
             else -> ""
         }
 
@@ -81,8 +82,6 @@ class BookmarkHandler(
         }
 
         sendActionEvent(ReaderActionEvent.ExitBookmark)
-
-
     }
 
     fun onEditBookmark(bookmarkUiItem: BookmarkUiItem) {
@@ -170,11 +169,13 @@ class BookmarkHandler(
         }
     }
 
-    fun onClickDelete() {
+    fun onClickDelete(bookmarkId: Long) {
 
         updateState { state ->
             state.copy(
                     bookmarkUiState = state.bookmarkUiState.copy(
+                            selectedMenuItemId = null,
+                            selectedBookmarkId = bookmarkId,
                             dialogInputState = state.bookmarkUiState.dialogInputState.copy(
                                     showDeleteBookmarkDialog = true
                             )
@@ -183,21 +184,14 @@ class BookmarkHandler(
         }
     }
 
-    fun onCancelDeleteDialog() {
-        closeBookmarkDeleteDialog()
-    }
-
     fun onConfirmDelete() {
+
+        val bookmarkId = currentState().bookmarkUiState.selectedBookmarkId ?: return
 
         coroutineScope.launch(Dispatchers.IO) {
 
             try {
-
-                val selectedBookmark =
-                    currentState().bookmarkUiState.selectedBookmarkId
-                        ?: return@launch
-                bookmarkRepository.deleteBookmarkById(bookmarkId = selectedBookmark)
-
+                bookmarkRepository.deleteBookmarkById(bookmarkId = bookmarkId)
                 closeBookmarkDeleteDialog()
 
             } catch (e: CancellationException) {
@@ -208,14 +202,17 @@ class BookmarkHandler(
         }
     }
 
+    fun onCancelDeleteDialog() {
+        closeBookmarkDeleteDialog()
+    }
+
     fun onShowPopupMenu(bookmarkUiItem: BookmarkUiItem) {
 
         updateState { state ->
             state.copy(
                     bookmarkUiState = state.bookmarkUiState.copy(
-                            selectedBookmarkId = bookmarkUiItem.id,
-
-                            )
+                            selectedMenuItemId = bookmarkUiItem.id
+                    )
             )
         }
     }
@@ -225,7 +222,7 @@ class BookmarkHandler(
         updateState { state ->
             state.copy(
                     bookmarkUiState = state.bookmarkUiState.copy(
-                            selectedBookmarkId = null
+                            selectedMenuItemId = null
                     )
             )
         }
@@ -234,6 +231,7 @@ class BookmarkHandler(
     fun onDismissBookmarkDialog() {
         closeBookmarkEditDialog()
     }
+
     fun onExitBookmark() {
         sendActionEvent(ReaderActionEvent.ExitBookmark)
     }
